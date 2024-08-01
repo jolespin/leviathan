@@ -1,0 +1,6 @@
+pathlib
+tqdm
+memory_profiler
+pandas
+biopython
+      

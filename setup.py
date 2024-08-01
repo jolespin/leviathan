@@ -12,24 +12,31 @@ with open(os.path.join(script_directory, package_name, '__init__.py')) as f:
             version = line.split("=")[-1].strip().strip('"')
 assert version is not None, f"Check version in {package_name}/__init__.py"
 
+requirements = list()
+with open(os.path.join(script_directory, 'requirements.txt')) as f:
+    for line in f.readlines():
+        line = line.strip()
+        if line:
+            if not line.startswith("#"):
+                requirements.append(line)
+                
 setup(name='leviathan',
-      version=version,
-      description='Genome-resolved taxonomic and pathway profiling',
-      url='https://github.com/new-atlantis-labs/leviathan',
-      author='Josh L. Espinoza',
-      author_email='jolespin@newatlantis.io, jol.espinoz@gmail.com',
-      license='GNU AGPL_v3 License',
-      packages=["leviathan"],
-      install_requires=[
-      "pandas",
-      "tqdm",
-      "memory_profiler",
-      "biopython",
-      ],
+    version=version,
+    description='Genome-resolved taxonomic and pathway profiling',
+    url='https://github.com/new-atlantis-labs/leviathan',
+    author='Josh L. Espinoza',
+    author_email='jolespin@newatlantis.io, jol.espinoz@gmail.com',
+    license='GNU AGPL_v3 License',
+    packages=["leviathan"],
+    install_requires=requirements,
     include_package_data=False,
-     scripts=[
-       "bin/leviathan-index.py",
-        ],
+    scripts=[
+        "bin/leviathan-index.py",
+        "bin/leviathan-info.py",
+        "bin/leviathan-profile-taxonomy.py",
+        "bin/leviathan-profile-pathway.py",
+
+    ],
 
 )
 

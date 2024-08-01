@@ -4,44 +4,51 @@ from collections import defaultdict
 from pandas.errors import EmptyDataError
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 from tqdm import tqdm
-from memory_profiler import profile
+# from memory_profiler import profile
 
 __program__ = os.path.split(sys.argv[0])[-1]
 
 from .utils import (
     open_file_reader,
-    open_file_writer,
+    # open_file_writer,
     read_pickle, 
-    write_pickle,
+    # write_pickle,
     read_json,
-    write_json,
-    build_logger,
-    reset_logger,
-    format_duration,
-    format_header,
-    format_memory,
+    # write_json,
+    # build_logger,
+    # reset_logger,
+    get_timestamp,
+    # format_duration,
+    # format_header,
+    format_bytes,
+    get_file_size,
+    profile_peak_memory,
     RunShellCommand,
 )
 
-@profile
+@profile_peak_memory
 def process_and_check_inputs(fasta, feature_mapping, genomes, logger):  
    # Fasta
     genes_from_fasta = set()
     with open_file_reader(fasta) as f:
         for header, seq in tqdm(SimpleFastaParser(f), f"Loading fasta: {fasta}"):
-            id = header.split(" ")
+            id = header.split(" ")[0]
             genes_from_fasta.add(id)
             
     # Config flags
     config = dict(
+        fasta_filepath=fasta,
+        feature_mapping_filepath=feature_mapping,
         contains_genome_cluster_mapping=False,
         contains_genome_filepaths=False,
+        timestamp=get_timestamp(),
     )
     
     # Feature mapping
     # ===============
     gene_to_data = defaultdict(dict)
     genome_to_data = defaultdict(dict)
+    features_from_data = set()
     with open_file_reader(feature_mapping) as f:
         first_line = f.readline().strip()
         assert "\t" in first_line
@@ -80,6 +87,9 @@ def process_and_check_inputs(fasta, feature_mapping, genomes, logger):
                     genome_to_data[id_genome]["id_genome_cluster"] = id_genome_cluster
                     
         config["contains_genome_cluster_mapping"] = True
+        
+    for id_gene, data in gene_to_data.items():
+        features_from_data.update(data["features"])
 
     # Check overlap of genes between --fasta and --feature_mapping
     genes_from_feature_mapping = set(gene_to_data.keys())
@@ -94,6 +104,8 @@ def process_and_check_inputs(fasta, feature_mapping, genomes, logger):
             msg += f"\nN={len(B_exclusive)} genes in --feature_mapping that are not in --fasta"
         logger.critical(msg)
         raise IndexError(msg)
+    config["number_of_genes"] = len(genes_from_feature_mapping)
+    config["number_of_features"] = len(features_from_data)
     
     # Genomes
     # =======
@@ -119,13 +131,15 @@ def process_and_check_inputs(fasta, feature_mapping, genomes, logger):
             raise IndexError(msg)
         
         config["contains_genome_filepaths"] = True
-
+        
+    config["number_of_genomes"] = len(genomes_with_filepaths)
+    
     return config, gene_to_data, genome_to_data
 
 # Load database and check inputs
 def load_database_and_check_inputs(index_directory, genomes, logger):
     # Read database files
-    config = read_json(os.path.join(index_directory, "database", "config.json"))
+    config = read_json(os.path.join(index_directory, "config.json"))
     gene_to_data = read_pickle(os.path.join(index_directory, "database", "gene_to_data.pkl.gz"))
     genome_to_data = read_pickle(os.path.join(index_directory, "database", "genome_to_data.pkl.gz"))
     genomes_from_feature_mapping = set(genome_to_data.keys())
@@ -152,6 +166,8 @@ def load_database_and_check_inputs(index_directory, genomes, logger):
         raise IndexError(msg)
     
     config["contains_genome_filepaths"] = True
+    config["timestamp"] = get_timestamp()
+
     
     return config, gene_to_data, genome_to_data
 
@@ -171,7 +187,8 @@ def check_salmon_index(salmon_index_directory, logger):
             if not os.path.exists(filepath):
                 missing_files.append(filepath)
                 
-            filesize = os.stat(filepath).st_size
+            filesize = get_file_size(filepath)
+            logger.info(f"[salmon_index] {filepath} ({format_bytes(filesize)})")
             if filesize < 1:
                 empty_files.append(filepath)
         if any(missing_files):
@@ -188,7 +205,7 @@ def check_salmon_index(salmon_index_directory, logger):
         raise FileNotFoundError(msg)
 
 # Run Salmon (salmon index --keepDuplicates --threads ${N_JOBS} --transcripts ${FASTA} --index ${INDEX})
-def run_salmon_indexer(salmon_executable, n_jobs, fasta, index_directory, index_options):    
+def run_salmon_indexer(logger, log_directory, salmon_executable, n_jobs, fasta, index_directory, index_options):    
     cmd = RunShellCommand(
         command=[
             salmon_executable,
@@ -204,16 +221,24 @@ def run_salmon_indexer(salmon_executable, n_jobs, fasta, index_directory, index_
             ], 
         name="salmon_indexer",
     )
+    
     # Run
+    logger.info(f"[{cmd.name}] running command: {cmd.command}")
     cmd.run()
+    logger.info(f"[{cmd.name}] duration: {cmd.duration_}")
+    logger.info(f"[{cmd.name}] peak memory: {format_bytes(cmd.peak_memory_)}")
+
     # Dump
-    cmd.dump(os.path.join(index_directory, "logs"))
+    logger.info(f"[{cmd.name}] dumping stdout, stderr, and return code: {log_directory}")
+    cmd.dump(log_directory)
+    
     # Validate
+    logger.info(f"[{cmd.name}] checking return code status: {cmd.returncode_}")
     cmd.check_status()
     return cmd
 
 # Run Sylph (sylph sketch -t ${N_JOBS} --gl ${GENOMES} -o ${INDEX} -k ${K} --min-spacing ${MIN_SPACING})
-def run_sylph_sketcher(sylph_executable, n_jobs, genome_filepaths, index_directory, k, minimum_spacing, subsampling_rate, sylph_sketch_options):
+def run_sylph_genomes_sketcher(logger, log_directory, sylph_executable, n_jobs, genome_filepaths, index_directory, k, minimum_spacing, subsampling_rate, sylph_sketch_options):
     cmd = RunShellCommand(
         command=[
             sylph_executable,
@@ -223,7 +248,7 @@ def run_sylph_sketcher(sylph_executable, n_jobs, genome_filepaths, index_directo
             "--gl",
             genome_filepaths,
             "-o",
-            os.path.join(index_directory, "databases", "genomes"),
+            os.path.join(index_directory, "database", "genomes"),
             "-k",
             k,
             "--min-spacing",
@@ -232,13 +257,21 @@ def run_sylph_sketcher(sylph_executable, n_jobs, genome_filepaths, index_directo
             subsampling_rate,
             sylph_sketch_options,
         ],
-        name="sylph_sketcher",
+        name="sylph_genomes_sketcher",
     )
+    
     # Run
+    logger.info(f"[{cmd.name}] running command: {cmd.command}")
     cmd.run()
+    logger.info(f"[{cmd.name}] duration: {cmd.duration_}")
+    logger.info(f"[{cmd.name}] peak memory: {format_bytes(cmd.peak_memory_)}")
+
     # Dump
-    cmd.dump(os.path.join(index_directory, "logs"))
+    logger.info(f"[{cmd.name}] dumping stdout, stderr, and return code: {log_directory}")
+    cmd.dump(log_directory)
+    
     # Validate
+    logger.info(f"[{cmd.name}] checking return code status: {cmd.returncode_}")
     cmd.check_status()
     return cmd
 

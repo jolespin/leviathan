@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import sys,os, argparse, warnings, subprocess
 from collections import defaultdict
-from pandas.errors import EmptyDataError
-from Bio.SeqIO.FastaIO import SimpleFastaParser
+# from pandas.errors import EmptyDataError
+# from Bio.SeqIO.FastaIO import SimpleFastaParser
 from tqdm import tqdm
-from memory_profiler import profile
+# from memory_profiler import profile
 
 __program__ = os.path.split(sys.argv[0])[-1]
 
@@ -19,7 +19,10 @@ from leviathan.utils import (
     reset_logger,
     format_duration,
     format_header,
-    format_memory,
+    format_bytes,
+    get_directory_tree,
+    get_directory_size,
+    get_md5hash_from_directory,
     RunShellCommand,
 )
 
@@ -28,7 +31,7 @@ from leviathan.index import(
     load_database_and_check_inputs,
     check_salmon_index,
     run_salmon_indexer,
-    run_sylph_sketcher,
+    run_sylph_genomes_sketcher,
 )
 
 def main(args=None):
@@ -52,13 +55,12 @@ def main(args=None):
     parser_io.add_argument("-f","--fasta", type=str,  help = "path/to/cds.fasta") # default="stdin"?
     parser_io.add_argument("-m","--feature_mapping", type=str,  help = "path/to/feature_mapping.tsv [id_gene, feature_set, id_genome, (Optional: id_genome_cluster)] (No header)")
     parser_io.add_argument("-g","--genomes", type=str, help = "path/to/genomes.tsv [id_genome, path/to/genome] (No header)")
-    parser_io.add_argument("-o","--index_directory", type=str, required=True, help = "path/to/index_directory/")
+    parser_io.add_argument("-d","--index_directory", type=str, required=True, help = "path/to/index_directory/ (Recommended: leviathan_output/index/ if this will only be used for one project or a centralized location if it will be used for multiple projects)")
     parser_io.add_argument("-u", "--update_with_genomes", action="store_true",  help = "Update databases with genomes for Sylph sketches")
 
     # Utilities
     parser_utility = parser.add_argument_group('Utility arguments')
-    parser_utility.add_argument("-p","--n_jobs", type=int, default=1,  help = "Number of threads to use [Default: 1]")
-    # parser_utility.add_argument("-c", "--cleanup", action="store_true",  help = "Remove temporary files")
+    parser_utility.add_argument("-p","--n_jobs", type=int, default=1,  help = "Number of threads to use.  Use -1 for all available. [Default: 1]")
 
     # Salmon
     parser_salmon_index = parser.add_argument_group('salmon index arguments')
@@ -66,7 +68,7 @@ def main(args=None):
     parser_salmon_index.add_argument("--salmon_index_options", type=str, default="", help="salmon index| More options (e.g. --arg=1 ) https://salmon.readthedocs.io/en/latest/ [Default: '']")
 
     # Sylph
-    parser_sylph_sketch = parser.add_argument_group('Sylph sketch arguments (Fastq)')
+    parser_sylph_sketch = parser.add_argument_group('Sylph genomes sketcher arguments (Fastq)')
     parser_sylph_sketch.add_argument("--sylph_executable", type=str, help="Sylph executable [Default: $PATH]")
     parser_sylph_sketch.add_argument("--sylph_k", type=int, choices={21,31}, default=31,  help="Sylph |  Value of k. Only k = 21, 31 are currently supported. [Default: 31]")
     parser_sylph_sketch.add_argument("--sylph_minimum_spacing", type=int,  default=30,  help="Sylph |  Minimum spacing between selected k-mers on the genomes [Default: 30]")
@@ -80,6 +82,9 @@ def main(args=None):
 
     # logger
     logger = build_logger("leviathan index")
+
+    # Commands
+    logger.info(f"Command: {sys.argv}")
      
     # Post-processing argument dependencies
     if opts.update_with_genomes:
@@ -127,7 +132,7 @@ def main(args=None):
         ]):
         msg = f"--index_directory {opts.index_directory} already exists.  If you want to update with genomes, please use --update_with_genomes or remove directory to overwrite"
         logger.critical(msg)
-        raise FileNotFoundError(msg)
+        raise FileExistsError(msg)
     
     os.makedirs(os.path.join(opts.index_directory, "database"), exist_ok=True)
     os.makedirs(os.path.join(opts.index_directory, "logs"), exist_ok=True)
@@ -146,21 +151,23 @@ def main(args=None):
         
         # Write database files
         logger.info("Writing config and database files")
-        write_json(config, os.path.join(opts.index_directory, "database", "config.json"))
+        write_json(config, os.path.join(opts.index_directory,  "config.json"))
         write_pickle(gene_to_data, os.path.join(opts.index_directory, "database", "gene_to_data.pkl.gz"))
         write_pickle(genome_to_data, os.path.join(opts.index_directory, "database", "genome_to_data.pkl.gz"))
 
         # ==================
         # Build Salmon Index
         # ==================
-        logger.info("Running Salmon indexer")
         cmd_salmon_indexer = run_salmon_indexer(
+                        logger=logger,
+                        log_directory = os.path.join(opts.index_directory, "logs"),
                         salmon_executable=opts.salmon_executable,
                         n_jobs=opts.n_jobs,
                         fasta=opts.fasta,
                         index_directory=opts.index_directory,
                         index_options=opts.salmon_index_options,
         )
+
     else:
         # Process and check inputs
         logger.info("Loading previously built database and checking genomes for database update")
@@ -172,7 +179,7 @@ def main(args=None):
         
         # Update database files
         logger.info("Rewriting config and database files")
-        write_json(config, os.path.join(opts.index_directory, "database", "config.json"))
+        write_json(config, os.path.join(opts.index_directory, "config.json"))
         write_pickle(genome_to_data, os.path.join(opts.index_directory, "database", "genome_to_data.pkl.gz"))
         
  
@@ -189,8 +196,10 @@ def main(args=None):
                 print(data["filepath"], file=f)
                 
         # Run Sylph
-        logger.info("Running Sylph sketcher")
-        cmd_sylph_sketcher = run_sylph_sketcher(
+        logger.info("Running Sylph genome sketcher")
+        cmd_sylph_genomes_sketcher = run_sylph_genomes_sketcher(
+            logger=logger,
+            log_directory = os.path.join(opts.index_directory, "logs"),
             sylph_executable=opts.sylph_executable, 
             n_jobs=opts.n_jobs, 
             genome_filepaths=genome_filepaths, 
@@ -203,7 +212,21 @@ def main(args=None):
 
     else:
         logger.warning("--genomes not provided so Leviathan is not building Sylph sketches")
-    
+        
+    # ========
+    # Hash
+    # ========   
+    logger.info(f"Calculating md5 hashes")
+    file_to_hash = get_md5hash_from_directory(opts.index_directory)
+    write_json(file_to_hash, os.path.join(opts.index_directory, "md5hashes.json"))
+
+    # ========
+    # Complete
+    # ========    
+    logger.info(f"Completed building leviathan index: {opts.index_directory}")
+    logger.info(f"Directory size of leviathan index: {format_bytes(get_directory_size(opts.index_directory))}")
+    logger.info(f"Directory structure of leviathan index:\n{get_directory_tree(opts.index_directory, ascii=True)}")
+
 if __name__ == "__main__":
     main()
     

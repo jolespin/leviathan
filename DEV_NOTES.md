@@ -1,21 +1,6 @@
-Steps: 
-* Run taxonomic profiling first?
-* Salmon align to enzymes
-    * Identifier mapping tables: id_gene, id_enzyme, id_genome[, id_genome_cluster]
+# Internal Development Notes
 
-
-* Metagenomics usage: https://github.com/COMBINE-lab/salmon/issues/330
-
-index: 
-    * `salmon index --keepDuplicates --threads ${N_JOBS} --transcripts ${FASTA} --index ${INDEX}`
-    * Regarding --keepDuplicates https://github.com/COMBINE-lab/salmon/issues/223
-
-
-Usage:
-    leviathn index -f fasta -t table.tsv -i index_directory/
-
-
-## Benchmarking: 
+### Salmon Index Benchmarking: 
     * Number of sequences (~400 enzymes per prokaryotic genome):
         10k genomes: OceanDNA.n_10000.fasta:3729135
         1k genomes: OceanDNA.n_1000.fasta:419841
@@ -41,3 +26,10 @@ Usage:
 quant: 
     * --meta mode https://salmon.readthedocs.io/en/develop/salmon.html#meta
     * salmon quant --meta --libType A --index ${INDEX} -1 ${R1} -2 ${R2} --threads ${N_JOBS}  --minScoreFraction=0.87 --writeUnmappedNames
+
+
+* needs pathway abundance and completion/coverage estimation 
+
+#### Relevant Discussion:
+* Regarding --keepDuplicates https://github.com/COMBINE-lab/salmon/issues/223
+* Metagenomics usage: https://github.com/COMBINE-lab/salmon/issues/330

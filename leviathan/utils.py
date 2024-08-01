@@ -1,6 +1,9 @@
 #!/usr/bin/env python
-import sys, os, time, gzip, bz2, subprocess, pickle, json, logging
+import sys, os, time, gzip, bz2, subprocess, pickle, json, logging, functools, hashlib
+from datetime import datetime
+import pathlib
 from memory_profiler import memory_usage
+from pandas.errors import EmptyDataError
 
 # Read/Write
 # ==========
@@ -114,7 +117,7 @@ def format_header(text, line_character="=", n=None):
     return "{}\n{}\n{}".format(line, text, line)
 
 # Format memory
-def format_memory(B, unit="auto", return_units=True):
+def format_bytes(B, unit="auto", return_units=True):
     """
     Return the given bytes as a human-readable string in KB, MB, GB, or TB.
     1 KB = 1024 Bytes
@@ -193,6 +196,115 @@ def reset_logger(logger):
     # Optionally set a new level
     logger.setLevel(logging.DEBUG)
     
+# Timestamp
+def get_timestamp(format_string:str="%Y-%m-%d %H:%M:%S"):
+    # Get the current date and time
+    now =  datetime.now()
+    # Create a timestamp string
+    return now.strftime(format_string)
+
+# Profiling
+# =========
+def profile_peak_memory(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        # Measure memory usage
+        mem_usage = memory_usage((func, args, kwargs), max_usage=True, retval=True, max_iterations=1)
+        peak_memory, result = mem_usage[0], mem_usage[1]
+        print(f"Peak memory usage for {func.__name__}: {format_bytes(peak_memory)}")
+        return result
+    return wrapper
+
+# Directory
+# =========
+def get_file_size(filepath:str, format=False):
+    size_in_bytes = os.stat(filepath).st_size
+    if format:
+        return format_bytes(size_in_bytes)
+    else:
+        return size_in_bytes
+    
+def check_file(filepath:str, empty_ok=False, minimum_filesize=1): # Doesn't handle empty gzipped files
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(filepath)
+    if not empty_ok:
+        if get_file_size(filepath) < minimum_filesize:
+            raise EmptyDataError(filepath)
+
+# md5 hash from file
+def get_md5hash_from_file(filepath:str, block_size=65536):
+    """
+    Calculate the MD5 hash of a file.
+
+    Parameters:
+    - file_path: The path to the file.
+    - block_size: The size of each block read from the file (default is 64KB).
+
+    Returns:
+    - A string containing the MD5 hash.
+    """
+    md5 = hashlib.md5()
+    with open(filepath, 'rb') as f:
+        for block in iter(lambda: f.read(block_size), b''):
+            md5.update(block)
+    return md5.hexdigest()
+
+# md5 hash from directory
+def get_md5hash_from_directory(directory:str):
+    """
+    Calculate the MD5 hash of all files in a directory.
+
+    Parameters:
+    - directory_path: The path to the directory.
+
+    Returns:
+    - A dictionary where the keys are file paths and the values are their MD5 hashes.
+    """
+    md5_hashes = {}
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if os.path.isfile(file_path):
+                file_md5 = get_md5hash_from_file(file_path)
+                md5_hashes[file_path] = file_md5
+    return md5_hashes
+
+# Get directory tree structure
+def get_directory_tree(root, ascii=False):
+    if not ascii:
+        return DisplayablePath.view(root)
+    else:
+        return DisplayablePath.get_ascii(root)
+
+# Directory size
+def get_directory_size(directory:str='.'):
+    """
+    Adapted from @Chris:
+    https://stackoverflow.com/questions/1392413/calculating-a-directorys-size-using-python
+    """
+
+    total_size = 0
+    seen = {}
+    for dirpath, dirnames, filenames in os.walk(directory):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            try:
+                stat = os.stat(fp)
+            except OSError:
+                continue
+
+            try:
+                seen[stat.st_ino]
+            except KeyError:
+                seen[stat.st_ino] = True
+            else:
+                continue
+
+            total_size += stat.st_size
+
+    return total_size
+
+
 # Classes
 # =======
 class RunShellCommand(object):
@@ -225,6 +337,8 @@ class RunShellCommand(object):
         command:str, 
         name:str=None, 
         shell_executable:str="/bin/bash",
+        validate_input_filepaths:list=None,
+        validate_output_filepaths:list=None,
         ):
 
         if isinstance(command, str):
@@ -233,6 +347,8 @@ class RunShellCommand(object):
         self.command = command
         self.name = name
         self.shell_executable = shell_executable
+        self.validate_input_filepaths = validate_input_filepaths if validate_input_filepaths else list()
+        self.validate_output_filepaths = validate_input_filepaths if validate_input_filepaths else list()
         self.executed = False
         
     def run(self, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8", **popen_kws):
@@ -270,6 +386,9 @@ class RunShellCommand(object):
 
         # Measure memory usage
         t0 = time.time()
+        if self.validate_input_filepaths:
+            for filepath in self.validate_input_filepaths:
+                check_file(filepath, empty_ok=False)
         self.memory_usage_ = memory_usage((execute_command, (encoding, stdout, stderr,)), max_iterations=1)
         self.duration_ = time.time() - t0
 
@@ -308,29 +427,29 @@ class RunShellCommand(object):
                 fields += [
                 pad*" " + "- stdout({}): {}".format(
                     self.redirect_stdout,
-                    format_memory(os.stat(self.redirect_stdout).st_size),
+                    get_file_size(self.redirect_stdout, format=True),
                 )
                 ]
             else:
                 fields += [
-                pad*" " + "- stdout: {}".format(format_memory(sys.getsizeof(self.stdout_))),
+                pad*" " + "- stdout: {}".format(format_bytes(sys.getsizeof(self.stdout_))),
                 ]
             # stderr
             if self.redirect_stderr:
                 fields += [
                 pad*" " + "- stderr({}): {}".format(
                     self.redirect_stderr,
-                    format_memory(os.stat(self.redirect_stderr).st_size),
+                    get_file_size(self.redirect_stderr, format=True),
                 )
                 ]
             else:
                 fields += [
-                pad*" " + "- stderr: {}".format(format_memory(sys.getsizeof(self.stderr_))),
+                pad*" " + "- stderr: {}".format(format_bytes(sys.getsizeof(self.stderr_))),
                 ]
 
             fields += [
             pad*" " + "- returncode: {}".format(self.returncode_),
-            pad*" " + "- peak memory: {}".format(format_memory(self.peak_memory_)),
+            pad*" " + "- peak memory: {}".format(format_bytes(self.peak_memory_)),
             pad*" " + "- duration: {}".format(format_duration(self.duration_)),
             ]
         return "\n".join(fields)
@@ -351,11 +470,110 @@ class RunShellCommand(object):
     def check_status(self):
         if self.returncode_ != 0:
             raise subprocess.CalledProcessError(
-                "\n".join([
+                returncode=self.returncode_,
+                cmd="\n".join([
                 f"Command Failed: {self.command}",
-                f"return code: {self.return_code_}",
+                f"return code: {self.returncode_}",
                 f"stderr:\n{self.stderr_}",
                 ]),
             )
         else:
+            if self.validate_output_filepaths:
+                for filepath in self.validate_output_filepaths:
+                    check_file(filepath, empty_ok=False)
             print(f"Command Successful: {self.command}", file=sys.stderr)
+
+# # View directory structures
+class DisplayablePath(object):
+    """
+    Source: https://github.com/jolespin/genopype
+    
+    Display the tree structure of a directory.
+
+    Implementation adapted from the following sources:
+        * Credits to @abstrus
+        https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
+    """
+    display_filename_prefix_middle = '|__'
+    display_filename_prefix_last = '|__'
+    display_parent_prefix_middle = '    '
+    display_parent_prefix_last = '|   '
+
+    def __init__(self, path, parent_path, is_last):
+        self.path = pathlib.Path(str(path))
+        self.parent = parent_path
+        self.is_last = is_last
+        if self.parent:
+            self.depth = self.parent.depth + 1
+        else:
+            self.depth = 0
+
+    @property
+    def displayname(self):
+        if self.path.is_dir():
+            return self.path.name + '/'
+        return self.path.name
+
+    @classmethod
+    def make_tree(cls, root, parent=None, is_last=False, criteria=None):
+        root = pathlib.Path(str(root))
+        criteria = criteria or cls._default_criteria
+
+        displayable_root = cls(root, parent, is_last)
+        yield displayable_root
+
+        children = sorted(list(path
+                               for path in root.iterdir()
+                               if criteria(path)),
+                          key=lambda s: str(s).lower())
+        count = 1
+        for path in children:
+            is_last = count == len(children)
+            if path.is_dir():
+                for item in cls.make_tree(path, parent=displayable_root, is_last=is_last, criteria=criteria):
+                    yield item
+            else:
+                yield cls(path, displayable_root, is_last)
+            count += 1
+
+    @classmethod
+    def _default_criteria(cls, path):
+        return True
+
+    @property
+    def displayname(self):
+        if self.path.is_dir():
+            return self.path.name + '/'
+        return self.path.name
+
+    def displayable(self):
+        if self.parent is None:
+            return self.displayname
+
+        _filename_prefix = (self.display_filename_prefix_last
+                            if self.is_last
+                            else self.display_filename_prefix_middle)
+
+        parts = ['{!s} {!s}'.format(_filename_prefix,
+                                    self.displayname)]
+
+        parent = self.parent
+        while parent and parent.parent is not None:
+            parts.append(self.display_parent_prefix_middle
+                         if parent.is_last
+                         else self.display_parent_prefix_last)
+            parent = parent.parent
+
+        return ''.join(reversed(parts))
+
+    # Additions by Josh L. Espinoza for Soothsayer
+    @classmethod
+    def get_ascii(cls, root):
+        ascii_output = list()
+        paths = cls.make_tree(root)
+        for path in paths:
+            ascii_output.append(path.displayable())
+        return "\n".join(ascii_output)
+    @classmethod
+    def view(cls, root, file=sys.stdout):
+        print(cls.get_ascii(root), file=file)

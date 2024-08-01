@@ -3,12 +3,12 @@
 
 ## Modules
 * `leviathan preprocess` - Preprocesses data into form than can be used for `leviathan index`
-* `leviathan index` - Build, update, and check leviathan database
-* `leviathan info` - Report information about leviathan database
-* `leviathan profile-taxonomy` - Profile taxonomy using `Sylph` with leviathan database (provide --subset option for only using certain genomes)
-* `leviathan profile-pathway` - Profile pathways using `Salmon` with leviathan database (provide --subset option for only using certain genomes)
-* `leviathan convert` - Convert abundance tables (e.g., format for `metabolic_niche_space`)
-* `leviathan end-to-end` - Complete end-to-end pipeline which builds database, profiles, and converts tables
+* `leviathan index` - Build, update, and validate leviathan database
+* `leviathan info` - Report information about `leviathan` database
+* `leviathan profile-taxonomy` - Profile taxonomy using `Sylph` with leviathan database
+* `leviathan profile-pathway` - Profile pathways using `Salmon` with leviathan database
+* `leviathan profile-targeted` - Profile taxonomy and pathways uing targeted approach which runs `profile-taxonomy` then gets the subset of detected genomes, builds a targeted Salmon index, then runs `profile-pathway`
+* [?] `leviathan end-to-end` - Complete end-to-end pipeline which builds database, profiles, and converts tables
 
 ## Development Stage:
 * `pre-alpha`

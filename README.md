@@ -8,7 +8,11 @@
 * `leviathan profile-taxonomy` - Profile taxonomy using `Sylph` with leviathan database
 * `leviathan profile-pathway` - Profile pathways using `Salmon` with leviathan database
 * `leviathan profile-targeted` - Profile taxonomy and pathways uing targeted approach which runs `profile-taxonomy` then gets the subset of detected genomes, builds a targeted Salmon index, then runs `profile-pathway`
+* `leviathan reformat` - Reformat tables into various formats and shapes
 * [?] `leviathan end-to-end` - Complete end-to-end pipeline which builds database, profiles, and converts tables
 
 ## Development Stage:
 * `pre-alpha`
+
+## Modules:
+![Modules](images/modules.png)

@@ -1,5 +1,9 @@
 # Internal Development Notes
 
+### Features: 
+* Enzymes
+* Reactions
+
 ### Salmon Index Benchmarking: 
     * Number of sequences (~400 enzymes per prokaryotic genome):
         10k genomes: OceanDNA.n_10000.fasta:3729135

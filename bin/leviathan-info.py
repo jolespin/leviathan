@@ -2,7 +2,6 @@
 import sys,os, argparse, warnings, subprocess
 from collections import defaultdict
 from pandas.errors import EmptyDataError
-from Bio.SeqIO.FastaIO import SimpleFastaParser
 from tqdm import tqdm
 from memory_profiler import profile
 

@@ -94,6 +94,8 @@ def main(args=None):
     if opts.n_jobs == -1:
         from multiprocessing import cpu_count 
         opts.n_jobs = cpu_count()
+        logger.info(f"Setting --n_jobs to maximum threads {opts.n_jobs}")
+
     assert opts.n_jobs >= 1, "--n_jobs must be ≥ 1.  To select all available threads, use -1."
     
     # Executables
@@ -202,14 +204,14 @@ def main(args=None):
     df_sylph = pd.read_csv(os.path.join(output_directory, "output", "sylph_profile.tsv.gz"), sep="\t", index_col=0)
     genome_to_abundance = df_sylph.reset_index().set_index("Genome_file")["Taxonomic_abundance"]
     genome_to_abundance.index = genome_to_abundance.index.map(lambda filepath:genomefilepath_to_genomeid[filepath])
-    genome_to_abundance.name = "id_genome"
+    genome_to_abundance.index.name = "id_genome"
     genome_to_abundance.to_frame("abundance").to_csv(genome_abundance_filepath, sep="\t")
     
     if config["contains_genome_cluster_mapping"]:
         genomecluster_abundance_filepath = os.path.join(output_directory, "output", "taxonomic_abundance.genome_clusters.tsv.gz")
         logger.info(f"Aggregating taxonomic abundance for genome clusters: {genomecluster_abundance_filepath}")
         genomecluster_to_abundance = genome_to_abundance.groupby(genome_to_genomecluster).sum()
-        genomecluster_to_abundance.name = "id_genome_cluster"
+        genomecluster_to_abundance.index.name = "id_genome_cluster"
         genomecluster_to_abundance.to_frame("abundance").to_csv(genomecluster_abundance_filepath, sep="\t")
 
     # ========

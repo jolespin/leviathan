@@ -6,7 +6,9 @@ import pandas as pd
 import numpy as np
 # from memory_profiler import profile
 
-__program__ = os.path.split(sys.argv[0])[-1]
+from kegg_pathway_profiler.pathways import (
+    pathway_coverage_wrapper,
+)
 
 from .utils import (
     # open_file_reader,
@@ -28,6 +30,10 @@ from .utils import (
 )
     
         
+        
+__program__ = os.path.split(sys.argv[0])[-1]
+
+
 # Run Salmon quant (salmon quant --meta --libType A --index ${INDEX} -1 ${R1} -2 ${R2} --threads ${N_JOBS}  --minScoreFraction=0.87 --writeUnmappedNames)
 def run_salmon_quant(logger, log_directory, salmon_executable, n_jobs, output_directory, index_directory, forward_reads, reverse_reads, minimum_score_fraction, salmon_quant_options):
     cmd = RunShellCommand(
@@ -96,10 +102,9 @@ def reformat_gene_abundance(df_quant:pd.DataFrame, gene_to_data:dict):
     )
     
 def reformat_feature_abundance(df_gene_abundances:pd.DataFrame, gene_to_data:dict, split_feature_abundances:bool):
-    index = list()
-    values = list()
+    feature_to_values = defaultdict(lambda: np.zeros(2, dtype=float))
     if split_feature_abundances:
-        columns = ["number_of_reads(scaled)", "tpm(scaled)", ]
+        columns = ["number_of_reads(scaled)", "tpm(scaled)"]
         for (id_genome, id_gene), row in tqdm(df_gene_abundances.iterrows(), "Aggregating feature counts (Splitting abundances across features)"):
             abundance, tpm = row
             features = gene_to_data[id_gene]["features"]
@@ -108,8 +113,7 @@ def reformat_feature_abundance(df_gene_abundances:pd.DataFrame, gene_to_data:dic
                 tpm_scaled = tpm/number_of_features
                 abundance_scaled = abundance/number_of_features
                 for id_feature in features:
-                    values.append([abundance_scaled, tpm_scaled])
-                    index.append((id_genome, id_feature))
+                    feature_to_values[(id_genome, id_feature)] += [abundance_scaled, tpm_scaled]
     else:
         columns = ["number_of_reads", "tpm"]
         for (id_genome, id_gene), row in tqdm(df_gene_abundances.iterrows(), "Aggregating feature counts"):
@@ -118,14 +122,15 @@ def reformat_feature_abundance(df_gene_abundances:pd.DataFrame, gene_to_data:dic
             if features:
                 number_of_features = len(features)
                 for id_feature in features:
-                    values.append([abundance, tpm])
-                    index.append((id_genome, id_feature))
+                    feature_to_values[(id_genome, id_feature)] += [abundance_scaled, tpm_scaled]
+
                     
-    return pd.DataFrame(
-        data=values,
-        index=pd.MultiIndex.from_tuples(index, names=["id_genome", "id_feature"]),
-        columns=columns,
-    )
+    df_output = pd.DataFrame(
+        data=feature_to_values,
+        index=columns,
+    ).T
+    df_output.index.names = ["id_genome", "id_feature"]
+    return df_output
     
 def build_wide_feature_prevalence_matrix(df_feature_abundance:pd.DataFrame, threshold:float=0.0):
     # Index
@@ -152,12 +157,55 @@ def build_wide_feature_prevalence_matrix(df_feature_abundance:pd.DataFrame, thre
         columns=pd.Index(features, name="id_feature"),
     )
                     
+def build_feature_prevalence_dictionary(df_feature_prevalence_binary:pd.DataFrame):
+    genome_to_features = dict()
+    for id_genome, prevalence in df_feature_prevalence_binary.iterrows():
+        genome_to_features[id_genome] = set(prevalence[lambda x: x > 0].index)
+    return genome_to_features
+
+def build_feature_pathway_dictionary(pathway_to_data:dict):
+    feature_to_pathways = defaultdict(set)
+    for id_pathway, data in pathway_to_data.items():
+        for id_feature in data["ko_to_nodes"]:
+            feature_to_pathways[id_feature].add(id_pathway)
+    return feature_to_pathways
+            
+        
+def calculate_pathway_coverage(genome_to_features:dict, pathway_to_data:dict):
+    # Coverage
+    coverages = dict()
+    # Calculate pathway coverage for all genomes
+    for id_genome, evaluation_features in genome_to_features.items():
+        # Calculate pathway coverage for all pathways based on evaluation feature set
+        pathway_to_results = pathway_coverage_wrapper(
+            evaluation_kos=evaluation_features,
+            database=pathway_to_data,
+            progressbar_description=f"Calculating pathway coverage: {id_genome}",
+        )
+
+        # Coverage
+        for id_pathway, results in pathway_to_results.items():
+            coverages[(id_genome, id_pathway)] = results["coverage"]
+    
+    return coverages
+
+def aggregate_pathway_abundance_and_append_coverage(df_feature_abundance:pd.DataFrame, feature_to_pathways:dict, coverages:dict, index_names = ["id_genome", "id_pathway"]):
+    abundance_matrix = defaultdict(lambda: np.zeros(3, dtype=float))
+    for (id_genome, id_feature), values in df_feature_abundance.iterrows():
+        for id_pathway in feature_to_pathways[id_feature]:
+            abundance_matrix[(id_genome, id_pathway)][:-1] += values
+    for (id_genome, id_pathway) in abundance_matrix:
+        coverage = coverages.get((id_genome, id_pathway), 0.0)
+        abundance_matrix[(id_genome, id_pathway)] += [0.0, 0.0, coverage]
+            
+    df_output = pd.DataFrame(abundance_matrix, index=df_feature_abundance.columns.tolist() + ["coverage"]).T
+    df_output.index.names = index_names
+    return df_output
+
 def aggregate_feature_abundance_for_clusters(df_feature_abundance:pd.DataFrame, genome_to_data:dict):
     def f(x):
         id_genome, id_feature = x
         return (genome_to_data[id_genome]["id_genome_cluster"], id_feature)
-    df_aggregated = df_feature_abundance.groupby(f, axis=0).sum()
-    df_aggregated.index = pd.MultiIndex.from_tuples(df_aggregated.index, names=["id_genome_cluster", "id_feature"])
-    return df_aggregated
-
-    
+    df_output = df_feature_abundance.groupby(f).sum()
+    df_output.index = pd.MultiIndex.from_tuples(df_output.index, names=["id_genome_cluster", "id_feature"])
+    return df_output

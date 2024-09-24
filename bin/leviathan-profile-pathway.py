@@ -37,6 +37,10 @@ from leviathan.profile_pathway import(
     reformat_gene_abundance,
     reformat_feature_abundance,
     build_wide_feature_prevalence_matrix,
+    build_feature_prevalence_dictionary,
+    build_feature_pathway_dictionary,
+    calculate_pathway_coverage,
+    aggregate_pathway_abundance_and_append_coverage,
     aggregate_feature_abundance_for_clusters,
 )
 
@@ -60,6 +64,8 @@ def main(args=None):
     parser_io = parser.add_argument_group('I/O arguments')
     parser_io.add_argument("-1","--forward_reads", type=str,  help = "path/to/forward_reads.fq[.gz] (Cannot be used with -s/--read_sketch)")
     parser_io.add_argument("-2","--reverse_reads", type=str,  help = "path/to/reverse_reads.fq[.gz] (Cannot be used with -s/--read_sketch)")
+    # parser_io.add_argument("--ont", type=str,  help = "path/to/ont_reads.fq[.gz] (Cannot be used with -s/--read_sketch)")
+
     parser_io.add_argument("-n", "--name", type=str, required=True, help="Name of sample")
     parser_io.add_argument("-o","--project_directory", type=str, default="leviathan_output/profiling/pathway", help = "path/to/project_directory (e.g., leviathan_output/profiling/pathway]")
     parser_io.add_argument("-d","--index_directory", type=str, required=True, help = "path/to/index_directory/")
@@ -93,6 +99,8 @@ def main(args=None):
     if opts.n_jobs == -1:
         from multiprocessing import cpu_count 
         opts.n_jobs = cpu_count()
+        logger.info(f"Setting --n_jobs to maximum threads {opts.n_jobs}")
+
     assert opts.n_jobs >= 1, "--n_jobs must be ≥ 1.  To select all available threads, use -1."
     
     # Executables
@@ -124,7 +132,14 @@ def main(args=None):
     logger.info(f"Checking genome metadata: {genome_data_filepath}")
     check_file(genome_data_filepath, minimum_filesize=48)
     
-    
+    # Check pathway metadata
+    if config["contains_pathways"]:
+        pathway_data_filepath = os.path.join(opts.index_directory, "database", "pathway_to_data.pkl.gz")
+        logger.info(f"Checking pathway metadata: {pathway_data_filepath}")
+        check_file(pathway_data_filepath, minimum_filesize=48)
+    else:
+        logger.warning(f"No pathways available in index: {opts.index_directory}.  Feature-level profiling will be completed but pathway abundances and coverage will not be in output.")
+
     # Output
     output_directory = os.path.join(opts.project_directory, opts.name)
     os.makedirs(output_directory, exist_ok=True)
@@ -136,15 +151,21 @@ def main(args=None):
     # =====================
     # Loading gene metadata
     # =====================
-    logger.info("Loading gene metadata") 
+    logger.info("Loading gene data") 
     gene_to_data = read_pickle(os.path.join(opts.index_directory, "database", "gene_to_data.pkl.gz"))
 
     # =======================
     # Loading genome metadata
     # =======================
-    logger.info("Loading genome metadata") 
+    logger.info("Loading genome data") 
     genome_to_data = read_pickle(os.path.join(opts.index_directory, "database", "genome_to_data.pkl.gz"))
 
+    # =======================
+    # Loading pathway metadata
+    # =======================
+    if config["contains_pathways"]:
+        logger.info("Loading pathway data") 
+        pathway_to_data = read_pickle(os.path.join(opts.index_directory, "database", "pathway_to_data.pkl.gz"))
 
     # ====================
     # Build Salmon profiler
@@ -167,30 +188,45 @@ def main(args=None):
     # ===============================
     # Abundance and prevalence tables
     # ===============================
-    gene_abundance_filepath = os.path.join(output_directory, "output", "gene_abundances.genomes.tsv.gz")
-    logger.info(f"[level=genome] Reformatting gene abundance: {gene_abundance_filepath}")
+    level="genome"
+    gene_abundance_filepath = os.path.join(output_directory, "output", f"gene_abundances.{level}s.tsv.gz")
+    logger.info(f"[level={level}] Reformatting gene abundance: {gene_abundance_filepath}")
     
     df_quant = pd.read_csv(os.path.join(output_directory, "intermediate", "quant.sf"), sep="\t", index_col=0)
     df_gene_abundance = reformat_gene_abundance(df_quant, gene_to_data)
     df_gene_abundance.to_csv(gene_abundance_filepath, sep="\t")
     
-    feature_abundance_filepath = os.path.join(output_directory, "output", "feature_abundances.genomes.tsv.gz")
-    logger.info(f"[level=genome] Calculating feature abundance: {feature_abundance_filepath}")
+    feature_abundance_filepath = os.path.join(output_directory, "output", f"feature_abundances.{level}s.tsv.gz")
+    logger.info(f"[level={level}] Calculating feature abundance: {feature_abundance_filepath}")
     df_feature_abundance = reformat_feature_abundance(df_gene_abundance, gene_to_data, split_feature_abundances=not opts.no_split_feature_abundances)
     df_feature_abundance.to_csv(feature_abundance_filepath, sep="\t")
     
-    feature_prevalence_filepath = os.path.join(output_directory, "output", "feature_prevalence.genomes.tsv.gz")
-    logger.info(f"[level=genome] Calculating feature prevalence: {feature_prevalence_filepath}")
+    feature_prevalence_filepath = os.path.join(output_directory, "output", f"feature_prevalence.{level}s.tsv.gz")
+    logger.info(f"[level={level}] Calculating feature prevalence: {feature_prevalence_filepath}")
     df_feature_prevalence = build_wide_feature_prevalence_matrix(df_feature_abundance, threshold=0)
     df_feature_prevalence.to_csv(feature_prevalence_filepath, sep="\t")
     
-    feature_prevalence_binary_filepath = os.path.join(output_directory, "output", "feature_prevalence-binary.genomes.tsv.gz")
-    logger.info(f"[level=genome] Reformatting binary feature prevalence: {feature_prevalence_binary_filepath}")
+    feature_prevalence_binary_filepath = os.path.join(output_directory, "output", f"feature_prevalence-binary.{level}s.tsv.gz")
+    logger.info(f"[level={level}] Reformatting binary feature prevalence: {feature_prevalence_binary_filepath}")
     df_feature_prevalence_binary = (df_feature_prevalence > 0).astype(int)
     df_feature_prevalence_binary.to_csv(feature_prevalence_binary_filepath, sep="\t")
-
+    
+    if config["contains_pathways"]:
+        logger.info(f"[level={level}] Building binary feature prevalence to dictionary")
+        genome_to_features = build_feature_prevalence_dictionary(df_feature_prevalence_binary)
+        logger.info(f"[level={level}] Building feature to pathways dictionary")
+        feature_to_pathways = build_feature_pathway_dictionary(pathway_to_data)
+        logger.info(f"[level={level}] Calculating pathway coverage")
+        coverages = calculate_pathway_coverage(genome_to_features, pathway_to_data)
+        
+        pathway_abundances_filepath = os.path.join(output_directory, "output", f"pathway_abundances.{level}s.tsv.gz")
+        logger.info(f"[level={level}] Aggregating pathway abundances and appending coverages: {pathway_abundances_filepath}")
+        df_pathway_abundances = aggregate_pathway_abundance_and_append_coverage(df_feature_abundance, feature_to_pathways, coverages, index_names = [f"id_{level}", "id_pathway"])
+        df_pathway_abundances.to_csv(pathway_abundances_filepath, sep="\t")
 
     if config["contains_genome_cluster_mapping"]:
+        level="genome_cluster"
+
         feature_prevalence_filepath = os.path.join(output_directory, "output", "feature_abundances.genome_clusters.tsv.gz")
         logger.info(f"[level=genome_cluster] Calculating feature abundance: {feature_prevalence_filepath}")
         df_feature_abundance = aggregate_feature_abundance_for_clusters(df_feature_abundance, genome_to_data)
@@ -211,6 +247,18 @@ def main(args=None):
         df_feature_prevalence_binary = (df_feature_prevalence > 0).astype(int)
         df_feature_prevalence_binary.to_csv(feature_prevalence_binary_filepath, sep="\t")
         
+        if config["contains_pathways"]:
+            logger.info(f"[level={level}] Building binary feature prevalence to dictionary")
+            genome_to_features = build_feature_prevalence_dictionary(df_feature_prevalence_binary)
+            logger.info(f"[level={level}] Building feature to pathways dictionary")
+            feature_to_pathways = build_feature_pathway_dictionary(pathway_to_data)
+            logger.info(f"[level={level}] Calculating pathway coverage")
+            coverages = calculate_pathway_coverage(genome_to_features, pathway_to_data)
+            
+            pathway_abundances_filepath = os.path.join(output_directory, "output", f"pathway_abundances.{level}s.tsv.gz")
+            logger.info(f"[level={level}] Aggregating pathway abundances and appending coverages: {pathway_abundances_filepath}")
+            df_pathway_abundances = aggregate_pathway_abundance_and_append_coverage(df_feature_abundance, feature_to_pathways, coverages, index_names = [f"id_{level}", "id_pathway"])
+            df_pathway_abundances.to_csv(pathway_abundances_filepath, sep="\t")
 
 
     # ========

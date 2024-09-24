@@ -60,11 +60,9 @@ def main(args=None):
 
     # Pipeline
     parser_io = parser.add_argument_group('I/O arguments')
-    parser_io.add_argument("-f","--fasta", type=str,  help = "path/to/cds.fasta") # default="stdin"?
-    parser_io.add_argument("-m","--feature_mapping", type=str,  help = "path/to/feature_mapping.tsv [id_gene, feature_set, id_genome, (Optional: id_genome_cluster)] (No header)")
-    parser_io.add_argument("-g","--genomes", type=str, help = "path/to/genomes.tsv [id_genome, path/to/genome] (No header)")
-    parser_io.add_argument("-d","--index_directory", type=str, required=True, help = "path/to/index_directory/ (Recommended: leviathan_output/index/ if this will only be used for one project or a centralized location if it will be used for multiple projects)")
-    parser_io.add_argument("-u", "--update_with_genomes", action="store_true",  help = "Update databases with genomes for Sylph sketches")
+    parser_io.add_argument("-i","--genomes_table", type=str, default="stdin", help = "path/to/genomes_table.tsv [id_genome, path/to/assembly.fasta, path/to/cds.fasta] (No header, Tab delimited)")
+    parser_io.add_argument("-a","--annotations", type=str, help = "path/to/annotations.tsv from either PyKOfamSearch or PyHMMSearch (with header)")
+    parser_io.add_argument("-f","--annotation_format", type=str, default="pykofamsearch", choices={"pykofamsearch", "pyhmmsearch", "custom"}, help = "Annotation format. If 'custom', then annotation table must be 2 columns [id_gene, id_feature] (No header, Tab delimited) [Default: pykofamsearch]")
 
     # Utilities
     parser_utility = parser.add_argument_group('Utility arguments')

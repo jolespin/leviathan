@@ -1,10 +1,11 @@
 #!python
-import sys,os, argparse, warnings, subprocess
+import sys,os, argparse, warnings, subprocess, shutil
 from collections import defaultdict
-from pandas.errors import EmptyDataError
-from Bio.SeqIO.FastaIO import SimpleFastaParser
+from importlib.resources import files as resource_files
+# from pandas.errors import EmptyDataError
+# from Bio.SeqIO.FastaIO import SimpleFastaParser
 from tqdm import tqdm
-from memory_profiler import profile
+# from memory_profiler import profile
 
 __program__ = os.path.split(sys.argv[0])[-1]
 
@@ -19,17 +20,27 @@ from leviathan.utils import (
     reset_logger,
     format_duration,
     format_header,
-    format_memory,
+    format_bytes,
+    get_timestamp,
+    get_directory_tree,
+    get_directory_size,
+    get_md5hash_from_directory,
     RunShellCommand,
 )
 
 from leviathan.index import(
-    process_and_check_inputs,
-    load_database_and_check_inputs,
+    process_genomic_databases_and_check_inputs,
+    update_genome_database_with_fasta_filepaths_and_check_inputs,
+    load_pathway_database_and_check_inputs,
     check_salmon_index,
     run_salmon_indexer,
-    run_sylph_sketcher,
+    run_sylph_genomes_sketcher,
+    run_kegg_pathway_downloader,
 )
+
+DEFAULT_PATHWAY_DATABASE = str(resource_files('kegg_pathway_profiler').joinpath('data/database.pkl.gz'))
+if not os.path.exists(DEFAULT_PATHWAY_DATABASE):
+    DEFAULT_PATHWAY_DATABASE = None
 
 def main(args=None):
     # Options
@@ -52,13 +63,12 @@ def main(args=None):
     parser_io.add_argument("-f","--fasta", type=str,  help = "path/to/cds.fasta") # default="stdin"?
     parser_io.add_argument("-m","--feature_mapping", type=str,  help = "path/to/feature_mapping.tsv [id_gene, feature_set, id_genome, (Optional: id_genome_cluster)] (No header)")
     parser_io.add_argument("-g","--genomes", type=str, help = "path/to/genomes.tsv [id_genome, path/to/genome] (No header)")
-    parser_io.add_argument("-o","--index_directory", type=str, required=True, help = "path/to/index_directory/")
+    parser_io.add_argument("-d","--index_directory", type=str, required=True, help = "path/to/index_directory/ (Recommended: leviathan_output/index/ if this will only be used for one project or a centralized location if it will be used for multiple projects)")
     parser_io.add_argument("-u", "--update_with_genomes", action="store_true",  help = "Update databases with genomes for Sylph sketches")
 
     # Utilities
     parser_utility = parser.add_argument_group('Utility arguments')
-    parser_utility.add_argument("-p","--n_jobs", type=int, default=1,  help = "Number of threads to use [Default: 1]")
-    # parser_utility.add_argument("-c", "--cleanup", action="store_true",  help = "Remove temporary files")
+    parser_utility.add_argument("-p","--n_jobs", type=int, default=1,  help = "Number of threads to use.  Use -1 for all available. [Default: 1]")
 
     # Salmon
     parser_salmon_index = parser.add_argument_group('salmon index arguments')
@@ -66,12 +76,18 @@ def main(args=None):
     parser_salmon_index.add_argument("--salmon_index_options", type=str, default="", help="salmon index| More options (e.g. --arg=1 ) https://salmon.readthedocs.io/en/latest/ [Default: '']")
 
     # Sylph
-    parser_sylph_sketch = parser.add_argument_group('Sylph sketch arguments (Fastq)')
+    parser_sylph_sketch = parser.add_argument_group('Sylph genomes sketcher arguments (Fastq)')
     parser_sylph_sketch.add_argument("--sylph_executable", type=str, help="Sylph executable [Default: $PATH]")
     parser_sylph_sketch.add_argument("--sylph_k", type=int, choices={21,31}, default=31,  help="Sylph |  Value of k. Only k = 21, 31 are currently supported. [Default: 31]")
     parser_sylph_sketch.add_argument("--sylph_minimum_spacing", type=int,  default=30,  help="Sylph |  Minimum spacing between selected k-mers on the genomes [Default: 30]")
     parser_sylph_sketch.add_argument("--sylph_subsampling_rate", type=int, default=200,  help="Sylph | Subsampling rate.	[Default: 200]")
     parser_sylph_sketch.add_argument("--sylph_sketch_options", type=str, default="", help="Sylph | More options for `sylph sketch` (e.g. --arg=1 ) [Default: '']")
+
+    # Pathway
+    parser_pathways = parser.add_argument_group('Pathway database arguments')
+    parser_pathways.add_argument("--pathway_database_downloader_executable", type=str, help="KEGG Pathway profiler `build-pathway-database.py` executable. Ignored if --database is provided. [Default: $PATH]")
+    parser_pathways.add_argument("--no_intermediate_files", action="store_true",  help = "Don't write intermediate files when downloading database")
+    parser_pathways.add_argument("--pathway_database", type=str, default=DEFAULT_PATHWAY_DATABASE, help=f"Pathway database formatted as a Python pkl[.gz].  See documentation for details.  If no database is provided, then a database will be generated if KEGG orthologs are provided as features. [Default: {DEFAULT_PATHWAY_DATABASE}]")
 
     # Options
     opts = parser.parse_args()
@@ -80,6 +96,9 @@ def main(args=None):
 
     # logger
     logger = build_logger("leviathan index")
+
+    # Commands
+    logger.info(f"Command: {sys.argv}")
      
     # Post-processing argument dependencies
     if opts.update_with_genomes:
@@ -102,6 +121,8 @@ def main(args=None):
     if opts.n_jobs == -1:
         from multiprocessing import cpu_count 
         opts.n_jobs = cpu_count()
+        logger.info(f"Setting --n_jobs to maximum threads {opts.n_jobs}")
+
     assert opts.n_jobs >= 1, "--n_jobs must be ≥ 1.  To select all available threads, use -1."
     
     # Executables
@@ -109,17 +130,30 @@ def main(args=None):
     if not opts.salmon_executable:
         opts.salmon_executable = os.path.join(bin_directory, "salmon")
     if not os.path.exists(opts.salmon_executable):
-        msg = f"salmon executable not doesn't exist: {opts.salmon_executable}"
+        msg = f"salmon executable doesn't exist: {opts.salmon_executable}"
         logger.critical(msg)
         raise FileNotFoundError(msg)
+    
     # * Sylph
     if not opts.sylph_executable:
         opts.sylph_executable = os.path.join(bin_directory, "sylph")
     if not os.path.exists(opts.sylph_executable):
-        msg = f"sylph executable not doesn't exist: {opts.sylph_executable}"
+        msg = f"sylph executable doesn't exist: {opts.sylph_executable}"
         logger.critical(msg)
         raise FileNotFoundError(msg)
-
+    
+    # * KEGG Pathway Profiler
+    if opts.pathway_database:
+        logger.info(f"Database provided: {opts.pathway_database}")
+        logger.info(f"Ignoring --pathway_database_downloader_executable {opts.pathway_database_downloader_executable}")
+    else:
+        if not opts.pathway_database_downloader_executable:
+            opts.pathway_database_downloader_executable = os.path.join(bin_directory, "build-pathway-database.py")
+        if not os.path.exists(opts.pathway_database_downloader_executable):
+            msg = f"KEGG Pathway Profiler's `build-pathway-database.py` executable doesn't exist: {opts.pathway_database_downloader_executable}. Please install or provide a custom database."
+            logger.critical(msg)
+            raise FileNotFoundError(msg)
+    
     # Index directory
     if all([
         os.path.exists(opts.index_directory),
@@ -127,55 +161,108 @@ def main(args=None):
         ]):
         msg = f"--index_directory {opts.index_directory} already exists.  If you want to update with genomes, please use --update_with_genomes or remove directory to overwrite"
         logger.critical(msg)
-        raise FileNotFoundError(msg)
+        raise FileExistsError(msg)
     
     os.makedirs(os.path.join(opts.index_directory, "database"), exist_ok=True)
     os.makedirs(os.path.join(opts.index_directory, "logs"), exist_ok=True)
     os.makedirs(os.path.join(opts.index_directory, "tmp"), exist_ok=True)
 
     if not opts.update_with_genomes:
-        # Process and check inputs
-        logger.info("Processing and checking input files")
+        # Setup config
+        logger.info("Setting up config")
 
-        config, gene_to_data, genome_to_data = process_and_check_inputs(
+        config = dict(
+            fasta_filepath=opts.fasta,
+            feature_mapping_filepath=opts.feature_mapping,
+            contains_genome_cluster_mapping=False,
+            contains_genome_filepaths=False,
+            timestamp=get_timestamp(),
+        )
+        # Genomes and genes database
+        # --------------------------
+        # Process genomes/genes and check inputs
+        logger.info("Processing and checking input files")
+        
+        config, gene_to_data, genome_to_data = process_genomic_databases_and_check_inputs(
             fasta=opts.fasta, 
             feature_mapping=opts.feature_mapping, 
             genomes=opts.genomes,
             logger=logger,
+            config=config,
             )
         
+        # Pathway database
+        # ----------------
+        # Fetch database
+        config["contains_pathways"] = False
+        if opts.pathway_database:
+            logger.info(f"Pathway database provided and copying to index: {opts.pathway_database}")
+            shutil.copy(opts.pathway_database, os.path.join(opts.index_directory, "database", "pathway_to_data.pkl.gz"), follow_symlinks=True)
+            config["contains_pathways"] = True
+        else:
+            if config["feature_type_is_kegg_ortholog"]:
+                # Run KEGG Pathway Downloader
+                logger.info("Running KEGG Pathway downloader")
+                cmd_kegg_pathway_downloader = run_kegg_pathway_downloader(
+                    logger=logger,
+                    log_directory = os.path.join(opts.index_directory, "logs"),
+                    pathway_database_downloader_executable=opts.pathway_database_downloader_executable,
+                    index_directory=opts.index_directory,
+                    no_intermediate_files=bool(opts.no_intermediate_files),
+                    )
+                config["contains_pathways"] = True
+            else:
+                logger.warning("No pathway database was provided and features were not determined to be KEGG orthologs so automatic database compilation is not available.  Pathway profiling will not include pathway coverage or abundances.")
+
+        # Check pathway database
+        if config["contains_pathways"]:
+            config, pathway_to_data = load_pathway_database_and_check_inputs(
+                index_directory=opts.index_directory, 
+                gene_to_data=gene_to_data, 
+                logger=logger, 
+                config=config,
+                )
+
         # Write database files
         logger.info("Writing config and database files")
-        write_json(config, os.path.join(opts.index_directory, "database", "config.json"))
+        write_json(config, os.path.join(opts.index_directory,  "config.json"))
         write_pickle(gene_to_data, os.path.join(opts.index_directory, "database", "gene_to_data.pkl.gz"))
         write_pickle(genome_to_data, os.path.join(opts.index_directory, "database", "genome_to_data.pkl.gz"))
 
         # ==================
         # Build Salmon Index
         # ==================
-        logger.info("Running Salmon indexer")
         cmd_salmon_indexer = run_salmon_indexer(
+                        logger=logger,
+                        log_directory = os.path.join(opts.index_directory, "logs"),
                         salmon_executable=opts.salmon_executable,
                         n_jobs=opts.n_jobs,
                         fasta=opts.fasta,
                         index_directory=opts.index_directory,
                         index_options=opts.salmon_index_options,
         )
+        
     else:
+        # Load config
+        config_filepath = os.path.join(opts.index_directory, "config.json")
+        logger.info(f"Loading config: {config_filepath}")
+        config = read_json(config_filepath)
+
         # Process and check inputs
         logger.info("Loading previously built database and checking genomes for database update")
-        config, gene_to_data, genome_to_data = load_database_and_check_inputs(
+        config, gene_to_data, genome_to_data = update_genome_database_with_fasta_filepaths_and_check_inputs(
             index_directory=opts.index_directory, 
             genomes=opts.genomes,
             logger=logger,
+            config=config,
             )
         
         # Update database files
         logger.info("Rewriting config and database files")
-        write_json(config, os.path.join(opts.index_directory, "database", "config.json"))
+        write_json(config, config_filepath)
         write_pickle(genome_to_data, os.path.join(opts.index_directory, "database", "genome_to_data.pkl.gz"))
         
- 
+
     # ==================
     # Build Sylph Sketch
     # ==================
@@ -189,8 +276,10 @@ def main(args=None):
                 print(data["filepath"], file=f)
                 
         # Run Sylph
-        logger.info("Running Sylph sketcher")
-        cmd_sylph_sketcher = run_sylph_sketcher(
+        logger.info("Running Sylph genome sketcher")
+        cmd_sylph_genomes_sketcher = run_sylph_genomes_sketcher(
+            logger=logger,
+            log_directory = os.path.join(opts.index_directory, "logs"),
             sylph_executable=opts.sylph_executable, 
             n_jobs=opts.n_jobs, 
             genome_filepaths=genome_filepaths, 
@@ -203,7 +292,21 @@ def main(args=None):
 
     else:
         logger.warning("--genomes not provided so Leviathan is not building Sylph sketches")
-    
+        
+    # ========
+    # Hash
+    # ========   
+    logger.info(f"Calculating md5 hashes")
+    file_to_hash = get_md5hash_from_directory(opts.index_directory)
+    write_json(file_to_hash, os.path.join(opts.index_directory, "md5hashes.json"))
+
+    # ========
+    # Complete
+    # ========    
+    logger.info(f"Completed building leviathan index: {opts.index_directory}")
+    logger.info(f"Directory size of leviathan index: {format_bytes(get_directory_size(opts.index_directory))}")
+    logger.info(f"Directory structure of leviathan index:\n{get_directory_tree(opts.index_directory, ascii=True)}")
+
 if __name__ == "__main__":
     main()
     

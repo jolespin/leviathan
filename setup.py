@@ -31,11 +31,11 @@ setup(name='leviathan',
     install_requires=requirements,
     include_package_data=False,
     scripts=[
+        "bin/leviathan-preprocess.py",
         "bin/leviathan-index.py",
         "bin/leviathan-info.py",
         "bin/leviathan-profile-taxonomy.py",
         "bin/leviathan-profile-pathway.py",
-
     ],
 
 )

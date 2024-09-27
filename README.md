@@ -1,42 +1,58 @@
 # Leviathan
 `Leviathan` is a fast, memory-efficient, and scalable taxonomic and pathway profiler for next generation sequencing (genome-resolved) metagenomics and metatranscriptomics.  `Leviathan` is powered by `Salmon` and `Sylph` in the backend.
 
+## Benchmarking
+Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 SageMaker instance (ml.m5.4xlarge)
+
+| number_of_genomes | number_of_cds_with_features | preprocess | index | profile-taxonomy | profile-pathway |
+|-------------------|-----------------------------|------------|-------|------------------|-----------------|
+| 10                | 1928                        | 0:03       | 0:09  | 0:41             | 2:09            |
+| 100               | 18410                       | 0:31       | 0:26  | 0:41             | 4:29            |
+| 1000              | 191155                      | 5:29       | 3:55  | 0:43             | 12:50           |
+| 10000             | 1684876                     | 46:00      | 39:10 | 0:48             | 18:14           |
+
+
 ## Modules
-* `leviathan preprocess` - Preprocesses data into form than can be used for `leviathan index` [Pending]
-* `leviathan index` - Build, update, and validate leviathan database [Complete]
+* `leviathan preprocess` - Preprocesses data into form than can be used by `leviathan index` 
+
+    ```
+    leviathan-preprocess.py \
+        -i references/manifest.tsv \
+        -a references/pykofamsearch.pathways.tsv.gz \
+        -o references/
+    ```
+
+* `leviathan index` - Build, update, and validate leviathan database
     ```
     leviathan-index.py \
-        -f leviathan-test-n10.fasta \
-        -m leviathan-test-n10.feature_mapping.tsv \
-        -g leviathan-test-n10.genome_filepaths.tsv \
-        -d leviathan-test-n10-index/ \
+        -f references/cds.fasta.gz \
+        -m references/feature_mapping.tsv.gz \
+        -g references/genomes.tsv.gz \
+        -d index/ \
         -p=-1
     ```
-* `leviathan info` - Report information about `leviathan` database [Complete]
+* `leviathan info` - Report information about `leviathan` database
     ```
-    leviathan-info.py -d leviathan-test-n10-index/
+    leviathan-info.py -d index/
     ```
-* `leviathan profile-taxonomy` - Profile taxonomy using `Sylph` with leviathan database [Complete]
+* `leviathan profile-taxonomy` - Profile taxonomy using `Sylph` with leviathan database
     ```
     leviathan-profile-taxonomy.py \
         -1 ../Fastq/SRR12042303_1.fastq.gz \
         -2 ../Fastq/SRR12042303_2.fastq.gz \
         -n SRR12042303 \
-        -d index/leviathan-test-n10-index/ \
+        -d index/ \
         -p=-1
     ```
-* `leviathan profile-pathway` - Profile pathways using `Salmon` with leviathan database [In progress]
+* `leviathan profile-pathway` - Profile pathways using `Salmon` with leviathan database
     ```
     leviathan-profile-pathway.py \
         -1 ../Fastq/SRR12042303_1.fastq.gz \
         -2 ../Fastq/SRR12042303_2.fastq.gz \
         -n SRR12042303 \
-        -d index/leviathan-test-n10-index/ \
+        -d index/ \
         -p=-1
     ```
-* `leviathan profile-targeted` - Profile taxonomy and pathways uing targeted approach which runs `profile-taxonomy` then gets the subset of detected genomes, builds a targeted Salmon index, then runs `profile-pathway` [Pending]
-* `leviathan reformat` - Reformat tables into various formats and shapes [Pending]
-* [?] `leviathan end-to-end` - Complete end-to-end pipeline which builds database, profiles, and converts tables [Pending]
 
 ## Pathway Databases
 Currently, the only pathway database supported for pathway coverage calculations is the KEGG module database using KEGG orthologs as features.  This database can be pre-built using [KEGG Pathway Profiler](https://github.com/jolespin/kegg_pathway_profiler) or built with `leviathan index` if KEGG orthologs are used as features.  
@@ -144,7 +160,13 @@ If custom databases are built, then the following nested Python dictionary struc
 For documentation for pathway theory or how `MultiDiGraph` objects are generated, please refer to the source repository for [KEGG Pathway Completeness Tool](https://github.com/EBI-Metagenomics/kegg-pathways-completeness-tool) as [KEGG Pathway Profiler](https://github.com/jolespin/kegg_pathway_profiler) is a reimplementation for production.
 
 ## Development Stage:
-* `alpha`
+* `beta`
+
+## Citation:
+* In progress
+
+## Contact:
+* jolespin@newatlantis.io
 
 ## Modules:
 ![Modules](images/modules.png)

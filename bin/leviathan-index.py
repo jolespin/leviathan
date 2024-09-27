@@ -145,7 +145,8 @@ def main(args=None):
     # * KEGG Pathway Profiler
     if opts.pathway_database:
         logger.info(f"Database provided: {opts.pathway_database}")
-        logger.info(f"Ignoring --pathway_database_downloader_executable {opts.pathway_database_downloader_executable}")
+        if opts.pathway_database_downloader_executable:
+            logger.info(f"Ignoring --pathway_database_downloader_executable {opts.pathway_database_downloader_executable}")
     else:
         if not opts.pathway_database_downloader_executable:
             opts.pathway_database_downloader_executable = os.path.join(bin_directory, "build-pathway-database.py")
@@ -258,9 +259,10 @@ def main(args=None):
             )
         
         # Update database files
-        logger.info("Rewriting config and database files")
+        genome_to_data_filepath = os.path.join(opts.index_directory, "database", "genome_to_data.pkl.gz")
+        logger.info(f"Rewriting config and database files: {genome_to_data_filepath}")
         write_json(config, config_filepath)
-        write_pickle(genome_to_data, os.path.join(opts.index_directory, "database", "genome_to_data.pkl.gz"))
+        write_pickle(genome_to_data, genome_to_data_filepath)
         
 
     # ==================
@@ -272,7 +274,7 @@ def main(args=None):
         # Write filepaths
         genome_filepaths = os.path.join(opts.index_directory, "tmp", "genome_filepaths.list")
         with open_file_writer(genome_filepaths) as f:
-            for id_genome, data in tqdm(genome_to_data.items(), f"Writing genome filepaths for Sylph: {genome_filepaths}"):
+            for id_genome, data in tqdm(genome_to_data.items(), f"Writing filepaths: {genome_filepaths}"):
                 print(data["filepath"], file=f)
                 
         # Run Sylph
@@ -296,9 +298,10 @@ def main(args=None):
     # ========
     # Hash
     # ========   
-    logger.info(f"Calculating md5 hashes")
+    md5hash_filepath = os.path.join(opts.index_directory, "md5hashes.json")
+    logger.info(f"Calculating md5 hashes: {md5hash_filepath}")
     file_to_hash = get_md5hash_from_directory(opts.index_directory)
-    write_json(file_to_hash, os.path.join(opts.index_directory, "md5hashes.json"))
+    write_json(file_to_hash, md5hash_filepath)
 
     # ========
     # Complete

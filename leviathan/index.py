@@ -120,15 +120,15 @@ def process_genomic_databases_and_check_inputs(fasta, feature_mapping, genomes, 
                     genomes_with_filepaths.add(id_genome)
                     
         if genomes_from_feature_mapping != genomes_with_filepaths:
-            A_exclusive = genes_from_feature_mapping - genomes_with_filepaths
-            B_exclusive = genomes_with_filepaths - genes_from_feature_mapping
-            msg = "--feature_mapping must contain same genomes in --genomes"
+            A_exclusive = genomes_from_feature_mapping - genomes_with_filepaths
+            B_exclusive = genomes_with_filepaths - genomes_from_feature_mapping
+            msg = "--feature_mapping and --genomes genome sets are different"
             if A_exclusive:
                 msg += f"\nN={len(A_exclusive)} genomes in --feature_mapping that are not in --genomes"
             if B_exclusive:
                 msg += f"\nN={len(B_exclusive)} genomes in --genomes that are not in --feature_mapping"
-            logger.critical(msg)
-            raise IndexError(msg)
+            logger.warn(msg)
+            # raise IndexError(msg)
         
         config["contains_genome_filepaths"] = True
         
@@ -157,13 +157,13 @@ def update_genome_database_with_fasta_filepaths_and_check_inputs(index_directory
     if genomes_from_feature_mapping != genomes_with_filepaths:
         A_exclusive = genomes_from_feature_mapping - genomes_with_filepaths
         B_exclusive = genomes_with_filepaths - genomes_from_feature_mapping
-        msg = "--feature_mapping must contain same genomes in --genomes"
+        msg = "--feature_mapping and --genomes genome sets are different"
         if A_exclusive:
             msg += f"\nN={len(A_exclusive)} genomes in --feature_mapping that are not in --genomes"
         if B_exclusive:
             msg += f"\nN={len(B_exclusive)} genomes in --genomes that are not in --feature_mapping"
-        logger.critical(msg)
-        raise IndexError(msg)
+        logger.warn(msg)
+        # raise IndexError(msg)
     
     config["contains_genome_filepaths"] = True
     config["timestamp"] = get_timestamp()

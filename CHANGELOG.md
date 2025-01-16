@@ -10,6 +10,8 @@
 
 #### Pending: 
 * Add long read support
+* Change `index` to `build-database`
+* Port functions from `pyexeggutor`
 
 #### Critical:
 * Memory profiler is incorrect

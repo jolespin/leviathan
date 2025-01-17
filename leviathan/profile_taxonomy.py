@@ -125,6 +125,7 @@ def run_sylph_profiler(logger, log_directory, sylph_executable, n_jobs, output_d
         command=[
             sylph_executable,
             "profile",
+            "--estimate-unknown",
             "-t",
             n_jobs,
             "--minimum-ani",

@@ -54,6 +54,16 @@ Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 Sag
         -p=-1
     ```
 
+## Utility Scripts
+* `compile-manifest-from-veba.py` - Compiles manifest.tsv file for `leviathan preprocess` from `VEBA` binning output 
+
+    ```
+    compile-manifest-from-veba.py \
+        -i path/to/veba_output/binning/ \
+        -t prokaryotic,eukaryotic \
+        -o references/manifest.tsv
+    ```
+
 ## Pathway Databases
 Currently, the only pathway database supported for pathway coverage calculations is the KEGG module database using KEGG orthologs as features.  This database can be pre-built using [KEGG Pathway Profiler](https://github.com/jolespin/kegg_pathway_profiler) or built with `leviathan index` if KEGG orthologs are used as features.  
 

@@ -7,7 +7,7 @@ from memory_profiler import profile
 
 __program__ = os.path.split(sys.argv[0])[-1]
 
-from leviathan.utils import (
+from pyexeggutor import (
     open_file_reader,
     # open_file_writer,
     read_pickle, 

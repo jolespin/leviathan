@@ -10,7 +10,7 @@ from kegg_pathway_profiler.pathways import (
     pathway_coverage_wrapper,
 )
 
-from .utils import (
+from pyexeggutor import (
     # open_file_reader,
     # open_file_writer,
     # read_pickle, 

@@ -30,7 +30,7 @@ def main(args=None):
 
     # Pipeline
     parser_io = parser.add_argument_group('I/O arguments')
-    parser_io.add_argument("-i","--veba_directory", type=str, required=True, help = "path/to/veba_directory/")
+    parser_io.add_argument("-i","--veba_binning_directory", type=str, required=True, help = "path/to/veba_binning_directory/ (e.g., veba_output/binning/)")
     parser_io.add_argument("-t","--organism_types", type=str, default = "prokaryotic,eukaryotic", help="Comma-separated list of organism types.  Choose between {prokaryotic, eukaryotic, viral}(e.g., prokaryotic,eukaryotic).  viral is not recommended.")
     parser_io.add_argument("-o", "--output", type=str,  default="stdout", help = "path/to/output.tsv[.gz] [Default: stdout]")
 
@@ -73,7 +73,7 @@ def main(args=None):
     # Create manifest
     manifest = defaultdict(dict)
     for organism_type in opts.organism_types:
-        organism_type_directory = os.path.join(opts.veba_directory, "binning", organism_type)
+        organism_type_directory = os.path.join(opts.veba_directory,  organism_type)
         logger.info(f"Creating manifest from {organism_type_directory}")
         if not os.path.exists(organism_type_directory):
             logger.critical(f"{organism_type_directory} does not exist.")

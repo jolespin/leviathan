@@ -91,6 +91,7 @@ def main(args=None):
     # Genome clusters
     contains_genome_clusters = False
     genome_cluster_filepath = os.path.join(opts.veba_directory, "cluster", "output", "global", "mags_to_slcs.tsv")
+    
     if os.path.exists(genome_cluster_filepath):
         logger.info(f"Adding genome clusters from {genome_cluster_filepath}")
         with open_file_reader(genome_cluster_filepath) as f_in:
@@ -107,8 +108,8 @@ def main(args=None):
     
 
     # Check files
-    logger.info(f"Checking files for manifest")
-    for id_genome, data in tqdm(manifest.items(), f"Checking files for manifest", unit=" genomes"):
+    logger.info(f"Checking assembly and CDS files for manifest")
+    for id_genome, data in tqdm(manifest.items(), unit=" genomes"):
         try:
             filepath = data["assembly"]
             if not os.path.exists(filepath):
@@ -126,12 +127,17 @@ def main(args=None):
             logger.critical(f"{id_genome} does not have a CDS fasta file.")
             sys.exit(1)
     if contains_genome_clusters:
-        for id_genome, data in tqdm(manifest.items(), f"Checking clustering for genomes in manifest", unit=" genomes"):
+        logger.info(f"Checking clustering for genomes in manifest",)
+        genomes_missing_clusters = set()
+        for id_genome, data in tqdm(manifest.items(), unit=" genomes"):
             try:
-                id_cluster = data["cluster"]
+                id_cluster = data["id_genome_cluster"]
             except KeyError:
-                logger.critical(f"{id_genome} does not have a genome cluster.")
+                genomes_missing_clusters.add(id_genome)
                 sys.exit(1)
+        if genomes_missing_clusters:
+            logger.critical("The following genomes do not have genome clusters:{}".format("\n".join(sorted(genomes_missing_clusters))))
+            sys.exit(1)
             
     # Write manifest
     logger.info(f"Writing manifest: {f_out}")

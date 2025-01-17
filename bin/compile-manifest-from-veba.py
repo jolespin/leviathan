@@ -134,7 +134,6 @@ def main(args=None):
                 id_cluster = data["id_genome_cluster"]
             except KeyError:
                 genomes_missing_clusters.add(id_genome)
-                sys.exit(1)
         if genomes_missing_clusters:
             logger.critical("The following genomes do not have genome clusters:{}".format("\n".join(sorted(genomes_missing_clusters))))
             sys.exit(1)

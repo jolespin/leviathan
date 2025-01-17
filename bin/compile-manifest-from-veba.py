@@ -30,7 +30,7 @@ def main(args=None):
 
     # Pipeline
     parser_io = parser.add_argument_group('I/O arguments')
-    parser_io.add_argument("-i","--veba_binning_directory", type=str, required=True, help = "path/to/veba_binning_directory/ (e.g., veba_output/binning/)")
+    parser_io.add_argument("-i","--veba_directory", type=str, required=True, help = "path/to/veba_directory/ (e.g., veba_output/)")
     parser_io.add_argument("-t","--organism_types", type=str, default = "prokaryotic,eukaryotic", help="Comma-separated list of organism types.  Choose between {prokaryotic, eukaryotic, viral}(e.g., prokaryotic,eukaryotic).  viral is not recommended.")
     parser_io.add_argument("-o", "--output", type=str,  default="stdout", help = "path/to/output.tsv[.gz] [Default: stdout]")
 
@@ -46,13 +46,13 @@ def main(args=None):
     logger.info(f"Command: {sys.argv}")
      
     # Inputs
-    logger.info(f"Checking input directory: {opts.veba_binning_directory}")
+    logger.info(f"Checking input directory: {opts.veba_directory}")
 
-    if not os.path.exists(opts.veba_binning_directory):
-        logger.error(f"Error: {opts.veba_binning_directory} does not exist.")
+    if not os.path.exists(opts.veba_directory):
+        logger.error(f"Error: {opts.veba_directory} does not exist.")
         sys.exit(1)
-    if not os.path.isdir(opts.veba_binning_directory):
-        logger.error(f"Error: {opts.veba_binning_directory} is not a directory.")
+    if not os.path.isdir(opts.veba_directory):
+        logger.error(f"Error: {opts.veba_directory} is not a directory.")
         sys.exit(1)
     # Output
     if opts.output == "stdout":
@@ -73,7 +73,7 @@ def main(args=None):
     # Create manifest
     manifest = defaultdict(dict)
     for organism_type in opts.organism_types:
-        organism_type_directory = os.path.join(opts.veba_binning_directory,  organism_type)
+        organism_type_directory = os.path.join(opts.veba_directory, "binning", organism_type)
         logger.info(f"Creating manifest from {organism_type_directory}")
         if not os.path.exists(organism_type_directory):
             logger.critical(f"{organism_type_directory} does not exist.")
@@ -87,6 +87,24 @@ def main(args=None):
         for filepath in tqdm(glob.glob(os.path.join(organism_type_directory, "*", "output", "genomes", "*.ffn")), f"Identifying CDS sequences for {organism_type}", unit=" genomes"):
             id_genome = os.path.split(filepath)[1][:-4]
             manifest[id_genome]["cds"] = filepath
+        
+    # Genome clusters
+    contains_genome_clusters = False
+    genome_cluster_filepath = os.path.join(opts.veba_directory, "cluster", "output", "global", "mags_to_slcs.tsv")
+    if os.path.exists(genome_cluster_filepath):
+        logger.info(f"Adding genome clusters from {genome_cluster_filepath}")
+        with open_file_reader(genome_cluster_filepath) as f_in:
+            for line in f_in:
+                line = line.strip()
+                if line:
+                    id_genome, id_cluster = line.strip().split("\t")
+                    if id_genome in manifest:
+                        manifest[id_genome]["id_genome_cluster"] = id_cluster
+        contains_genome_clusters = True
+    else:
+        logger.warning(f"No genome clusters found at {genome_cluster_filepath}")
+
+    
 
     # Check files
     logger.info(f"Checking files for manifest")
@@ -107,11 +125,22 @@ def main(args=None):
         except KeyError:
             logger.critical(f"{id_genome} does not have a CDS fasta file.")
             sys.exit(1)
+    if contains_genome_clusters:
+        for id_genome, data in tqdm(manifest.items(), f"Checking clustering for genomes in manifest", unit=" genomes"):
+            try:
+                id_cluster = data["cluster"]
+            except KeyError:
+                logger.critical(f"{id_genome} does not have a genome cluster.")
+                sys.exit(1)
             
     # Write manifest
     logger.info(f"Writing manifest: {f_out}")
-    for id_genome, data in manifest.items():
-        print(id_genome, data["assembly"], data["cds"], sep="\t", file=f_out)
+    if contains_genome_clusters:
+        for id_genome, data in manifest.items():
+            print(id_genome, data["assembly"], data["cds"], data["id_genome_cluster"],sep="\t", file=f_out)
+    else:
+        for id_genome, data in manifest.items():
+            print(id_genome, data["assembly"], data["cds"], sep="\t", file=f_out)
     if f_out != sys.stdout:
         f_out.close()
         

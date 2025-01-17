@@ -115,7 +115,7 @@ def main(args=None):
                     cds_identifiers.add(id_gene)
                     gene_to_genome[id_gene] = id_genome
                     
-    genes_missing_cds_sequences = set(gene_to_features) - cds_identifiers
+    genes_missing_cds_sequences = set(gene_to_features.keys()) - cds_identifiers
     if genes_missing_cds_sequences:
         logger.warning(f"Number of genes in --annotations that do not have sequences from --input: {len(genes_missing_cds_sequences)}")
         with open_file_writer(os.path.join(opts.output_directory, "genes_missing_cds_sequences.list")) as f:

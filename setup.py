@@ -31,6 +31,7 @@ setup(name='leviathan',
     install_requires=requirements,
     include_package_data=False,
     scripts=[
+        "bin/compile-manifest-from-veba.py",
         "bin/leviathan-preprocess.py",
         "bin/leviathan-index.py",
         "bin/leviathan-info.py",

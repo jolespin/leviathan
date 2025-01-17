@@ -46,13 +46,13 @@ def main(args=None):
     logger.info(f"Command: {sys.argv}")
      
     # Inputs
-    logger.info(f"Checking input directory: {opts.veba_directory}")
+    logger.info(f"Checking input directory: {opts.veba_binning_directory}")
 
-    if not os.path.exists(opts.veba_directory):
-        logger.error(f"Error: {opts.veba_directory} does not exist.")
+    if not os.path.exists(opts.veba_binning_directory):
+        logger.error(f"Error: {opts.veba_binning_directory} does not exist.")
         sys.exit(1)
-    if not os.path.isdir(opts.veba_directory):
-        logger.error(f"Error: {opts.veba_directory} is not a directory.")
+    if not os.path.isdir(opts.veba_binning_directory):
+        logger.error(f"Error: {opts.veba_binning_directory} is not a directory.")
         sys.exit(1)
     # Output
     if opts.output == "stdout":
@@ -73,7 +73,7 @@ def main(args=None):
     # Create manifest
     manifest = defaultdict(dict)
     for organism_type in opts.organism_types:
-        organism_type_directory = os.path.join(opts.veba_directory,  organism_type)
+        organism_type_directory = os.path.join(opts.veba_binning_directory,  organism_type)
         logger.info(f"Creating manifest from {organism_type_directory}")
         if not os.path.exists(organism_type_directory):
             logger.critical(f"{organism_type_directory} does not exist.")

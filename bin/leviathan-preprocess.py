@@ -17,7 +17,6 @@ from pyexeggutor import (
     # write_pickle,
     # read_json,
     write_json,
-    read_annotations,
     build_logger,
     # reset_logger,
     format_duration,
@@ -28,6 +27,9 @@ from pyexeggutor import (
     get_directory_size,
     get_md5hash_from_directory,
     # RunShellCommand,
+)
+from leviathan.utils import (
+    read_annotations,
 )
 
 

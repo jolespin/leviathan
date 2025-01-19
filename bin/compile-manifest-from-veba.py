@@ -108,8 +108,9 @@ def main(args=None):
     
 
     # Check files
-    logger.info(f"Checking assembly and CDS files for manifest")
-    for id_genome, data in tqdm(manifest.items(), unit=" genomes"):
+    task_description = f"Checking assembly and CDS files for manifest"
+    logger.info(task_description)
+    for id_genome, data in tqdm(manifest.items(), task_description, unit=" genomes"):
         try:
             filepath = data["assembly"]
             if not os.path.exists(filepath):
@@ -127,15 +128,16 @@ def main(args=None):
             logger.critical(f"{id_genome} does not have a CDS fasta file.")
             sys.exit(1)
     if contains_genome_clusters:
-        logger.info(f"Checking clustering for genomes in manifest",)
+        task_description = f"Checking clustering for genomes in manifest"
+        logger.info(task_description)
         genomes_missing_clusters = set()
-        for id_genome, data in tqdm(manifest.items(), unit=" genomes"):
+        for id_genome, data in tqdm(manifest.items(), task_description, unit=" genomes"):
             try:
                 id_cluster = data["id_genome_cluster"]
             except KeyError:
                 genomes_missing_clusters.add(id_genome)
         if genomes_missing_clusters:
-            logger.critical("The following genomes do not have genome clusters:{}".format("\n".join(sorted(genomes_missing_clusters))))
+            logger.critical("The following genomes do not have genome clusters:\n{}".format("\n".join(sorted(genomes_missing_clusters))))
             sys.exit(1)
             
     # Write manifest

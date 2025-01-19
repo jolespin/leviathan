@@ -8,22 +8,33 @@ from pyexeggutor import (
 
 # Annotations
 def read_annotations(path:str, format="pykofamsearch"):
-    choices = {"pykofamsearch", "pyhmmsearch", "veba-pfam","veba-kofam","veba-cazy","veba-uniref", "veba-mibig", "veba-vfdb","veba-amr", "custom"}
+    choices = {"pykofamsearch", "pykofamsearch-reformatted", "pyhmmsearch","pyhmmsearch-reformatted", "veba-pfam","veba-kofam","veba-cazy","veba-uniref", "veba-mibig", "veba-vfdb","veba-amr", "custom"}
     if format not in choices:
         raise KeyError(f"format must be in {choices}")
     
-    if format in {"pykofamsearch", "pyhmmsearch", "custom"}:
+    if format in {"pykofamsearch", "pyhmmsearch", "custom", "pykofamsearch-reformatted", "pyhmmsearch-reformatted"}:
         f_annotations = open_file_reader(path)
 
         gene_to_features = defaultdict(set)    
         if format != "custom":
             next(f_annotations)
+            
+        if format in {"pykofamsearch-reformatted", "pyhmmsearch-reformatted"}:
+            for line in tqdm(f_annotations, desc="Extracting feature annotations"):
+                line = line.strip()
+                if line:
+                    id_gene, number_of_hits, features, *extra = line.split("\t")
+                    gene_to_features[id_gene] = set(eval(features))
+
         for line in tqdm(f_annotations, desc="Extracting feature annotations"):
             line = line.strip()
             if line:
                 id_gene, id_feature, *extra = line.split("\t")
                 gene_to_features[id_gene].add(id_feature)
         f_annotations.close()
+
+
+
     else:
         from pandas import read_csv
         df_annotations = read_csv(path, sep="\t", index_col=0, header=[0,1])

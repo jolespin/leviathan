@@ -53,7 +53,7 @@ def main(args=None):
     parser.add_argument("-i","--input", type=str, default="stdin", help = "path/to/input.tsv[.gz] [id_genome, path/to/assembly.fasta, path/to/cds.fasta. [Optional: id_genome_cluster]] (No header, Tab delimited)")
     parser.add_argument("-a","--annotations", type=str, help = "path/to/annotations.tsv[.gz] from either PyKOfamSearch or PyHMMSearch (with header). Note: Assumes protein-level annotations have same protein identifiers as CDS sequences")
     parser.add_argument("-f","--annotation_format", type=str, default="pykofamsearch", 
-                           choices={"pykofamsearch", "pyhmmsearch", "veba-pfam","veba-kofam","veba-cazy","veba-uniref", "veba-mibig", "veba-vfdb","veba-amr", "custom"}, 
+                           choices={"pykofamsearch", "pyhmmsearch", "pykofamsearch-reformatted", "pyhmmsearch-reformatted", "veba-pfam","veba-kofam","veba-cazy","veba-uniref", "veba-mibig", "veba-vfdb","veba-amr", "custom"}, 
                            help = "Annotation format. If 'custom', then annotation table must be 2 columns [id_gene, id_feature] (No header, Tab delimited)"
                                    "and can contain multiple lines per gene. [Default: pykofamsearch]",
                                    )

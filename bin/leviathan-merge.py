@@ -1,0 +1,140 @@
+#!/usr/bin/env python
+import sys,os, argparse, warnings, subprocess
+from collections import defaultdict
+from itertools import product
+from pandas.errors import EmptyDataError
+from tqdm import tqdm
+from memory_profiler import profile
+
+__program__ = os.path.split(sys.argv[0])[-1]
+
+from pyexeggutor import (
+    open_file_reader,
+    # open_file_writer,
+    read_pickle, 
+    # write_pickle,
+    read_json,
+    # write_json,
+    build_logger,
+    # reset_logger,
+    # format_duration,
+    # format_header,
+    format_bytes,
+    # get_directory_tree,
+    get_directory_size,
+    get_md5hash_from_file,
+    get_md5hash_from_directory,
+    # RunShellCommand,
+)
+
+from leviathan.utils import (
+    merge_taxonomic_profiling_tables,
+    merge_pathway_profiling_tables,
+)
+
+
+def main(args=None):
+    # Options
+    # =======
+    # Path info
+    python_executable = sys.executable
+    bin_directory = "/".join(python_executable.split("/")[:-1])
+    script_directory  =  os.path.dirname(os.path.abspath( __file__ ))
+    script_filename = __program__
+    description = """
+    Running: {} v{} via Python v{} | {}""".format(__program__, sys.version.split(" ")[0], python_executable, script_filename)
+    usage = f"{__program__} -t path/to/taxonomic_profiling_directory/ -p path/to/pathway_profiling_directory/ -o path/to/output_directory/"
+    epilog = "Copyright 2024 New Atlantis Labs (jolespin@newatlantis.io)"
+
+    # Parser
+    parser = argparse.ArgumentParser(description=description, usage=usage, epilog=epilog, formatter_class=argparse.RawTextHelpFormatter)
+
+    # Pipeline
+    parser.add_argument("-t","--taxonomic_profiling_directory", type=str, help = "path/to/profiling/taxonomy/")
+    parser.add_argument("-p","--pathway_profiling_directory", type=str, help = "path/to/profiling/pathway/")
+    parser.add_argument("-o","--output_directory", type=str,  help = "path/to/output_directory. Default is either --taxonomic_profiling_directory and --pathway_profiling_directory")
+    parser.add_argument("-f","--output_format", type=str, choices={"tsv", "pickle"}, help = "Output format [Default: tsv]")
+
+    # Options
+    opts = parser.parse_args()
+    opts.script_directory  = script_directory
+    opts.script_filename = script_filename
+
+    # logger
+    logger = build_logger("leviathan merge")
+
+    # Commands
+    logger.info(f"Command: {sys.argv}")
+     
+    # I/O
+    ## Taxonomic Profiling
+    proceed_with_merging_taxonomic_profiles = False
+    taxonomic_profiling_output_directory = None
+    if opts.taxonomic_profiling_directory:
+        if os.path.exists(opts.taxonomic_profiling_directory):
+            proceed_with_merging_taxonomic_profiles = True
+            if not opts.output_directory:
+                taxonomic_profiling_output_directory = opts.taxonomic_profiling_directory
+            else:
+                taxonomic_profiling_output_directory = opts.output_directory
+        logger.info(f"Creating taxonomic profiling output directory (if it does not exist): {taxonomic_profiling_output_directory}")
+        os.makedirs(taxonomic_profiling_output_directory, exist_ok=True)
+        
+    ## Pathway Profiling
+    proceed_with_merging_pathway_profiles = False
+    pathway_profiling_output_directory = None
+    if opts.pathway_profiling_directory:
+        if os.path.exists(opts.pathway_profiling_directory):
+            proceed_with_merging_pathway_profiles = True
+            if not opts.output_directory:
+                pathway_profiling_output_directory = opts.pathway_profiling_directory
+            else:
+                pathway_profiling_output_directory = opts.output_directory
+        logger.info(f"Creating pathway profiling output directory (if it does not exist): {pathway_profiling_output_directory}")
+        os.makedirs(pathway_profiling_output_directory, exist_ok=True)
+        
+    # Run
+    ## Taxonomic Profiling
+    if proceed_with_merging_taxonomic_profiles:
+        for level in ["genomes", "genome_clusters"]:
+            try:
+                X = merge_taxonomic_profiling_tables(profiling_directory=opts.taxonomic_profiling_directory, level=level)
+                if opts.output_format == "tsv":
+                    X.to_csv(f"{taxonomic_profiling_output_directory}/taxonomic_abundance.{level}.tsv.gz", sep="\t")
+                elif opts.output_format == "pickle":
+                    X.to_pickle(f"{taxonomic_profiling_output_directory}/taxonomic_abundance.{level}.pkl.gz", sep="\t")
+
+            except Exception as e:
+                logger.info(f"No level={level} files found in {opts.taxonomic_profiling_directory}")
+                
+    ## Pathway Profiling
+    if proceed_with_merging_pathway_profiles:
+
+        levels = ["genomes", "genome_clusters"]
+        data_types = ["feature_abundances", "feature_prevalence", "feature_prevalence-binary", "feature_prevalence-ratio", "gene_abundances", "pathway_abundances"]
+        metrics = ["number_of_reads", "tpm", "coverage"]
+
+        for level, data_type, metric in product(levels, data_types, metrics):
+            illegal_conditions = [
+                (level == "genome_cluster") and (data_type == "gene_abundances"),
+                (level == "genomes") and (data_type == "feature_prevalence-ratio"),
+                (data_type != "pathway_abundances") and (metric == "coverage"),
+            ]
+            if not any(illegal_conditions):
+                try:
+                    X = merge_pathway_profiling_tables(profiling_directory=opts.pathway_profiling_directory, data_type=data_type, level=level, metric=metric)
+                    if opts.output_format == "tsv":
+                        X.to_csv(f"{pathway_profiling_output_directory}/{data_type}.{level}.{metric}.tsv.gz", sep="\t")
+                    elif opts.output_format == "pickle":
+                        X.to_pickle(f"{pathway_profiling_output_directory}/{data_type}.{level}.{metric}.pkl.gz", sep="\t")
+
+                except Exception as e:
+                    logger.warning(f"Not able to merge {data_type}.{level}.{metric} files from {opts.pathway_profiling_directory}: {e}")
+        
+
+if __name__ == "__main__":
+    main()
+    
+    
+
+    

@@ -102,7 +102,7 @@ def main(args=None):
     df_input["assembly"].to_csv(genomes_filepath, sep="\t", header=None)
 
     # Annotations
-    logger.info(f"Reading annotations: {opts.input} [Format: {opts.annotation_format}]")
+    logger.info(f"Reading annotations: {opts.annotations} [Format: {opts.annotation_format}]")
     gene_to_features = read_annotations(opts.annotations, format=opts.annotation_format)    
      
     # Build CDS fasta

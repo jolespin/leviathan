@@ -1,4 +1,0 @@
-pandas
-tqdm
-memory_profiler
-biopython

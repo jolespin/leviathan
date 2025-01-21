@@ -1,4 +1,6 @@
 #### Daily Change Log:
+* [2025.1.21] - Added `leviathan-merge` module along with adding `merge_taxonomic_profiling_tables` and `merge_pathway_profiling_tables` to `utils`
+* [2025.1.18] - Added support for `pykofamsearch-reformatted` and `pyhmmsearch-reformatted` in `leviathan-preprocess.py` and `read_annotations`
 * [2025.1.17] - Port functions from `pyexeggutor`
 * [2025.1.17] - Added `compile-manifest-from-veba.py` script
 * [2024.9.27] - Removed dependency for every genome to require a hit in the feauture mapping table

@@ -1,16 +1,35 @@
 #!/usr/bin/env python
-import sys, os
+import sys, os, glob
 from tqdm import tqdm
-from collections import defaultdict    
+from collections import defaultdict
+import pandas as pd
 from pyexeggutor import (
     open_file_reader,
+    check_argument_choice,
 )
 
 # Annotations
 def read_annotations(path:str, format="pykofamsearch"):
-    choices = {"pykofamsearch", "pykofamsearch-reformatted", "pyhmmsearch","pyhmmsearch-reformatted", "veba-pfam","veba-kofam","veba-cazy","veba-uniref", "veba-mibig", "veba-vfdb","veba-amr", "custom"}
-    if format not in choices:
-        raise KeyError(f"format must be in {choices}")
+    
+    """
+    Reads feature annotations from a given file and returns a dictionary mapping each gene to its associated features.
+
+    Parameters
+    ----------
+    path : str
+        Path to the annotation file
+    format : str
+        Format of the annotation file. Options: pykofamsearch, pykofamsearch-reformatted, pyhmmsearch, pyhmmsearch-reformatted, veba-pfam, veba-kofam, veba-cazy, veba-uniref, veba-mibig, veba-vfdb, veba-amr, custom
+
+    Returns
+    -------
+    gene_to_features : dict
+        Mapping of gene identifiers to their associated features
+    """
+    check_argument_choice(
+        query=format, 
+        choices={"pykofamsearch", "pykofamsearch-reformatted", "pyhmmsearch","pyhmmsearch-reformatted", "veba-pfam","veba-kofam","veba-cazy","veba-uniref", "veba-mibig", "veba-vfdb","veba-amr", "custom"},
+        )
     
     if format in {"pykofamsearch", "pyhmmsearch", "custom", "pykofamsearch-reformatted", "pyhmmsearch-reformatted"}:
         f_annotations = open_file_reader(path)
@@ -61,3 +80,156 @@ def read_annotations(path:str, format="pykofamsearch"):
             for id_gene, id_feature in df_annotations[column].items():
                 gene_to_features[id_gene].add(id_feature)
     return gene_to_features
+
+def merge_taxonomic_profiling_tables(profiling_directory:str, level="genome"):
+    
+    """
+    Merge taxonomic profiling at the genome or genome cluster level.
+
+    Parameters
+    ----------
+    profiling_directory : str
+        Directory containing the profiling output.
+    level : str, optional
+        Level at which to merge the taxonomic profiling. Options are
+        "genome" or "genome_cluster". Default is "genome".
+
+    Returns
+    -------
+    pd.DataFrame
+        Merged taxonomic profiling at the specified level.
+
+    Raises
+    ------
+    KeyError
+        If `level` is not in {"genome", "genome_cluster"}.
+    FileNotFoundError
+        If no files are found in the specified directory.
+
+    Files:
+    * taxonomic_abundance.genome_clusters.tsv.gz
+    * taxonomic_abundance.genomes.tsv.gz
+    """
+    choices = {"genome", "genome_cluster"}
+    if level not in choices:
+        raise KeyError(f"level must be in {choices}")
+    
+    output = dict()
+
+    # Genomes
+    if level == "genome":
+        filepaths = glob.glob(f"{profiling_directory}/*/output/taxonomic_abundance.genomes.tsv.gz")
+        if filepaths:
+            for filepath in tqdm(filepaths, f"Concatenating {level}-level taxonomic abundances"):
+                id_sample = filepath.split("/")[-3]
+                output[id_sample] = pd.read_csv(filepath, sep="\t", index_col=0).squeeze("columns")
+        else:
+            raise FileNotFoundError(f"Could not find any taxonomic_abundance.genomes.tsv.gz files in {profiling_directory}")
+     
+    # Genome clusters
+    elif level == "genome_cluster":
+        filepaths = glob.glob(f"{profiling_directory}/*/output/taxonomic_abundance.genome_clusters.tsv.gz")
+        output = dict()
+        if filepaths:
+            for filepath in tqdm(filepaths, f"Concatenating {level}-level taxonomic abundances"):
+                id_sample = filepath.split("/")[-3]
+                output[id_sample] = pd.read_csv(filepath, sep="\t", index_col=0).squeeze("columns")
+        else:
+            raise FileNotFoundError(f"Could not find any taxonomic_abundance.genome_clusters.tsv.gz files in {profiling_directory}")
+        
+    return pd.DataFrame(output).T
+
+def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level="genomes", metric="number_of_reads"):
+    
+    """
+    merges sample-level {data_type} values from multiple samples into a single DataFrame.
+
+    Parameters
+    ----------
+    profiling_directory : str
+        Path to directory containing sample-level directories with output files.
+    data_type : str
+        Type of {level}-level data to merge.
+    level : str, optional
+        Level of organization for {data_type}. One of {"genomes", "genome_cluster"}.
+    metric : str, optional
+        Metric to use for {data_type}. One of {"number_of_reads", "tpm", "coverage"}.
+
+    Returns
+    -------
+    pd.DataFrame
+        merged DataFrame with {data_type} values for each sample.
+
+    Notes
+    -----
+    Will raise a ValueError if an invalid combination of arguments is provided, such as level="genome_cluster" and data_type="gene_abundances".
+    
+    Files:
+    * feature_abundances.genome_clusters.tsv.gz
+    * feature_abundances.genomes.tsv.gz
+    * feature_prevalence-binary.genome_clusters.tsv.gz
+    * feature_prevalence-binary.genomes.tsv.gz
+    * feature_prevalence.genome_clusters.tsv.gz
+    * feature_prevalence.genomes.tsv.gz
+    * feature_prevalence-ratio.genome_clusters.tsv.gz
+    * gene_abundances.genomes.tsv.gz
+    * pathway_abundances.genome_clusters.tsv.gz
+    * pathway_abundances.genomes.tsv.gz
+    """
+
+    check_argument_choice(
+        query=data_type, 
+        choices={"feature_abundances", "feature_prevalence", "feature_prevalence-binary", "feature_prevalence-ratio", "gene_abundances", "pathway_abundances"},
+        )
+    check_argument_choice(
+        query=level, 
+        choices={"genomes", "genome_cluster"},
+        )
+    check_argument_choice(
+        query=metric, 
+        choices={"number_of_reads", "tpm", "coverage"},
+        )
+
+    illegal_conditions = [
+        (level == "genome_cluster") and (data_type == "gene_abundances"),
+        (level == "genomes") and (data_type == "feature_prevalence-ratio"),
+        (data_type != "pathway_abundances") and (metric == "coverage"),
+    ]
+    
+    if any(illegal_conditions):
+        raise ValueError(f"Invalid combination of arguments: level={level}, data_type={data_type}, metric={metric}")
+    
+    # Merge tables to produce output
+    filepaths = glob.glob(f"{profiling_directory}/*/output/{data_type}.{level}.tsv.gz")
+    if filepaths:
+        output = dict()
+        # Abundance/Coverage
+        if data_type in {"feature_abundances", "gene_abundances", "pathway_abundances"}:
+            
+            # Determine column name
+            column = str(metric)
+            if data_type in {"feature_abundances", "pathway_abundances"}:
+                if metric != "coverage":
+                    column = f"{metric}(scaled)"
+            
+            description = "Concatenating {}-level {} {} values".format(level, data_type.replace("_", " "), metric)
+            for filepath in tqdm(filepaths, description):
+                id_sample = filepath.split("/")[-3]
+                df = pd.read_csv(filepath, sep="\t", index_col=0)
+                output[id_sample] = df[column]
+                
+        # Prevalence
+        elif data_type in {"feature_prevalence", "feature_prevalence-binary", "feature_prevalence-ratio"}:
+            description = "Concatenating {}-level {} prevalence values".format(level, data_type.replace("_", " "))
+            for filepath in tqdm(filepaths, description):
+                id_sample = filepath.split("/")[-3]
+                df = pd.read_csv(filepath, sep="\t", index_col=0)
+                output[id_sample] = df.stack()
+                
+        return pd.DataFrame(output).T
+                
+    else:
+        raise FileNotFoundError(f"Could not find any {data_type}.{level}.tsv.gz files in {profiling_directory}")
+
+                
+

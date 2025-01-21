@@ -103,13 +103,15 @@ def main(args=None):
                 X = merge_taxonomic_profiling_tables(profiling_directory=opts.taxonomic_profiling_directory, level=level)
                 if X.empty:
                     raise EmptyDataError(f"Merging taxonomic profiles for level={level} in {opts.taxonomic_profiling_directory} resulted in empty DataFrame")
-        
+                
+                logger.info(f"Taxonomic profiles for level={level} have {X.shape[0]} rows and {X.shape[1]} columns")
+
                 if opts.output_format == "tsv":
-                    filepath = f"{taxonomic_profiling_output_directory}/taxonomic_abundance.{level}.tsv.gz"
+                    filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.tsv.gz")
                     logger.info(f"Writing output: {filepath}")
                     X.to_csv(filepath, sep="\t")
                 elif opts.output_format == "pickle":
-                    filepath =f"{taxonomic_profiling_output_directory}/taxonomic_abundance.{level}.pkl.gz"
+                    filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.pkl.gz")
                     logger.info(f"Writing output: {filepath}")
                     X.to_pickle(filepath, sep="\t")
 
@@ -132,12 +134,17 @@ def main(args=None):
             if not any(illegal_conditions):
                 try:
                     X = merge_pathway_profiling_tables(profiling_directory=opts.pathway_profiling_directory, data_type=data_type, level=level, metric=metric)
+                    if X.empty:
+                        raise EmptyDataError(f"Merging pathway profiles for level={level}, data_type={data_type}, metric={metric} in {opts.pathway_profiling_directory} resulted in empty DataFrame")
+                    
+                    logger.info(f"Pathway profiles for level={level}, data_type={data_type}, metric={metric} have {X.shape[0]} rows and {X.shape[1]} columns")
+                    
                     if opts.output_format == "tsv":
-                        filepath = f"{pathway_profiling_output_directory}/{data_type}.{level}.{metric}.tsv.gz"
+                        filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.{metric}.tsv.gz")
                         logger.info(f"Writing output: {filepath}")
                         X.to_csv(filepath, sep="\t")
                     elif opts.output_format == "pickle":
-                        filepath = f"{pathway_profiling_output_directory}/{data_type}.{level}.{metric}.pkl.gz"
+                        filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.{metric}.pkl.gz")
                         logger.info(f"Writing output: {filepath}")
                         X.to_pickle(filepath, sep="\t")
 

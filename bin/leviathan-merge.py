@@ -97,12 +97,18 @@ def main(args=None):
     ## Taxonomic Profiling
     if proceed_with_merging_taxonomic_profiles:
         for level in ["genomes", "genome_clusters"]:
+            logger.info(f"Merging taxonomic profiles for level={level}")
+
             try:
                 X = merge_taxonomic_profiling_tables(profiling_directory=opts.taxonomic_profiling_directory, level=level)
                 if opts.output_format == "tsv":
-                    X.to_csv(f"{taxonomic_profiling_output_directory}/taxonomic_abundance.{level}.tsv.gz", sep="\t")
+                    filepath = f"{taxonomic_profiling_output_directory}/taxonomic_abundance.{level}.tsv.gz"
+                    logger.info(f"Writing output: {filepath}")
+                    X.to_csv(filepath, sep="\t")
                 elif opts.output_format == "pickle":
-                    X.to_pickle(f"{taxonomic_profiling_output_directory}/taxonomic_abundance.{level}.pkl.gz", sep="\t")
+                    filepath =f"{taxonomic_profiling_output_directory}/taxonomic_abundance.{level}.pkl.gz"
+                    logger.info(f"Writing output: {filepath}")
+                    X.to_pickle(filepath, sep="\t")
 
             except Exception as e:
                 logger.info(f"No level={level} files found in {opts.taxonomic_profiling_directory}: {e}")
@@ -124,9 +130,13 @@ def main(args=None):
                 try:
                     X = merge_pathway_profiling_tables(profiling_directory=opts.pathway_profiling_directory, data_type=data_type, level=level, metric=metric)
                     if opts.output_format == "tsv":
-                        X.to_csv(f"{pathway_profiling_output_directory}/{data_type}.{level}.{metric}.tsv.gz", sep="\t")
+                        filepath = f"{pathway_profiling_output_directory}/{data_type}.{level}.{metric}.tsv.gz"
+                        logger.info(f"Writing output: {filepath}")
+                        X.to_csv(filepath, sep="\t")
                     elif opts.output_format == "pickle":
-                        X.to_pickle(f"{pathway_profiling_output_directory}/{data_type}.{level}.{metric}.pkl.gz", sep="\t")
+                        filepath = f"{pathway_profiling_output_directory}/{data_type}.{level}.{metric}.pkl.gz"
+                        logger.info(f"Writing output: {filepath}")
+                        X.to_pickle(filepath, sep="\t")
 
                 except Exception as e:
                     logger.warning(f"Not able to merge {data_type}.{level}.{metric} files from {opts.pathway_profiling_directory}: {e}")

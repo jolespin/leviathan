@@ -110,7 +110,7 @@ def merge_taxonomic_profiling_tables(profiling_directory:str, level="genome"):
     * taxonomic_abundance.genome_clusters.tsv.gz
     * taxonomic_abundance.genomes.tsv.gz
     """
-    choices = {"genome", "genome_cluster"}
+    choices = {"genomes", "genome_clusters"}
     if level not in choices:
         raise KeyError(f"level must be in {choices}")
     
@@ -183,7 +183,7 @@ def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level
         )
     check_argument_choice(
         query=level, 
-        choices={"genomes", "genome_cluster"},
+        choices={"genomes", "genome_clusters"},
         )
     check_argument_choice(
         query=metric, 
@@ -215,7 +215,7 @@ def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level
             description = "Concatenating {}-level {} {} values".format(level, data_type.replace("_", " "), metric)
             for filepath in tqdm(filepaths, description):
                 id_sample = filepath.split("/")[-3]
-                df = pd.read_csv(filepath, sep="\t", index_col=0)
+                df = pd.read_csv(filepath, sep="\t", index_col=[0,1])
                 output[id_sample] = df[column]
                 
         # Prevalence

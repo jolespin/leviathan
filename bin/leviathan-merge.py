@@ -105,7 +105,7 @@ def main(args=None):
                     X.to_pickle(f"{taxonomic_profiling_output_directory}/taxonomic_abundance.{level}.pkl.gz", sep="\t")
 
             except Exception as e:
-                logger.info(f"No level={level} files found in {opts.taxonomic_profiling_directory}")
+                logger.info(f"No level={level} files found in {opts.taxonomic_profiling_directory}: {e}")
                 
     ## Pathway Profiling
     if proceed_with_merging_pathway_profiles:

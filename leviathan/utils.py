@@ -120,7 +120,7 @@ def merge_taxonomic_profiling_tables(profiling_directory:str, level="genome"):
     if level == "genomes":
         filepaths = glob.glob(f"{profiling_directory}/*/output/taxonomic_abundance.genomes.tsv.gz")
         if filepaths:
-            for filepath in tqdm(filepaths, f"Concatenating {level}-level taxonomic abundances"):
+            for filepath in tqdm(filepaths, f"Merging {level}-level taxonomic abundances"):
                 id_sample = filepath.split("/")[-3]
                 output[id_sample] = pd.read_csv(filepath, sep="\t", index_col=0).squeeze("columns")
         else:
@@ -131,13 +131,14 @@ def merge_taxonomic_profiling_tables(profiling_directory:str, level="genome"):
         filepaths = glob.glob(f"{profiling_directory}/*/output/taxonomic_abundance.genome_clusters.tsv.gz")
         output = dict()
         if filepaths:
-            for filepath in tqdm(filepaths, f"Concatenating {level}-level taxonomic abundances"):
+            for filepath in tqdm(filepaths, f"Merging {level}-level taxonomic abundances"):
                 id_sample = filepath.split("/")[-3]
                 output[id_sample] = pd.read_csv(filepath, sep="\t", index_col=0).squeeze("columns")
         else:
             raise FileNotFoundError(f"Could not find any taxonomic_abundance.genome_clusters.tsv.gz files in {profiling_directory}")
         
-    return pd.DataFrame(output).T
+    X = pd.DataFrame(output).T.fillna(0)
+    return X.astype(pd.SparseDtype("float", 0))
 
 def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level="genomes", metric="number_of_reads"):
     
@@ -212,7 +213,7 @@ def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level
                 if metric != "coverage":
                     column = f"{metric}(scaled)"
             
-            description = "Concatenating {}-level {} {} values".format(level, data_type.replace("_", " "), metric)
+            description = "Merging {}-level {} {} values".format(level, data_type.replace("_", " "), metric)
             for filepath in tqdm(filepaths, description):
                 id_sample = filepath.split("/")[-3]
                 df = pd.read_csv(filepath, sep="\t", index_col=[0,1])
@@ -220,13 +221,16 @@ def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level
                 
         # Prevalence
         elif data_type in {"feature_prevalence", "feature_prevalence-binary", "feature_prevalence-ratio"}:
-            description = "Concatenating {}-level {} prevalence values".format(level, data_type.replace("_", " "))
+            description = "Merging {}-level {} prevalence values".format(level, data_type.replace("_", " "))
             for filepath in tqdm(filepaths, description):
                 id_sample = filepath.split("/")[-3]
                 df = pd.read_csv(filepath, sep="\t", index_col=0)
                 output[id_sample] = df.stack()
-                
-        return pd.DataFrame(output).T
+        X = pd.DataFrame(output).T.fillna(0)
+        if data_type == "feature_prevalence-binary":
+            return X.astype(pd.SparseDtype("in", 0))
+        else:
+            return X.astype(pd.SparseDtype("float", 0))
                 
     else:
         raise FileNotFoundError(f"Could not find any {data_type}.{level}.tsv.gz files in {profiling_directory}")

@@ -53,7 +53,7 @@ def main(args=None):
     parser.add_argument("-t","--taxonomic_profiling_directory", type=str, help = "path/to/profiling/taxonomy/")
     parser.add_argument("-p","--pathway_profiling_directory", type=str, help = "path/to/profiling/pathway/")
     parser.add_argument("-o","--output_directory", type=str,  help = "path/to/output_directory. Default is either --taxonomic_profiling_directory and --pathway_profiling_directory")
-    parser.add_argument("-f","--output_format", type=str, choices={"tsv", "pickle"}, help = "Output format [Default: tsv]")
+    parser.add_argument("-f","--output_format", type=str, choices={"tsv", "pickle"}, default="tsv", help = "Output format [Default: tsv]")
 
     # Options
     opts = parser.parse_args()

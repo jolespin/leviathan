@@ -101,6 +101,9 @@ def main(args=None):
 
             try:
                 X = merge_taxonomic_profiling_tables(profiling_directory=opts.taxonomic_profiling_directory, level=level)
+                if X.empty:
+                    raise EmptyDataError(f"Merging taxonomic profiles for level={level} in {opts.taxonomic_profiling_directory} resulted in empty DataFrame")
+        
                 if opts.output_format == "tsv":
                     filepath = f"{taxonomic_profiling_output_directory}/taxonomic_abundance.{level}.tsv.gz"
                     logger.info(f"Writing output: {filepath}")

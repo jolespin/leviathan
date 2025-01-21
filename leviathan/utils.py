@@ -117,7 +117,7 @@ def merge_taxonomic_profiling_tables(profiling_directory:str, level="genome"):
     output = dict()
 
     # Genomes
-    if level == "genome":
+    if level == "genomes":
         filepaths = glob.glob(f"{profiling_directory}/*/output/taxonomic_abundance.genomes.tsv.gz")
         if filepaths:
             for filepath in tqdm(filepaths, f"Concatenating {level}-level taxonomic abundances"):
@@ -127,7 +127,7 @@ def merge_taxonomic_profiling_tables(profiling_directory:str, level="genome"):
             raise FileNotFoundError(f"Could not find any taxonomic_abundance.genomes.tsv.gz files in {profiling_directory}")
      
     # Genome clusters
-    elif level == "genome_cluster":
+    elif level == "genome_clusters":
         filepaths = glob.glob(f"{profiling_directory}/*/output/taxonomic_abundance.genome_clusters.tsv.gz")
         output = dict()
         if filepaths:

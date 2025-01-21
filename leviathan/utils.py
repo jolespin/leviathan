@@ -238,7 +238,7 @@ def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level
                 X = X.fillna(0).astype(pd.SparseDtype("int", 0))
             else:
                 X = X.fillna(0).astype(pd.SparseDtype("float", 0))
-            return X
+        return X
                 
     else:
         raise FileNotFoundError(f"Could not find any {data_type}.{level}.tsv.gz files in {profiling_directory}")

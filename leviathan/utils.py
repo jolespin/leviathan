@@ -81,7 +81,7 @@ def read_annotations(path:str, format="pykofamsearch"):
                 gene_to_features[id_gene].add(id_feature)
     return gene_to_features
 
-def merge_taxonomic_profiling_tables(profiling_directory:str, level="genome"):
+def merge_taxonomic_profiling_tables(profiling_directory:str, level="genome", sparse:bool=False):
     
     """
     Merge taxonomic profiling at the genome or genome cluster level.
@@ -93,6 +93,8 @@ def merge_taxonomic_profiling_tables(profiling_directory:str, level="genome"):
     level : str, optional
         Level at which to merge the taxonomic profiling. Options are
         "genome" or "genome_cluster". Default is "genome".
+    sparse : bool, optional
+        Whether to return a pd.Sparse type. Default is False.
 
     Returns
     -------
@@ -137,10 +139,12 @@ def merge_taxonomic_profiling_tables(profiling_directory:str, level="genome"):
         else:
             raise FileNotFoundError(f"Could not find any taxonomic_abundance.genome_clusters.tsv.gz files in {profiling_directory}")
         
-    X = pd.DataFrame(output).T.fillna(0)
-    return X.astype(pd.SparseDtype("float", 0))
+    X = pd.DataFrame(output).T
+    if sparse:
+        X = X.fillna(0).astype(pd.SparseDtype("float", 0))
+    return X
 
-def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level="genomes", metric="number_of_reads"):
+def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level="genomes", metric="number_of_reads", sparse:bool=False):
     
     """
     merges sample-level {data_type} values from multiple samples into a single DataFrame.
@@ -150,12 +154,14 @@ def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level
     profiling_directory : str
         Path to directory containing sample-level directories with output files.
     data_type : str
-        Type of {level}-level data to merge.
+        Type of {level}-level data to merge. One of: {"feature_abundances", "feature_prevalence", "feature_prevalence-binary", "feature_prevalence-ratio", "gene_abundances", "pathway_abundances"}
     level : str, optional
         Level of organization for {data_type}. One of {"genomes", "genome_cluster"}.
     metric : str, optional
         Metric to use for {data_type}. One of {"number_of_reads", "tpm", "coverage"}.
-
+    sparse : bool, optional
+        Whether to return a pd.Sparse type. Default is False.
+        
     Returns
     -------
     pd.DataFrame
@@ -226,11 +232,13 @@ def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level
                 id_sample = filepath.split("/")[-3]
                 df = pd.read_csv(filepath, sep="\t", index_col=0)
                 output[id_sample] = df.stack()
-        X = pd.DataFrame(output).T.fillna(0)
-        if data_type == "feature_prevalence-binary":
-            return X.astype(pd.SparseDtype("in", 0))
-        else:
-            return X.astype(pd.SparseDtype("float", 0))
+        X = pd.DataFrame(output).T
+        if sparse:
+            if data_type == "feature_prevalence-binary":
+                X = X.fillna(0).astype(pd.SparseDtype("int", 0))
+            else:
+                X = X.fillna(0).astype(pd.SparseDtype("float", 0))
+            return X
                 
     else:
         raise FileNotFoundError(f"Could not find any {data_type}.{level}.tsv.gz files in {profiling_directory}")

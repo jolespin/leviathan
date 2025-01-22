@@ -80,7 +80,7 @@ def read_annotations(path:str, format="pykofamsearch"):
                 gene_to_features[id_gene].add(id_feature)
     return gene_to_features
 
-def merge_taxonomic_profiling_tables(profiling_directory:str, level="genome", fillna_with_zeros:bool=False):
+def merge_taxonomic_profiling_tables(profiling_directory:str, level="genome", fillna_with_zeros:bool=False, sparse:bool=False):
     
     """
     Merge taxonomic profiling at the genome or genome cluster level.
@@ -94,6 +94,8 @@ def merge_taxonomic_profiling_tables(profiling_directory:str, level="genome", fi
         "genome" or "genome_cluster". Default is "genome".
     fillna_with_zeros : bool, optional
         Whether to fill missing values with zeros. Default is False.
+    sparse : bool, optional
+        Whether to return a pd.Sparse type. Default is False.
         
     Returns
     -------
@@ -139,14 +141,15 @@ def merge_taxonomic_profiling_tables(profiling_directory:str, level="genome", fi
             raise FileNotFoundError(f"Could not find any taxonomic_abundance.genome_clusters.tsv.gz files in {profiling_directory}")
         
     X = pd.DataFrame(output).T
+    missing_value_fill=pd.NA
     if fillna_with_zeros:
         X = X.fillna(0.0)
-        X = X.astype(pd.SparseDtype("float", 0.0))
-    else:
-        X = X.astype(pd.SparseDtype("float", pd.NA))
+        missing_value_fill = 0.0
+    if sparse:
+        X = X.astype(pd.SparseDtype("float", missing_value_fill))
     return X
 
-def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level="genomes", metric="number_of_reads", fillna_with_zeros:bool=False):
+def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level="genomes", metric="number_of_reads", fillna_with_zeros:bool=False, sparse:bool=False):
     
     """
     merges sample-level {data_type} values from multiple samples into a single DataFrame.
@@ -161,11 +164,10 @@ def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level
         Level of organization for {data_type}. One of {"genomes", "genome_cluster"}.
     metric : str, optional
         Metric to use for {data_type}. One of {"number_of_reads", "tpm", "coverage"}.
-    sparse : bool, optional
-        Whether to return a pd.Sparse type. Default is False.
     fillna_with_zeros : bool, optional
         Whether to fill missing values with zeros. Default is False.
-        
+    sparse : bool, optional
+        Whether to return a pd.Sparse type. Default is False. 
     Returns
     -------
     pd.DataFrame
@@ -238,19 +240,19 @@ def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level
                 output[id_sample] = df.stack()
         X = pd.DataFrame(output).T
         
+        sparse_dtype = "float"
+        missing_value_fill = pd.NA
         if data_type == "feature_prevalence-binary":
             if fillna_with_zeros:
                 X = X.fillna(0)
-                X = X.astype(pd.SparseDtype("int", 0))
-            else:
-                X = X.astype(pd.SparseDtype("int", pd.NA))
-
+                sparse_dtype = "int"
+                missing_value_fill = 0
         else:
             if fillna_with_zeros:
                 X = X.fillna(0.0)
-                X = X.astype(pd.SparseDtype("float", 0.0))
-            else:
-                X = X.astype(pd.SparseDtype("float", pd.NA))
+                missing_value_fill = 0.0
+        if sparse:
+            X = X.astype(pd.SparseDtype(sparse_dtype, missing_value_fill))
         return X
                 
     else:

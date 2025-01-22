@@ -55,6 +55,7 @@ def main(args=None):
     parser.add_argument("-o","--output_directory", type=str,  help = "path/to/output_directory. Default is either --taxonomic_profiling_directory and --pathway_profiling_directory")
     parser.add_argument("-f","--output_format", type=str, choices={"tsv", "pickle"}, default="tsv", help = "Output format [Default: tsv]")
     parser.add_argument("-z","--fillna_with_zeros", action="store_true", help = "Fill missing values with 0.  This will take a lot longer to write to disk.")
+    parser.add_argument("-s","--sparse", action="store_true", help = "Output pd.SparseDtype.  This will take a lot longer to write to disk.  Only applicable when --output_format=pickle.")
 
     # Options
     opts = parser.parse_args()
@@ -101,7 +102,7 @@ def main(args=None):
             logger.info(f"Merging taxonomic profiles for level={level}")
 
             try:
-                X = merge_taxonomic_profiling_tables(profiling_directory=opts.taxonomic_profiling_directory, level=level, fillna_with_zeros=bool(opts.fillna_with_zeros))
+                X = merge_taxonomic_profiling_tables(profiling_directory=opts.taxonomic_profiling_directory, level=level, fillna_with_zeros=bool(opts.fillna_with_zeros), sparse=opts.sparse if opts.output_format == "pickle" else False)
                 if X.empty:
                     raise EmptyDataError(f"Merging taxonomic profiles for level={level} in {opts.taxonomic_profiling_directory} resulted in empty DataFrame")
                 
@@ -134,7 +135,7 @@ def main(args=None):
             ]
             if not any(illegal_conditions):
                 try:
-                    X = merge_pathway_profiling_tables(profiling_directory=opts.pathway_profiling_directory, data_type=data_type, level=level, metric=metric, fillna_with_zeros=bool(opts.fillna_with_zeros))
+                    X = merge_pathway_profiling_tables(profiling_directory=opts.pathway_profiling_directory, data_type=data_type, level=level, metric=metric, fillna_with_zeros=bool(opts.fillna_with_zeros), sparse=opts.sparse if opts.output_format == "pickle" else False)
                     if X.empty:
                         raise EmptyDataError(f"Merging pathway profiles for level={level}, data_type={data_type}, metric={metric} in {opts.pathway_profiling_directory} resulted in empty DataFrame")
                     

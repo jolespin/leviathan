@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys,os, argparse, warnings, subprocess
 from collections import defaultdict
-from itertools import product
+from itertools import product, chain
 from pandas.errors import EmptyDataError
 from tqdm import tqdm
 from memory_profiler import profile
@@ -124,10 +124,17 @@ def main(args=None):
     if proceed_with_merging_pathway_profiles:
 
         levels = ["genomes", "genome_clusters"]
-        data_types = ["feature_abundances", "feature_prevalence", "feature_prevalence-binary", "feature_prevalence-ratio", "gene_abundances", "pathway_abundances"]
+        abundance_data_types = ["feature_abundances", "gene_abundances", "pathway_abundances"]
+        prevalence_data_types = ["feature_prevalence", "feature_prevalence-binary", "feature_prevalence-ratio"]
         metrics = ["number_of_reads", "tpm", "coverage"]
+        
+        argument_combinations = chain(
+            product(levels, abundance_data_types, metrics),
+            product(levels, prevalence_data_types, ["number_of_reads"]), # Expects an argument but it's not actually used
 
-        for level, data_type, metric in product(levels, data_types, metrics):
+        )
+
+        for level, data_type, metric in argument_combinations:
             illegal_conditions = [
                 (level == "genome_cluster") and (data_type == "gene_abundances"),
                 (level == "genomes") and (data_type == "feature_prevalence-ratio"),

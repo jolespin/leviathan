@@ -233,7 +233,7 @@ def merge_pathway_profiling_tables(profiling_directory:str, data_type:str, level
                 
         # Prevalence
         elif data_type in {"feature_prevalence", "feature_prevalence-binary", "feature_prevalence-ratio"}:
-            description = "Merging {}-level {} prevalence values".format(level, data_type.replace("_", " "))
+            description = "Merging {}-level {} values".format(level, data_type.replace("_", " "))
             for filepath in tqdm(filepaths, description):
                 id_sample = filepath.split("/")[-3]
                 df = pd.read_csv(filepath, sep="\t", index_col=0)

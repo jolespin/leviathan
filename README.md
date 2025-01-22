@@ -22,36 +22,45 @@ Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 Sag
         -o references/
     ```
 
-* `leviathan index` - Build, update, and validate leviathan database
+* `leviathan index` - Build, update, and validate `leviathan` database
     ```
     leviathan-index.py \
         -f references/cds.fasta.gz \
         -m references/feature_mapping.tsv.gz \
         -g references/genomes.tsv.gz \
-        -d index/ \
+        -d references/index/ \
         -p=-1
     ```
 * `leviathan info` - Report information about `leviathan` database
     ```
-    leviathan-info.py -d index/
+    leviathan-info.py -d references/index/
     ```
-* `leviathan profile-taxonomy` - Profile taxonomy using `Sylph` with leviathan database
+* `leviathan profile-taxonomy` - Profile taxonomy using `Sylph` with `leviathan` database
     ```
     leviathan-profile-taxonomy.py \
         -1 ../Fastq/SRR12042303_1.fastq.gz \
         -2 ../Fastq/SRR12042303_2.fastq.gz \
         -n SRR12042303 \
-        -d index/ \
+        -d references/index/ \
+        -o leviathan_output/profiling/taxonomy/ \
         -p=-1
     ```
-* `leviathan profile-pathway` - Profile pathways using `Salmon` with leviathan database
+* `leviathan profile-pathway` - Profile pathways using `Salmon` with `leviathan` database
     ```
     leviathan-profile-pathway.py \
         -1 ../Fastq/SRR12042303_1.fastq.gz \
         -2 ../Fastq/SRR12042303_2.fastq.gz \
         -n SRR12042303 \
-        -d index/ \
+        -d references/index/ \
+        -o leviathan_output/profiling/pathway/ \
         -p=-1
+    ```
+
+* `leviathan merge` - Merge sample-specific taxonomic and/or pathway profiling
+    ```
+    leviathan-merge.py \
+        -t leviathan_output/profiling/taxonomy/ \
+        -p leviathan_output/profiling/pathway/ \
     ```
 
 ## Utility Scripts

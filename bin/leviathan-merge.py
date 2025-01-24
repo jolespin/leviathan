@@ -119,7 +119,8 @@ def main(args=None):
 
             except Exception as e:
                 logger.info(f"No level={level} files found in {opts.taxonomic_profiling_directory}: {e}")
-                
+        logger.info(f"Completed merging taxonomic profiling tables: {taxonomic_profiling_output_directory}")
+
     ## Pathway Profiling
     if proceed_with_merging_pathway_profiles:
 
@@ -142,24 +143,42 @@ def main(args=None):
             ]
             if not any(illegal_conditions):
                 try:
-                    X = merge_pathway_profiling_tables(profiling_directory=opts.pathway_profiling_directory, data_type=data_type, level=level, metric=metric, fillna_with_zeros=bool(opts.fillna_with_zeros), sparse=opts.sparse if opts.output_format == "pickle" else False)
-                    if X.empty:
-                        raise EmptyDataError(f"Merging pathway profiles for level={level}, data_type={data_type}, metric={metric} in {opts.pathway_profiling_directory} resulted in empty DataFrame")
+ 
+                    if data_type in prevalence_data_types:
+                        X = merge_pathway_profiling_tables(profiling_directory=opts.pathway_profiling_directory, data_type=data_type, level=level, metric=metric, fillna_with_zeros=bool(opts.fillna_with_zeros), sparse=opts.sparse if opts.output_format == "pickle" else False)
+                        if X.empty:
+                            raise EmptyDataError(f"Merging pathway profiles for level={level}, data_type={data_type} in {opts.pathway_profiling_directory} resulted in empty DataFrame")
+                        
+                        logger.info(f"Pathway profiles for level={level}, data_type={data_type} have {X.shape[0]} rows and {X.shape[1]} columns")
                     
-                    logger.info(f"Pathway profiles for level={level}, data_type={data_type}, metric={metric} have {X.shape[0]} rows and {X.shape[1]} columns")
-                    
-                    if opts.output_format == "tsv":
-                        filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.{metric}.tsv.gz")
-                        logger.info(f"Writing output: {filepath}")
-                        X.to_csv(filepath, sep="\t")
-                    elif opts.output_format == "pickle":
-                        filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.{metric}.pkl.gz")
-                        logger.info(f"Writing output: {filepath}")
-                        X.to_pickle(filepath, sep="\t")
+                        if opts.output_format == "tsv":
+                            filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.tsv.gz")
+                            logger.info(f"Writing output: {filepath}")
+                            X.to_csv(filepath, sep="\t")
+                        elif opts.output_format == "pickle":
+                            filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.pkl.gz")
+                            logger.info(f"Writing output: {filepath}")
+                            X.to_pickle(filepath, sep="\t")
+                    else:
+                        X = merge_pathway_profiling_tables(profiling_directory=opts.pathway_profiling_directory, data_type=data_type, level=level, metric=metric, fillna_with_zeros=bool(opts.fillna_with_zeros), sparse=opts.sparse if opts.output_format == "pickle" else False)
+                        if X.empty:
+                            raise EmptyDataError(f"Merging pathway profiles for level={level}, data_type={data_type}, metric={metric} in {opts.pathway_profiling_directory} resulted in empty DataFrame")
+                        
+                        logger.info(f"Pathway profiles for level={level}, data_type={data_type}, metric={metric} have {X.shape[0]} rows and {X.shape[1]} columns")
+                        
+                        if opts.output_format == "tsv":
+                            filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.{metric}.tsv.gz")
+                            logger.info(f"Writing output: {filepath}")
+                            X.to_csv(filepath, sep="\t")
+                        elif opts.output_format == "pickle":
+                            filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.{metric}.pkl.gz")
+                            logger.info(f"Writing output: {filepath}")
+                            X.to_pickle(filepath, sep="\t")
 
                 except Exception as e:
                     logger.warning(f"Not able to merge {data_type}.{level}.{metric} files from {opts.pathway_profiling_directory}: {e}")
-        
+        logger.info(f"Completed merging pathway profiling tables: {pathway_profiling_output_directory}")
+
 
 if __name__ == "__main__":
     main()

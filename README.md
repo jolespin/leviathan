@@ -73,6 +73,51 @@ Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 Sag
         -o references/manifest.tsv
     ```
 
+## Output Description
+
+### Taxonomy profiles
+* Examples: 
+    - Genome = Metagenome-assembled genome (MAG)
+    - Genome cluster = ANI ≥ 95% & Alignment Fraction ≥ 50%
+
+#### Taxonomic abundances - Relative abundance of a genome/genome-cluster within a sample
+ * `taxonomic_abundance.genome_clusters.tsv.gz` - Genome-cluster-level taxonomic relative abundance profiles
+ * `taxonomic_abundance.genomes.tsv.gz` - Genome-level taxonomic relative abundance profiles
+
+**Note:** `Sylph` is run with `--estimate-unknown` so relative abundances do not sum to 100% and the remaining % represents the unassigned reads.
+
+### Functional profiles
+
+* Examples:
+    - Feature = KEGG ortholog
+    - Pathway = KEGG module
+
+#### Feature abundances - The (normalized) abundance of a feature relative to a genome/genome-cluster
+ * `feature_abundances.genome_clusters.number_of_reads.tsv.gz` - Feature abundances for each genome cluster (number of reads aligned)
+ * `feature_abundances.genome_clusters.tpm.tsv.gz` - Feature abundances for each genome cluster (TPM normalized abundances)
+ * `feature_abundances.genomes.number_of_reads.tsv.gz` - Feature abundances for each genome (number of reads aligned)
+ * `feature_abundances.genomes.tpm.tsv.gz` - Feature abundances for each genome (TPM normalized abundances)
+
+#### Feature prevalence - The number of genome/genome-clusters where a feature is detected
+ * `feature_prevalence-binary.genome_clusters.tsv.gz` - Binary feature prevalence relative to genome clusters
+ * `feature_prevalence-binary.genomes.tsv.gz` - Binary feature prevalence relative to genomes
+ * `feature_prevalence-ratio.genome_clusters.tsv.gz` - Ratio of genomes within a genome cluster with feature detected
+ * `feature_prevalence.genome_clusters.tsv.gz` - Binary feature prevalence relative to genome clusters
+ * `feature_prevalence.genomes.tsv.gz` - Feature prevalence relative to genomes
+
+#### Gene abundances - The abundance of individual genes within genome
+ * `gene_abundances.genomes.number_of_reads.tsv.gz` - Number of reads aligned to a gene within a genome
+ * `gene_abundances.genomes.tpm.tsv.gz` - TPM normalized abundance of reads aligned to a gene within a genome
+
+#### Pathway abundances - Pathway abundances for a genome and genome-cluster
+
+ * `pathway_abundances.genome_clusters.coverage.tsv.gz` - Pathway coverage relative to genome clusters
+ * `pathway_abundances.genome_clusters.number_of_reads.tsv.gz` - Pathway abundances as the number of reads aligned relative to genome clusters
+ * `pathway_abundances.genome_clusters.tpm.tsv.gz` - TPM normalized pathway abundances as the number of reads aligned relative to genome clusters
+ * `pathway_abundances.genomes.coverage.tsv.gz` - Pathway coverage relative to genomes
+ * `pathway_abundances.genomes.number_of_reads.tsv.gz` - Pathway abundances as the number of reads aligned relative to genomes
+ * `pathway_abundances.genomes.tpm.tsv.gz` - TPM normalized pathway abundances as the number of reads aligned relative to genomes
+
 ## Pathway Databases
 Currently, the only pathway database supported for pathway coverage calculations is the KEGG module database using KEGG orthologs as features.  This database can be pre-built using [KEGG Pathway Profiler](https://github.com/jolespin/kegg_pathway_profiler) or built with `leviathan index` if KEGG orthologs are used as features.  
 

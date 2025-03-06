@@ -70,6 +70,8 @@ def main(args=None):
     logger.info(f"Command: {sys.argv}")
      
     # I/O
+    if opts.output_format == "parquet":
+        logger.warn(f"--output_format parquet results in transposed output relative to tsv and pickle (n=genomes, m=features).  To avoid memory constraints, parquet will have features as rows and genomes/genome-clusters as columns."
     ## Taxonomic Profiling
     proceed_with_merging_taxonomic_profiles = False
     taxonomic_profiling_output_directory = None
@@ -117,7 +119,7 @@ def main(args=None):
                 if opts.output_format == "parquet":
                     filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.parquet")
                     logger.info(f"Writing output: {filepath}")
-                    X.to_parquet(filepath, index=True)
+                    X.T.to_parquet(filepath, index=True)
                 elif opts.output_format == "tsv":
                     filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.tsv.gz")
                     logger.info(f"Writing output: {filepath}")
@@ -164,7 +166,8 @@ def main(args=None):
                             sparse=opts.sparse if opts.output_format == "pickle" else False)
                         if X.empty:
                             raise EmptyDataError(f"Merging pathway profiles for level={level}, data_type={data_type} in {opts.pathway_profiling_directory} resulted in empty DataFrame")
-                        
+                        if opts.output_format == "parquet":
+                            X = X.T
                         logger.info(f"Pathway profiles for level={level}, data_type={data_type} have {X.shape[0]} rows and {X.shape[1]} columns")
                     
                         if opts.output_format == "parquet":
@@ -190,7 +193,8 @@ def main(args=None):
                         )
                         if X.empty:
                             raise EmptyDataError(f"Merging pathway profiles for level={level}, data_type={data_type}, metric={metric} in {opts.pathway_profiling_directory} resulted in empty DataFrame")
-                        
+                        if opts.output_format == "parquet":
+                            X = X.T
                         logger.info(f"Pathway profiles for level={level}, data_type={data_type}, metric={metric} have {X.shape[0]} rows and {X.shape[1]} columns")
                         
                         if opts.output_format == "parquet":

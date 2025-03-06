@@ -122,7 +122,7 @@ def main(args=None):
                     filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.tsv.gz")
                     logger.info(f"Writing output: {filepath}")
                     X.to_csv(filepath, sep="\t")
-                else opts.output_format == "pickle":
+                elif opts.output_format == "pickle":
                     filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.pkl.gz")
                     logger.info(f"Writing output: {filepath}")
                     X.to_pickle(filepath, sep="\t")
@@ -175,7 +175,7 @@ def main(args=None):
                             filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.tsv.gz")
                             logger.info(f"Writing output: {filepath}")
                             X.to_csv(filepath, sep="\t")
-                        else opts.output_format == "pickle":
+                        elif opts.output_format == "pickle":
                             filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.pkl.gz")
                             logger.info(f"Writing output: {filepath}")
                             X.to_pickle(filepath, sep="\t")
@@ -201,7 +201,7 @@ def main(args=None):
                             filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.{metric}.tsv.gz")
                             logger.info(f"Writing output: {filepath}")
                             X.to_csv(filepath, sep="\t")
-                        else opts.output_format == "pickle":
+                        elif opts.output_format == "pickle":
                             filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.{metric}.pkl.gz")
                             logger.info(f"Writing output: {filepath}")
                             X.to_pickle(filepath, sep="\t")

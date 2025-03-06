@@ -53,9 +53,10 @@ def main(args=None):
     parser.add_argument("-t","--taxonomic_profiling_directory", type=str, help = "path/to/profiling/taxonomy/")
     parser.add_argument("-p","--pathway_profiling_directory", type=str, help = "path/to/profiling/pathway/")
     parser.add_argument("-o","--output_directory", type=str,  help = "path/to/output_directory. Default is either --taxonomic_profiling_directory and --pathway_profiling_directory")
-    parser.add_argument("-f","--output_format", type=str, choices={"tsv", "pickle"}, default="tsv", help = "Output format [Default: tsv]")
+    parser.add_argument("-f","--output_format", type=str, choices={"tsv", "pickle", "parquet"}, default="parquet", help = "Output format [Default: parquet]")
     parser.add_argument("-z","--fillna_with_zeros", action="store_true", help = "Fill missing values with 0.  This will take a lot longer to write to disk.")
     parser.add_argument("-s","--sparse", action="store_true", help = "Output pd.SparseDtype.  This will take a lot longer to write to disk.  Only applicable when --output_format=pickle.")
+
 
     # Options
     opts = parser.parse_args()
@@ -102,13 +103,22 @@ def main(args=None):
             logger.info(f"Merging taxonomic profiles for level={level}")
 
             try:
-                X = merge_taxonomic_profiling_tables(profiling_directory=opts.taxonomic_profiling_directory, level=level, fillna_with_zeros=bool(opts.fillna_with_zeros), sparse=opts.sparse if opts.output_format == "pickle" else False)
+                X = merge_taxonomic_profiling_tables(
+                    profiling_directory=opts.taxonomic_profiling_directory, 
+                    level=level, 
+                    fillna_with_zeros=bool(opts.fillna_with_zeros), 
+                    sparse=opts.sparse if opts.output_format == "pickle" else False,
+                )
                 if X.empty:
                     raise EmptyDataError(f"Merging taxonomic profiles for level={level} in {opts.taxonomic_profiling_directory} resulted in empty DataFrame")
                 
                 logger.info(f"Taxonomic profiles for level={level} have {X.shape[0]} rows and {X.shape[1]} columns")
 
-                if opts.output_format == "tsv":
+                if opts.output_format == "parquet":
+                    filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.parquet")
+                    logger.info(f"Writing output: {filepath}")
+                    X.to_parquet(filepath, index=True)
+                elif opts.output_format == "tsv":
                     filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.tsv.gz")
                     logger.info(f"Writing output: {filepath}")
                     X.to_csv(filepath, sep="\t")
@@ -145,13 +155,23 @@ def main(args=None):
                 try:
  
                     if data_type in prevalence_data_types:
-                        X = merge_pathway_profiling_tables(profiling_directory=opts.pathway_profiling_directory, data_type=data_type, level=level, metric=metric, fillna_with_zeros=bool(opts.fillna_with_zeros), sparse=opts.sparse if opts.output_format == "pickle" else False)
+                        X = merge_pathway_profiling_tables(
+                            profiling_directory=opts.pathway_profiling_directory, 
+                            data_type=data_type, 
+                            level=level, 
+                            metric=metric, 
+                            fillna_with_zeros=bool(opts.fillna_with_zeros), 
+                            sparse=opts.sparse if opts.output_format == "pickle" else False)
                         if X.empty:
                             raise EmptyDataError(f"Merging pathway profiles for level={level}, data_type={data_type} in {opts.pathway_profiling_directory} resulted in empty DataFrame")
                         
                         logger.info(f"Pathway profiles for level={level}, data_type={data_type} have {X.shape[0]} rows and {X.shape[1]} columns")
                     
-                        if opts.output_format == "tsv":
+                        if opts.output_format == "parquet":
+                            filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.parquet")
+                            logger.info(f"Writing output: {filepath}")
+                            X.to_parquet(filepath, index=True)
+                        elif opts.output_format == "tsv":
                             filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.tsv.gz")
                             logger.info(f"Writing output: {filepath}")
                             X.to_csv(filepath, sep="\t")
@@ -160,13 +180,24 @@ def main(args=None):
                             logger.info(f"Writing output: {filepath}")
                             X.to_pickle(filepath, sep="\t")
                     else:
-                        X = merge_pathway_profiling_tables(profiling_directory=opts.pathway_profiling_directory, data_type=data_type, level=level, metric=metric, fillna_with_zeros=bool(opts.fillna_with_zeros), sparse=opts.sparse if opts.output_format == "pickle" else False)
+                        X = merge_pathway_profiling_tables(
+                            profiling_directory=opts.pathway_profiling_directory, 
+                            data_type=data_type, 
+                            level=level, 
+                            metric=metric, 
+                            fillna_with_zeros=bool(opts.fillna_with_zeros), 
+                            sparse=opts.sparse if opts.output_format == "pickle" else False,
+                        )
                         if X.empty:
                             raise EmptyDataError(f"Merging pathway profiles for level={level}, data_type={data_type}, metric={metric} in {opts.pathway_profiling_directory} resulted in empty DataFrame")
                         
                         logger.info(f"Pathway profiles for level={level}, data_type={data_type}, metric={metric} have {X.shape[0]} rows and {X.shape[1]} columns")
                         
-                        if opts.output_format == "tsv":
+                        if opts.output_format == "parquet":
+                            filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.{metric}.parquet")
+                            logger.info(f"Writing output: {filepath}")
+                            X.to_parquet(filepath, index=True)
+                        elif opts.output_format == "tsv":
                             filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.{metric}.tsv.gz")
                             logger.info(f"Writing output: {filepath}")
                             X.to_csv(filepath, sep="\t")
@@ -182,7 +213,6 @@ def main(args=None):
 
 if __name__ == "__main__":
     main()
-    
-    
+
 
     

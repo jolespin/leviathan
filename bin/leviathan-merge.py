@@ -71,7 +71,7 @@ def main(args=None):
      
     # I/O
     if opts.output_format == "parquet":
-        logger.warn(f"--output_format parquet results in transposed output relative to tsv and pickle (n=genomes, m=features).  To avoid memory constraints, parquet will have features as rows and genomes/genome-clusters as columns."
+        logger.warn(f"--output_format parquet results in transposed output relative to tsv and pickle (n=genomes, m=features).  To avoid memory constraints, parquet will have features as rows and genomes/genome-clusters as columns.")
     ## Taxonomic Profiling
     proceed_with_merging_taxonomic_profiles = False
     taxonomic_profiling_output_directory = None

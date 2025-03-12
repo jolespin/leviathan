@@ -167,6 +167,75 @@ def run_sylph_profiler(logger, log_directory, sylph_executable, n_jobs, output_d
     cmd.check_status()
     return cmd
 
+def merge_taxonomic_profiling_tables_as_pandas(profiling_directory:str, level="genome", fillna_with_zeros:bool=False, sparse:bool=False):
+    
+    """
+    Merge taxonomic profiling at the genome or genome cluster level.
+
+    Parameters
+    ----------
+    profiling_directory : str
+        Directory containing the profiling output.
+    level : str, optional
+        Level at which to merge the taxonomic profiling. Options are
+        "genome" or "genome_cluster". Default is "genome".
+    fillna_with_zeros : bool, optional
+        Whether to fill missing values with zeros. Default is False.
+    sparse : bool, optional
+        Whether to return a pd.Sparse type. Default is False.
+        
+    Returns
+    -------
+    pd.DataFrame
+        Merged taxonomic profiling at the specified level.
+
+    Raises
+    ------
+    KeyError
+        If `level` is not in {"genome", "genome_cluster"}.
+    FileNotFoundError
+        If no files are found in the specified directory.
+
+    Files:
+    * taxonomic_abundance.genome_clusters.tsv.gz
+    * taxonomic_abundance.genomes.tsv.gz
+    """
+    choices = {"genomes", "genome_clusters"}
+    if level not in choices:
+        raise KeyError(f"level must be in {choices}")
+    
+    output = dict()
+
+    # Genomes
+    if level == "genomes":
+        filepaths = glob.glob(f"{profiling_directory}/*/output/taxonomic_abundance.genomes.tsv.gz")
+        if filepaths:
+            for filepath in tqdm(filepaths, f"Merging {level}-level taxonomic abundances"):
+                id_sample = filepath.split("/")[-3]
+                output[id_sample] = pd.read_csv(filepath, sep="\t", index_col=0).squeeze("columns")
+        else:
+            raise FileNotFoundError(f"Could not find any taxonomic_abundance.genomes.tsv.gz files in {profiling_directory}")
+     
+    # Genome clusters
+    elif level == "genome_clusters":
+        filepaths = glob.glob(f"{profiling_directory}/*/output/taxonomic_abundance.genome_clusters.tsv.gz")
+        output = dict()
+        if filepaths:
+            for filepath in tqdm(filepaths, f"Merging {level}-level taxonomic abundances"):
+                id_sample = filepath.split("/")[-3]
+                output[id_sample] = pd.read_csv(filepath, sep="\t", index_col=0).squeeze("columns")
+        else:
+            raise FileNotFoundError(f"Could not find any taxonomic_abundance.genome_clusters.tsv.gz files in {profiling_directory}")
+        
+    X = pd.DataFrame(output).T
+    missing_value_fill=pd.NA
+    if fillna_with_zeros:
+        X = X.fillna(0.0)
+        missing_value_fill = 0.0
+    if sparse:
+        X = X.astype(pd.SparseDtype("float", missing_value_fill))
+    return X
+
 
     
     

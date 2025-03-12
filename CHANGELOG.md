@@ -1,4 +1,10 @@
 #### Daily Change Log:
+* [2025.3.12] - Added `h5netcdf` to `requirements.txt`
+* [2025.3.12] - Removed option for output formats in `leviathan-merge.py`.  Taxonomic profiles are `pandas` stored as `parquet` and pathway profiles are `xarray` stored as `netcdf` files.
+* [2025.3.12] - Changed `merge_taxonomic_profiling_tables` to `merge_taxonomic_profiling_tables_as_pandas`
+* [2025.3.12] - Changed `merge_pathway_profiling_tables` to `merge_pathway_profiling_tables_as_pandas` and created `merge_pathway_profiling_tables_as_xarray`
+* [2025.3.12] - Moved `merge_pathway_profiling_tables` from `utils` to `profile_pathway`
+* [2025.3.12] - Moved `merge_taxonomic_profiling_tables` from `utils` to `profile_taxonomy`
 * [2025.3.11] - Added default to transpose tables in `leviathan-merge.py` but added `--no_transpose_taxonomic_profiles` and `--no_transpose_pathway_profiles`
 * [2025.3.6] - Added default --output_format for `leviathan-merge.py` to be parquet (which will be transposed relative to tsv and pickle)
 * [2025.1.21] - Added `leviathan-merge` module along with adding `merge_taxonomic_profiling_tables` and `merge_pathway_profiling_tables` to `utils`

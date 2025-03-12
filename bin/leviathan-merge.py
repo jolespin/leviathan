@@ -27,10 +27,14 @@ from pyexeggutor import (
     # RunShellCommand,
 )
 
-from leviathan.utils import (
-    merge_taxonomic_profiling_tables,
-    merge_pathway_profiling_tables,
+from leviathan.profile_taxonomy import (
+    merge_taxonomic_profiling_tables_as_pandas,
 )
+from leviathan.profile_pathway import (
+    merge_pathway_profiling_tables_as_xarray,
+)
+
+    ,
 
 
 def main(args=None):
@@ -53,11 +57,15 @@ def main(args=None):
     parser.add_argument("-t","--taxonomic_profiling_directory", type=str, help = "path/to/profiling/taxonomy/")
     parser.add_argument("-p","--pathway_profiling_directory", type=str, help = "path/to/profiling/pathway/")
     parser.add_argument("-o","--output_directory", type=str,  help = "path/to/output_directory. Default is either --taxonomic_profiling_directory and --pathway_profiling_directory")
-    parser.add_argument("-f","--output_format", type=str, choices={"tsv", "pickle", "parquet"}, default="parquet", help = "Output format [Default: parquet]")
     parser.add_argument("-z","--fillna_with_zeros", action="store_true", help = "Fill missing values with 0.  This will take a lot longer to write to disk.")
-    parser.add_argument("-s","--sparse", action="store_true", help = "Output pd.SparseDtype.  This will take a lot longer to write to disk.  Only applicable when --output_format=pickle.")
-    parser.add_argument("--no_transpose_taxonomic_profiling", action="store_true", help = "Do not transpose taxonomic profiling tables.  If you do not transpose them, it will use much more memory to read/write unless --output_format pickle")
-    parser.add_argument("--no_transpose_pathway_profiling", action="store_true", help = "Do not transpose pathway profiling tables.  If you do not transpose them, it will use much more memory to read/write unless --output_format pickle")
+    parser.add_argument("--xarray_engine", type=str, choices={"h5netcdf", "netcdf4"}, default="h5netcdf", help = "Xarray backend engine [Default: h5netcdf]")
+    parser.add_argument("--no_transpose_taxonomic_profiling", action="store_true", help = "Do not transpose taxonomic profiling tables.  If you do not transpose them, it will use more time/memory to read/write")
+    # ------------------
+    # Deprecated options
+    # ------------------
+    # parser.add_argument("-f","--output_format", type=str, choices={"tsv", "pickle", "parquet"}, default="parquet", help = "Output format [Default: parquet]")
+    # parser.add_argument("-s","--sparse", action="store_true", help = "Output pd.SparseDtype.  This will take a lot longer to write to disk.  Only applicable when --output_format=pickle.")
+    # parser.add_argument("--no_transpose_pathway_profiling", action="store_true", help = "Do not transpose pathway profiling tables.  If you do not transpose them, it will use much more memory to read/write unless --output_format pickle")
 
     # Options
     opts = parser.parse_args()
@@ -71,8 +79,9 @@ def main(args=None):
     logger.info(f"Command: {sys.argv}")
      
     # I/O
-    if opts.output_format == "parquet":
-        logger.warn(f"--output_format parquet results in transposed output relative to tsv and pickle (n=genomes, m=features).  To avoid memory constraints, parquet will have features as rows and genomes/genome-clusters as columns.")
+    # if opts.output_format == "parquet":
+        # logger.warn(f"--output_format parquet results in transposed output relative to tsv and pickle (n=genomes, m=features).  To avoid memory constraints, parquet will have features as rows and genomes/genome-clusters as columns.")
+        
     ## Taxonomic Profiling
     proceed_with_merging_taxonomic_profiles = False
     taxonomic_profiling_output_directory = None
@@ -106,15 +115,15 @@ def main(args=None):
             logger.info(f"Merging taxonomic profiles for level={level}")
 
             try:
-                X = merge_taxonomic_profiling_tables(
+                X = merge_taxonomic_profiling_tables_as_pandas(
                     profiling_directory=opts.taxonomic_profiling_directory, 
                     level=level, 
                     fillna_with_zeros=bool(opts.fillna_with_zeros), 
-                    sparse=opts.sparse if opts.output_format == "pickle" else False,
+                    sparse=False,
                 )
                 
                 if X.empty:
-                    raise EmptyDataError(f"Merging taxonomic profiles for level={level} in {opts.taxonomic_profiling_directory} resulted in empty DataFrame")
+                    raise EmptyDataError(f"Merging taxonomic profiles for level={level} in {opts.taxonomic_profiling_directory} resulted in empty pd.DataFrame")
                 
                 if not opts.no_transpose_taxonomic_profiling:
                     logger.info(f"Transposing taxonomic profiling tables for level={level}")
@@ -122,21 +131,13 @@ def main(args=None):
                     
                 logger.info(f"Taxonomic profiles for level={level} have {X.shape[0]} rows and {X.shape[1]} columns")
 
-                if opts.output_format == "parquet":
-                    filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.parquet")
-                    logger.info(f"Writing output: {filepath}")
-                    X.to_parquet(filepath, index=True)
-                elif opts.output_format == "tsv":
-                    filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.tsv.gz")
-                    logger.info(f"Writing output: {filepath}")
-                    X.to_csv(filepath, sep="\t")
-                elif opts.output_format == "pickle":
-                    filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.pkl.gz")
-                    logger.info(f"Writing output: {filepath}")
-                    X.to_pickle(filepath, sep="\t")
-
+                filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.parquet")
+                logger.info(f"Writing output: {filepath}")
+                X.to_parquet(filepath, index=True)
+     
             except Exception as e:
                 logger.info(f"No level={level} files found in {opts.taxonomic_profiling_directory}: {e}")
+                
         logger.info(f"Completed merging taxonomic profiling tables: {taxonomic_profiling_output_directory}")
 
     ## Pathway Profiling
@@ -150,7 +151,6 @@ def main(args=None):
         argument_combinations = chain(
             product(levels, abundance_data_types, metrics),
             product(levels, prevalence_data_types, ["number_of_reads"]), # Expects an argument but it's not actually used
-
         )
 
         for level, data_type, metric in argument_combinations:
@@ -161,66 +161,38 @@ def main(args=None):
             ]
             if not any(illegal_conditions):
                 try:
- 
-                    if data_type in prevalence_data_types:
-                        X = merge_pathway_profiling_tables(
-                            profiling_directory=opts.pathway_profiling_directory, 
-                            data_type=data_type, 
-                            level=level, 
-                            metric=metric, 
-                            fillna_with_zeros=bool(opts.fillna_with_zeros), 
-                            sparse=opts.sparse if opts.output_format == "pickle" else False)
-                        if X.empty:
-                            raise EmptyDataError(f"Merging pathway profiles for level={level}, data_type={data_type} in {opts.pathway_profiling_directory} resulted in empty DataFrame")
-                        if not opts.no_transpose_pathway_profiling:
-                            logger.info(f"Transposing pathway profiling tables for level={level}, data_type={data_type}")
-                            X = X.T
-                            
-                        logger.info(f"Pathway profiles for level={level}, data_type={data_type} have {X.shape[0]} rows and {X.shape[1]} columns")
-                    
-                        if opts.output_format == "parquet":
-                            filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.parquet")
-                            logger.info(f"Writing output: {filepath}")
-                            X.to_parquet(filepath, index=True)
-                        elif opts.output_format == "tsv":
-                            filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.tsv.gz")
-                            logger.info(f"Writing output: {filepath}")
-                            X.to_csv(filepath, sep="\t")
-                        elif opts.output_format == "pickle":
-                            filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.pkl.gz")
-                            logger.info(f"Writing output: {filepath}")
-                            X.to_pickle(filepath, sep="\t")
-                    else:
-                        X = merge_pathway_profiling_tables(
-                            profiling_directory=opts.pathway_profiling_directory, 
-                            data_type=data_type, 
-                            level=level, 
-                            metric=metric, 
-                            fillna_with_zeros=bool(opts.fillna_with_zeros), 
-                            sparse=opts.sparse if opts.output_format == "pickle" else False,
+                     
+                    X = merge_pathway_profiling_tables_as_xarray(
+                        profiling_directory=opts.pathway_profiling_directory, 
+                        data_type=data_type, 
+                        level=level, 
+                        metric=metric, 
+                        fillna_with_zeros=bool(opts.fillna_with_zeros), 
                         )
-                        if X.empty:
-                            raise EmptyDataError(f"Merging pathway profiles for level={level}, data_type={data_type}, metric={metric} in {opts.pathway_profiling_directory} resulted in empty DataFrame")
-                        if not opts.no_transpose_pathway_profiling:
-                            logger.info(f"Transposing pathway profiling tables for level={level}, data_type={data_type}, metric={metric}")
-                            X = X.T
-                        logger.info(f"Pathway profiles for level={level}, data_type={data_type}, metric={metric} have {X.shape[0]} rows and {X.shape[1]} columns")
-                        
-                        if opts.output_format == "parquet":
-                            filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.{metric}.parquet")
-                            logger.info(f"Writing output: {filepath}")
-                            X.to_parquet(filepath, index=True)
-                        elif opts.output_format == "tsv":
-                            filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.{metric}.tsv.gz")
-                            logger.info(f"Writing output: {filepath}")
-                            X.to_csv(filepath, sep="\t")
-                        elif opts.output_format == "pickle":
-                            filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.{metric}.pkl.gz")
-                            logger.info(f"Writing output: {filepath}")
-                            X.to_pickle(filepath, sep="\t")
+
+                    if data_type in prevalence_data_types:
+                        error_msg = f"Merging pathway profiles for level={level}, data_type={data_type} in {opts.pathway_profiling_directory} resulted in empty xr.DataArray"
+                        info_msg = f"Pathway profiles for level={level}, data_type={data_type} have {X.shape[0]} samples, {X.shape[1]} {level}, and {X.shape[2]} features"
+                        filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.nc")
+
+                    else:
+                        error_msg = f"Merging pathway profiles for level={level}, data_type={data_type}, metric={metric} in {opts.pathway_profiling_directory} resulted in empty xr.DataArray"
+                        info_msg = f"Pathway profiles for level={level}, data_type={data_type}, metric={metric} have {X.shape[0]} samples, {X.shape[1]} {level}, and {X.shape[2]} features"
+                        filepath = os.path.join(pathway_profiling_output_directory, f"{data_type}.{level}.{metric}.nc")
+
+                    if X.size == 0:
+                        raise EmptyDataError(error_msg)
+
+                    logger.info(info_msg)
+                    logger.info(f"Writing output: {filepath}")
+                    X.to_netcdf(filepath, engine=opts.xarray_engine, encoding={"compression": "gzip"})
 
                 except Exception as e:
-                    logger.warning(f"Not able to merge {data_type}.{level}.{metric} files from {opts.pathway_profiling_directory}: {e}")
+                    if data_type in prevalence_data_types:
+                        logger.warning(f"Not able to merge {data_type}.{level} files from {opts.pathway_profiling_directory}: {e}")
+                    else:
+                        logger.warning(f"Not able to merge {data_type}.{level}.{metric} files from {opts.pathway_profiling_directory}: {e}")
+                    
         logger.info(f"Completed merging pathway profiling tables: {pathway_profiling_output_directory}")
 
 

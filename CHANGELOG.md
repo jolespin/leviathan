@@ -1,4 +1,5 @@
 #### Daily Change Log:
+* [2025.3.11] - Added default to transpose tables in `leviathan-merge.py` but added `--no_transpose_taxonomic_profiles` and `--no_transpose_pathway_profiles`
 * [2025.3.6] - Added default --output_format for `leviathan-merge.py` to be parquet (which will be transposed relative to tsv and pickle)
 * [2025.1.21] - Added `leviathan-merge` module along with adding `merge_taxonomic_profiling_tables` and `merge_pathway_profiling_tables` to `utils`
 * [2025.1.18] - Added support for `pykofamsearch-reformatted` and `pyhmmsearch-reformatted` in `leviathan-preprocess.py` and `read_annotations`

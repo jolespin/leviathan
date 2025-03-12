@@ -44,7 +44,7 @@ def main(args=None):
     description = """
     Running: {} v{} via Python v{} | {}""".format(__program__, sys.version.split(" ")[0], python_executable, script_filename)
     usage = f"{__program__} -t path/to/taxonomic_profiling_directory/ -p path/to/pathway_profiling_directory/ -o path/to/output_directory/"
-    epilog = "Copyright 2024 New Atlantis Labs (jolespin@newatlantis.io)"
+    epilog = "Copyright 2024 NewAtlantis Labs (jolespin@newatlantis.io)"
 
     # Parser
     parser = argparse.ArgumentParser(description=description, usage=usage, epilog=epilog, formatter_class=argparse.RawTextHelpFormatter)
@@ -56,7 +56,8 @@ def main(args=None):
     parser.add_argument("-f","--output_format", type=str, choices={"tsv", "pickle", "parquet"}, default="parquet", help = "Output format [Default: parquet]")
     parser.add_argument("-z","--fillna_with_zeros", action="store_true", help = "Fill missing values with 0.  This will take a lot longer to write to disk.")
     parser.add_argument("-s","--sparse", action="store_true", help = "Output pd.SparseDtype.  This will take a lot longer to write to disk.  Only applicable when --output_format=pickle.")
-
+    parser.add_argument("--no_transpose_taxonomic_profiling", action="store_true", help = "Do not transpose taxonomic profiling tables.  If you do not transpose them, it will use much more memory to read/write unless --output_format pickle")
+    parser.add_argument("--no_transpose_pathway_profiling", action="store_true", help = "Do not transpose pathway profiling tables.  If you do not transpose them, it will use much more memory to read/write unless --output_format pickle")
 
     # Options
     opts = parser.parse_args()
@@ -111,15 +112,20 @@ def main(args=None):
                     fillna_with_zeros=bool(opts.fillna_with_zeros), 
                     sparse=opts.sparse if opts.output_format == "pickle" else False,
                 )
+                
                 if X.empty:
                     raise EmptyDataError(f"Merging taxonomic profiles for level={level} in {opts.taxonomic_profiling_directory} resulted in empty DataFrame")
                 
+                if not opts.no_transpose_taxonomic_profiling:
+                    logger.info(f"Transposing taxonomic profiling tables for level={level}")
+                    X = X.T
+                    
                 logger.info(f"Taxonomic profiles for level={level} have {X.shape[0]} rows and {X.shape[1]} columns")
 
                 if opts.output_format == "parquet":
                     filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.parquet")
                     logger.info(f"Writing output: {filepath}")
-                    X.T.to_parquet(filepath, index=True)
+                    X.to_parquet(filepath, index=True)
                 elif opts.output_format == "tsv":
                     filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.tsv.gz")
                     logger.info(f"Writing output: {filepath}")
@@ -166,8 +172,10 @@ def main(args=None):
                             sparse=opts.sparse if opts.output_format == "pickle" else False)
                         if X.empty:
                             raise EmptyDataError(f"Merging pathway profiles for level={level}, data_type={data_type} in {opts.pathway_profiling_directory} resulted in empty DataFrame")
-                        if opts.output_format == "parquet":
+                        if not opts.no_transpose_pathway_profiling:
+                            logger.info(f"Transposing pathway profiling tables for level={level}, data_type={data_type}")
                             X = X.T
+                            
                         logger.info(f"Pathway profiles for level={level}, data_type={data_type} have {X.shape[0]} rows and {X.shape[1]} columns")
                     
                         if opts.output_format == "parquet":
@@ -193,7 +201,8 @@ def main(args=None):
                         )
                         if X.empty:
                             raise EmptyDataError(f"Merging pathway profiles for level={level}, data_type={data_type}, metric={metric} in {opts.pathway_profiling_directory} resulted in empty DataFrame")
-                        if opts.output_format == "parquet":
+                        if not opts.no_transpose_pathway_profiling:
+                            logger.info(f"Transposing pathway profiling tables for level={level}, data_type={data_type}, metric={metric}")
                             X = X.T
                         logger.info(f"Pathway profiles for level={level}, data_type={data_type}, metric={metric} have {X.shape[0]} rows and {X.shape[1]} columns")
                         

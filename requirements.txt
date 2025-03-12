@@ -8,3 +8,4 @@ scipy
 kegg_pathway_profiler>=2024.9.21
 pyexeggutor>=2024.11.18
 fastparquet
+xarray

@@ -1,4 +1,5 @@
 #### Daily Change Log:
+* [2025.3.13] - Dropped gene_abundance merging because files are too big, sparse, and probably not that useful...
 * [2025.3.12] - Added `h5netcdf` to `requirements.txt`
 * [2025.3.12] - Removed option for output formats in `leviathan-merge.py`.  Taxonomic profiles are `pandas` stored as `parquet` and pathway profiles are `xarray` stored as `netcdf` files.
 * [2025.3.12] - Changed `merge_taxonomic_profiling_tables` to `merge_taxonomic_profiling_tables_as_pandas`

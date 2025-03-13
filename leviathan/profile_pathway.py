@@ -319,7 +319,7 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
     profiling_directory : str
         Path to directory containing sample-level directories with output files.
     data_type : str
-        Type of {level}-level data to merge. One of: {"feature_abundances", "feature_prevalence", "feature_prevalence-binary", "feature_prevalence-ratio", "gene_abundances", "pathway_abundances"}
+        Type of {level}-level data to merge. One of: {"feature_abundances", "feature_prevalence", "feature_prevalence-binary", "feature_prevalence-ratio", "pathway_abundances"}
     level : str, optional
         Level of organization for {data_type}. One of {"genomes", "genome_cluster"}.
     metric : str, optional
@@ -334,7 +334,7 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
 
     Notes
     -----
-    Will raise a ValueError if an invalid combination of arguments is provided, such as level="genome_cluster" and data_type="gene_abundances".
+    Will raise a ValueError if an invalid combination of arguments is provided, such as level="genomes" and data_type="feature_prevalence-ratio".
     
     Files:
     * feature_abundances.genome_clusters.tsv.gz
@@ -344,14 +344,17 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
     * feature_prevalence.genome_clusters.tsv.gz
     * feature_prevalence.genomes.tsv.gz
     * feature_prevalence-ratio.genome_clusters.tsv.gz
-    * gene_abundances.genomes.tsv.gz
     * pathway_abundances.genome_clusters.tsv.gz
     * pathway_abundances.genomes.tsv.gz
+    
+    # Not supported: 
+    * gene_abundances.genomes.tsv.gz
+
     """
 
     check_argument_choice(
         query=data_type, 
-        choices={"feature_abundances", "feature_prevalence", "feature_prevalence-binary", "feature_prevalence-ratio", "gene_abundances", "pathway_abundances"},
+        choices={"feature_abundances", "feature_prevalence", "feature_prevalence-binary", "feature_prevalence-ratio",  "pathway_abundances"}, # "gene_abundances",
         )
     check_argument_choice(
         query=level, 
@@ -363,7 +366,7 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
         )
 
     illegal_conditions = [
-        (level == "genome_cluster") and (data_type == "gene_abundances"),
+        # (level == "genome_cluster") and (data_type == "gene_abundances"),
         (level == "genomes") and (data_type == "feature_prevalence-ratio"),
         (data_type != "pathway_abundances") and (metric == "coverage"),
     ]
@@ -377,7 +380,9 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
         output = dict()
         # Abundance/Coverage
         if data_type in {"feature_abundances",  "pathway_abundances"}:
-            
+            name = (data_type, level, metric)
+            variable_label = data_type.split("_")[0] + "s"
+
             # Determine column name
             column = str(metric)
             if data_type in {"feature_abundances", "pathway_abundances"}:
@@ -389,28 +394,33 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
                 id_sample = filepath.split("/")[-3]
                 df = pd.read_csv(filepath, sep="\t", index_col=[0,1])
                 df = df[column].unstack()
-                output[id_sample] = xr.DataArray(data = df.values, coords = [(level, df.index), ("features", df.columns)])
+
+                output[id_sample] = xr.DataArray(data = df.values, coords = [(level, df.index), (variable_label, df.columns)])
                 del df
                 
         # Prevalence
         elif data_type in {"feature_prevalence", "feature_prevalence-binary", "feature_prevalence-ratio"}:
+            name = (data_type, level)
             description = "Merging {}-level {} values".format(level, data_type.replace("_", " "))
             for filepath in tqdm(filepaths, description):
                 id_sample = filepath.split("/")[-3]
                 df = pd.read_csv(filepath, sep="\t", index_col=0)
-                output[id_sample] = xr.DataArray(data = df.values, coords = [(level, df.index), ("features", df.columns)])
+                variable_label = data_type.split("_")[0] + "s"
+                output[id_sample] = xr.DataArray(data = df.values, coords = [(level, df.index), (variable_label, df.columns)])
         X = xr.concat(output.values(), dim="samples")
         X["samples"] = list(output.keys())
         
         
-        if data_type == "feature_prevalence-binary":
+        if data_type in {"feature_prevalence-binary", "feature_prevalence"}:
+            X = X.astype(np.int8)
             if fillna_with_zeros:
                 X = X.fillna(0)
-            X = X.astype(int)
         else:
+            X = X.astype(np.float32)
             if fillna_with_zeros:
                 X = X.fillna(0.0)
         return X
                 
     else:
         raise FileNotFoundError(f"Could not find any {data_type}.{level}.tsv.gz files in {profiling_directory}")
+

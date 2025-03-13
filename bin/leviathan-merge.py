@@ -1,30 +1,13 @@
 #!/usr/bin/env python
-import sys,os, argparse, warnings, subprocess
-from collections import defaultdict
+import sys,os, argparse
 from itertools import product, chain
 from pandas.errors import EmptyDataError
 from tqdm import tqdm
-from memory_profiler import profile
 
 __program__ = os.path.split(sys.argv[0])[-1]
 
 from pyexeggutor import (
-    open_file_reader,
-    # open_file_writer,
-    read_pickle, 
-    # write_pickle,
-    read_json,
-    # write_json,
     build_logger,
-    # reset_logger,
-    # format_duration,
-    # format_header,
-    format_bytes,
-    # get_directory_tree,
-    get_directory_size,
-    get_md5hash_from_file,
-    get_md5hash_from_directory,
-    # RunShellCommand,
 )
 
 from leviathan.profile_taxonomy import (
@@ -34,7 +17,6 @@ from leviathan.profile_pathway import (
     merge_pathway_profiling_tables_as_xarray,
 )
 
-    ,
 
 
 def main(args=None):
@@ -60,6 +42,11 @@ def main(args=None):
     parser.add_argument("-z","--fillna_with_zeros", action="store_true", help = "Fill missing values with 0.  This will take a lot longer to write to disk.")
     parser.add_argument("--xarray_engine", type=str, choices={"h5netcdf", "netcdf4"}, default="h5netcdf", help = "Xarray backend engine [Default: h5netcdf]")
     parser.add_argument("--no_transpose_taxonomic_profiling", action="store_true", help = "Do not transpose taxonomic profiling tables.  If you do not transpose them, it will use more time/memory to read/write")
+    
+    # ------------------
+    # Pending options
+    # ------------------
+    # parser.add_argument("--xarray_compression_level", type=int, choices=set(range(0, 10)), default=4, help = "netCDF gzip compression level. Use 0 for no compression. [Default: 4]")
     # ------------------
     # Deprecated options
     # ------------------
@@ -134,6 +121,7 @@ def main(args=None):
                 filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.parquet")
                 logger.info(f"Writing output: {filepath}")
                 X.to_parquet(filepath, index=True)
+                del X
      
             except Exception as e:
                 logger.info(f"No level={level} files found in {opts.taxonomic_profiling_directory}: {e}")
@@ -161,7 +149,6 @@ def main(args=None):
             ]
             if not any(illegal_conditions):
                 try:
-                     
                     X = merge_pathway_profiling_tables_as_xarray(
                         profiling_directory=opts.pathway_profiling_directory, 
                         data_type=data_type, 
@@ -182,10 +169,16 @@ def main(args=None):
 
                     if X.size == 0:
                         raise EmptyDataError(error_msg)
-
+                    
                     logger.info(info_msg)
                     logger.info(f"Writing output: {filepath}")
-                    X.to_netcdf(filepath, engine=opts.xarray_engine, encoding={"compression": "gzip"})
+                    # if opts.xarray_compression_level:
+                        # encoding = {var: {"compression": "gzip", "compression_opts": opts.xarray_compression_level} for var in X.data_vars}
+                    # else:
+                        # encoding = None
+
+                    X.to_netcdf(filepath, engine=opts.xarray_engine) #, encoding=encoding)
+                    del X
 
                 except Exception as e:
                     if data_type in prevalence_data_types:

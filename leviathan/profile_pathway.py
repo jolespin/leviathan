@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-import sys,os, argparse, warnings, subprocess
+import sys
+import os
+import glob
 from collections import defaultdict
 from tqdm import tqdm
 import pandas as pd
@@ -12,22 +14,9 @@ from kegg_pathway_profiler.pathways import (
 )
 
 from pyexeggutor import (
-    # open_file_reader,
-    # open_file_writer,
-    # read_pickle, 
-    # write_pickle,
-    # read_json,
-    # write_json,
-    # build_logger,
-    # reset_logger,
-    # get_timestamp,
-    # format_duration,
-    # format_header,
     format_bytes,
-    get_file_size,
-    get_directory_size,
-    profile_peak_memory,
     RunShellCommand,
+    check_argument_choice,
 )
     
         
@@ -387,7 +376,7 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
     if filepaths:
         output = dict()
         # Abundance/Coverage
-        if data_type in {"feature_abundances", "gene_abundances", "pathway_abundances"}:
+        if data_type in {"feature_abundances",  "pathway_abundances"}:
             
             # Determine column name
             column = str(metric)

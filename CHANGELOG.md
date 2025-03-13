@@ -21,6 +21,7 @@
 * [2024.7.26] - Unversioned pre-alpha release on GitHub which only includes utils and index modules.  
 
 #### Pending: 
+* ! No support for gene_abundances.  Must figure out how to gzip .nc
 * Add long read support
 * Change `index` to `build-database`
 

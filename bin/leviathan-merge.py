@@ -46,8 +46,8 @@ def main(args=None):
     parser.add_argument("-p","--pathway_profiling_directory", type=str, help = "path/to/profiling/pathway/")
     parser.add_argument("-o","--output_directory", type=str,  help = "path/to/output_directory. Default is either --taxonomic_profiling_directory and --pathway_profiling_directory")
     parser.add_argument("-z","--fillna_with_zeros", action="store_true", help = "Fill missing values with 0.  This will take a lot longer to write to disk.")
-    parser.add_argument("--xarray_engine", type=str, choices={"h5netcdf", "netcdf4"}, default="h5netcdf", help = "Xarray backend engine [Default: h5netcdf]")
-    parser.add_argument("--xarray_compression_level", type=int, choices=set(range(0, 10)), default=4, help = "netCDF gzip compression level. Use 0 for no compression. [Default: 4]")
+    parser.add_argument("-e", "--xarray_engine", type=str, choices={"h5netcdf", "netcdf4"}, default="h5netcdf", help = "Xarray backend engine [Default: h5netcdf]")
+    parser.add_argument("-c", "--xarray_compression_level", type=int, choices=set(range(0, 10)), default=4, help = "netCDF gzip compression level. Use 0 for no compression. [Default: 4]")
     parser.add_argument("--no_transpose_taxonomic_profiling", action="store_true", help = "Do not transpose taxonomic profiling tables.  If you do not transpose them, it will use more time/memory to read/write")
     
     # ------------------

@@ -65,10 +65,10 @@ def main(args=None):
     parser_io.add_argument("-1","--forward_reads", type=str,  help = "path/to/forward_reads.fq[.gz] (Cannot be used with -s/--read_sketch)")
     parser_io.add_argument("-2","--reverse_reads", type=str,  help = "path/to/reverse_reads.fq[.gz] (Cannot be used with -s/--read_sketch)")
     # parser_io.add_argument("--ont", type=str,  help = "path/to/ont_reads.fq[.gz] (Cannot be used with -s/--read_sketch)")
-
     parser_io.add_argument("-n", "--name", type=str, required=True, help="Name of sample")
     parser_io.add_argument("-o","--project_directory", type=str, default="leviathan_output/profiling/pathway", help = "path/to/project_directory (e.g., leviathan_output/profiling/pathway]")
     parser_io.add_argument("-d","--index_directory", type=str, required=True, help = "path/to/index_directory/")
+    parser_io.add_argument("-f","--output_format", type=str, choices={"tsv", "parquet"}, default="parquet", help = "Output format [Default: parquet]")
 
     # Utilities
     parser_utility = parser.add_argument_group('Utility arguments')
@@ -189,28 +189,53 @@ def main(args=None):
     # Abundance and prevalence tables
     # ===============================
     level="genome"
-    gene_abundance_filepath = os.path.join(output_directory, "output", f"gene_abundances.{level}s.tsv.gz")
+    
+    # Gene abundances
+    gene_abundance_filepath = os.path.join(output_directory, "output", f"gene_abundances.{level}s.{opts.output_format}")
+    if opts.output_format != "parquet":
+        gene_abundance_filepath += ".gz"
     logger.info(f"[level={level}] Reformatting gene abundance: {gene_abundance_filepath}")
     
     df_quant = pd.read_csv(os.path.join(output_directory, "intermediate", "quant.sf"), sep="\t", index_col=0)
     df_gene_abundance = reformat_gene_abundance(df_quant, gene_to_data)
-    df_gene_abundance.to_csv(gene_abundance_filepath, sep="\t")
-    
-    feature_abundance_filepath = os.path.join(output_directory, "output", f"feature_abundances.{level}s.tsv.gz")
+    if opts.output_format == "parquet":
+        df_gene_abundance.to_parquet(gene_abundance_filepath, index=True)
+    elif opts.output_format == "tsv":
+        df_gene_abundance.to_csv(gene_abundance_filepath, sep="\t")
+        
+    # Feature abundances
+    feature_abundance_filepath = os.path.join(output_directory, "output", f"feature_abundances.{level}s.{opts.output_format}")
+    if opts.output_format != "parquet":
+        feature_abundance_filepath += ".gz"
     logger.info(f"[level={level}] Calculating feature abundance: {feature_abundance_filepath}")
     df_feature_abundance = reformat_feature_abundance(df_gene_abundance, gene_to_data, split_feature_abundances=not opts.no_split_feature_abundances)
-    df_feature_abundance.to_csv(feature_abundance_filepath, sep="\t")
-    
-    feature_prevalence_filepath = os.path.join(output_directory, "output", f"feature_prevalence.{level}s.tsv.gz")
+    if opts.output_format == "parquet":
+        df_feature_abundance.to_parquet(feature_abundance_filepath, index=True)
+    elif opts.output_format == "tsv":
+        df_feature_abundance.to_csv(feature_abundance_filepath, sep="\t")
+        
+    # Feature prevalence
+    feature_prevalence_filepath = os.path.join(output_directory, "output", f"feature_prevalence.{level}s.{opts.output_format}")
+    if opts.output_format != "parquet":
+        feature_prevalence_filepath += ".gz"
     logger.info(f"[level={level}] Calculating feature prevalence: {feature_prevalence_filepath}")
     df_feature_prevalence = build_wide_feature_prevalence_matrix(df_feature_abundance, threshold=0)
-    df_feature_prevalence.to_csv(feature_prevalence_filepath, sep="\t")
-    
-    feature_prevalence_binary_filepath = os.path.join(output_directory, "output", f"feature_prevalence-binary.{level}s.tsv.gz")
+    if opts.output_format == "parquet":
+        df_feature_prevalence.to_parquet(feature_prevalence_filepath, index=True)
+    elif opts.output_format == "tsv":
+        df_feature_prevalence.to_csv(feature_prevalence_filepath, sep="\t")
+        
+    # Feature prevalence (binary)
+    feature_prevalence_binary_filepath = os.path.join(output_directory, "output", f"feature_prevalence-binary.{level}s.{opts.output_format}")
+    if opts.output_format != "parquet":
+        feature_prevalence_binary_filepath += ".gz"
     logger.info(f"[level={level}] Reformatting binary feature prevalence: {feature_prevalence_binary_filepath}")
     df_feature_prevalence_binary = (df_feature_prevalence > 0).astype(int)
-    df_feature_prevalence_binary.to_csv(feature_prevalence_binary_filepath, sep="\t")
-    
+    if opts.output_format == "parquet":
+        df_feature_prevalence_binary.to_parquet(feature_prevalence_binary_filepath, index=True)
+    elif opts.output_format == "tsv":
+        df_feature_prevalence_binary.to_csv(feature_prevalence_binary_filepath, sep="\t")
+        
     if config["contains_pathways"]:
         logger.info(f"[level={level}] Building binary feature prevalence to dictionary")
         genome_to_features = build_feature_prevalence_dictionary(df_feature_prevalence_binary)
@@ -219,33 +244,63 @@ def main(args=None):
         logger.info(f"[level={level}] Calculating pathway coverage")
         coverages = calculate_pathway_coverage(genome_to_features, pathway_to_data)
         
-        pathway_abundances_filepath = os.path.join(output_directory, "output", f"pathway_abundances.{level}s.tsv.gz")
+        pathway_abundances_filepath = os.path.join(output_directory, "output", f"pathway_abundances.{level}s.{opts.output_format}")
+        if opts.output_format != "parquet":
+            pathway_abundances_filepath += ".gz"
         logger.info(f"[level={level}] Aggregating pathway abundances and appending coverages: {pathway_abundances_filepath}")
         df_pathway_abundances = aggregate_pathway_abundance_and_append_coverage(df_feature_abundance, feature_to_pathways, coverages, index_names = [f"id_{level}", "id_pathway"])
-        df_pathway_abundances.to_csv(pathway_abundances_filepath, sep="\t")
+        if opts.output_format == "parquet":
+            df_pathway_abundances.to_parquet(pathway_abundances_filepath, index=True)
+        elif opts.output_format == "tsv":
+            df_pathway_abundances.to_csv(pathway_abundances_filepath, sep="\t")
 
     if config["contains_genome_cluster_mapping"]:
         level="genome_cluster"
-
-        feature_prevalence_filepath = os.path.join(output_directory, "output", "feature_abundances.genome_clusters.tsv.gz")
-        logger.info(f"[level=genome_cluster] Calculating feature abundance: {feature_prevalence_filepath}")
-        df_feature_abundance = aggregate_feature_abundance_for_clusters(df_feature_abundance, genome_to_data)
-        df_feature_abundance.to_csv(feature_prevalence_filepath, sep="\t")
         
-        feature_ratio_filepath = os.path.join(output_directory, "output", "feature_prevalence-ratio.genome_clusters.tsv.gz")
+        # Feature abundance
+        feature_abundance_filepath = os.path.join(output_directory, "output", f"feature_abundances.genome_clusters.{opts.output_format}")
+        if opts.output_format != "parquet":
+            feature_abundance_filepath += ".gz"
+        logger.info(f"[level=genome_cluster] Calculating feature abundance: {feature_abundance_filepath}")
+        df_feature_abundance = aggregate_feature_abundance_for_clusters(df_feature_abundance, genome_to_data)
+        if opts.output_format == "parquet":
+            df_feature_abundance.to_parquet(feature_abundance_filepath, index=True)
+        elif opts.output_format == "tsv":
+            df_feature_abundance.to_csv(feature_abundance_filepath, sep="\t")
+        
+        # Feature ratio
+        feature_ratio_filepath = os.path.join(output_directory, "output", f"feature_prevalence-ratio.genome_clusters.{opts.output_format}")
+        if opts.output_format != "parquet":
+            feature_ratio_filepath += ".gz"
         logger.info(f"[level=genome_cluster] Calculating feature prevalence ratios: {feature_ratio_filepath}")
         df_feature_prevalence_ratio = (df_feature_prevalence > 0).groupby(lambda x: genome_to_data[x]["id_genome_cluster"]).mean()
-        df_feature_prevalence_ratio.to_csv(feature_ratio_filepath, sep="\t")
+        if opts.output_format == "parquet":
+            df_feature_prevalence_ratio.to_parquet(feature_ratio_filepath, index=True)
+        elif opts.output_format == "tsv":
+            df_feature_prevalence_ratio.to_csv(feature_ratio_filepath, sep="\t")
         
-        feature_prevalence_filepath = os.path.join(output_directory, "output", "feature_prevalence.genome_clusters.tsv.gz")
+        # Feature prevalence
+        feature_prevalence_filepath = os.path.join(output_directory, "output", f"feature_prevalence.genome_clusters.{opts.output_format}")
+        if opts.output_format != "parquet":
+            feature_prevalence_filepath += ".gz"
         logger.info(f"[level=genome_cluster] Calculating feature prevalence: {feature_prevalence_filepath}")
-        df_feature_prevalence = df_feature_prevalence.groupby(lambda x: genome_to_data[x]["id_genome_cluster"]).sum()
-        df_feature_prevalence.to_csv(feature_prevalence_filepath, sep="\t")
+        df_feature_prevalence = df_feature_prevalence.groupby(lambda x: genome_to_data[x]["id_genome_cluster"]).sum()        
+        if opts.output_format == "parquet":
+            df_feature_prevalence.to_parquet(feature_prevalence_filepath, index=True)
+        elif opts.output_format == "tsv":
+            df_feature_prevalence.to_csv(feature_prevalence_filepath, sep="\t")
         
-        feature_prevalence_binary_filepath = os.path.join(output_directory, "output", "feature_prevalence-binary.genome_clusters.tsv.gz")
+        # Feature prevalence (binary)
+        feature_prevalence_binary_filepath = os.path.join(output_directory, "output", f"feature_prevalence-binary.genome_clusters.{opts.output_format}")
+        if opts.output_format != "parquet":
+            feature_prevalence_binary_filepath += ".gz"
         logger.info(f"[level=genome_cluster] Reformatting binary feature prevalence: {feature_prevalence_binary_filepath}")
         df_feature_prevalence_binary = (df_feature_prevalence > 0).astype(int)
-        df_feature_prevalence_binary.to_csv(feature_prevalence_binary_filepath, sep="\t")
+        
+        if opts.output_format == "parquet":
+            df_feature_prevalence_binary.to_parquet(feature_prevalence_binary_filepath, index=True)
+        elif opts.output_format == "tsv":
+            df_feature_prevalence_binary.to_csv(feature_prevalence_binary_filepath, sep="\t")
         
         if config["contains_pathways"]:
             logger.info(f"[level={level}] Building binary feature prevalence to dictionary")
@@ -255,10 +310,16 @@ def main(args=None):
             logger.info(f"[level={level}] Calculating pathway coverage")
             coverages = calculate_pathway_coverage(genome_to_features, pathway_to_data)
             
-            pathway_abundances_filepath = os.path.join(output_directory, "output", f"pathway_abundances.{level}s.tsv.gz")
+            pathway_abundances_filepath = os.path.join(output_directory, "output", f"pathway_abundances.{level}s.{opts.output_format}")
+            if opts.output_format != "parquet":
+                pathway_abundances_filepath += ".gz"
             logger.info(f"[level={level}] Aggregating pathway abundances and appending coverages: {pathway_abundances_filepath}")
             df_pathway_abundances = aggregate_pathway_abundance_and_append_coverage(df_feature_abundance, feature_to_pathways, coverages, index_names = [f"id_{level}", "id_pathway"])
-            df_pathway_abundances.to_csv(pathway_abundances_filepath, sep="\t")
+            
+            if opts.output_format == "parquet":
+                df_pathway_abundances.to_parquet(pathway_abundances_filepath, index=True)
+            elif opts.output_format == "tsv":
+                df_pathway_abundances.to_csv(pathway_abundances_filepath, sep="\t")
 
 
     # ========

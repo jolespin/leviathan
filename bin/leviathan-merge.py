@@ -86,9 +86,13 @@ def main(args=None):
                 taxonomic_profiling_output_directory = opts.taxonomic_profiling_directory
             else:
                 taxonomic_profiling_output_directory = opts.output_directory
-        logger.info(f"Creating taxonomic profiling output directory (if it does not exist): {taxonomic_profiling_output_directory}")
-        os.makedirs(taxonomic_profiling_output_directory, exist_ok=True)
-        
+            logger.info(f"Creating taxonomic profiling output directory (if it does not exist): {taxonomic_profiling_output_directory}")
+            os.makedirs(taxonomic_profiling_output_directory, exist_ok=True)
+        else:
+            msg = f"Taxonomic profiling output directory does not exist: {opts.taxonomic_profiling_directory}"
+            logger.critical(msg)
+            raise Exception(msg)
+
     ## Pathway Profiling
     proceed_with_merging_pathway_profiles = False
     pathway_profiling_output_directory = None
@@ -99,8 +103,12 @@ def main(args=None):
                 pathway_profiling_output_directory = opts.pathway_profiling_directory
             else:
                 pathway_profiling_output_directory = opts.output_directory
-        logger.info(f"Creating pathway profiling output directory (if it does not exist): {pathway_profiling_output_directory}")
-        os.makedirs(pathway_profiling_output_directory, exist_ok=True)
+            logger.info(f"Creating pathway profiling output directory (if it does not exist): {pathway_profiling_output_directory}")
+            os.makedirs(pathway_profiling_output_directory, exist_ok=True)
+        else:
+            msg = f"Pathway profiling output directory does not exist: {opts.pathway_profiling_directory}"
+            logger.critical(msg)
+            raise Exception(msg)
         
     # Run
     ## Taxonomic Profiling

@@ -1,4 +1,5 @@
 #### Daily Change Log:
+* [2025.3.13] - Added `-f/--output_format` to `profile-taxonomy.py` and `profile-pathway.py` modules with `parquet` as default but continued support for `.tsv`
 * [2025.3.13] - Dropped gene_abundance merging because files are too big, sparse, and probably not that useful...
 * [2025.3.12] - Added `h5netcdf` to `requirements.txt`
 * [2025.3.12] - Removed option for output formats in `leviathan-merge.py`.  Taxonomic profiles are `pandas` stored as `parquet` and pathway profiles are `xarray` stored as `netcdf` files.

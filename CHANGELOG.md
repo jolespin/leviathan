@@ -1,4 +1,5 @@
 #### Daily Change Log:
+* [2025.5.9] - Added `sequence_abundance.genomes.parquet` and `sequence_abundance.genome_clusters.parquet` to `leviathan-profile-taxonomy.py`
 * [2025.3.13] - Added `-f/--output_format` to `profile-taxonomy.py` and `profile-pathway.py` modules with `parquet` as default but continued support for `.tsv`
 * [2025.3.13] - Dropped gene_abundance merging because files are too big, sparse, and probably not that useful...
 * [2025.3.12] - Added `h5netcdf` to `requirements.txt`

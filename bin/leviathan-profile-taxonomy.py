@@ -196,16 +196,15 @@ def main(args=None):
         genome_to_genomecluster[id_genome] = data["id_genome_cluster"]
     del genome_to_data
        
-    # =========================
-    # Reformat abundance tables
-    # =========================
+    # ===================================
+    # Reformat taxonomic abundance tables
+    # ===================================
     genome_abundance_filepath = os.path.join(output_directory, "output", f"taxonomic_abundance.genomes.{opts.output_format}")
-    if not opts.output_format != "parquet":
+    if opts.output_format != "parquet":
         genome_abundance_filepath += ".gz"
 
     
     logger.info(f"Reformatting taxonomic abundance: {genome_abundance_filepath}")
-    
     df_sylph = pd.read_csv(os.path.join(output_directory, "output", "sylph_profile.tsv.gz"), sep="\t", index_col=0)
     genome_to_abundance = df_sylph.reset_index().set_index("Genome_file")["Taxonomic_abundance"]
     genome_to_abundance.index = genome_to_abundance.index.map(lambda filepath:genomefilepath_to_genomeid[filepath])
@@ -218,16 +217,49 @@ def main(args=None):
     
     if config["contains_genome_cluster_mapping"]:
         genomecluster_abundance_filepath = os.path.join(output_directory, "output", f"taxonomic_abundance.genome_clusters.{opts.output_format}")
-        if not opts.output_format != "parquet":
+        if opts.output_format != "parquet":
             genomecluster_abundance_filepath += ".gz"
         logger.info(f"Aggregating taxonomic abundance for genome clusters: {genomecluster_abundance_filepath}")
-        genomecluster_to_abundance = genome_to_abundance.groupby(genome_to_genomecluster).sum()
+        genomecluster_to_abundance = genome_to_abundance["abundance"].groupby(genome_to_genomecluster).sum()
         genomecluster_to_abundance.index.name = "id_genome_cluster"
         genomecluster_to_abundance = genomecluster_to_abundance.to_frame("abundance")
         if opts.output_format == "parquet":
             genomecluster_to_abundance.to_parquet(genomecluster_abundance_filepath, index=True)
         elif opts.output_format == "tsv":
             genomecluster_to_abundance.to_csv(genomecluster_abundance_filepath, sep="\t")
+
+    # ===================================
+    # Reformat sequence abundance tables
+    # ===================================
+    genome_abundance_filepath = os.path.join(output_directory, "output", f"sequence_abundance.genomes.{opts.output_format}")
+    if opts.output_format != "parquet":
+        genome_abundance_filepath += ".gz"
+
+    
+    logger.info(f"Reformatting sequence abundance: {genome_abundance_filepath}")
+    df_sylph = pd.read_csv(os.path.join(output_directory, "output", "sylph_profile.tsv.gz"), sep="\t", index_col=0)
+    genome_to_abundance = df_sylph.reset_index().set_index("Genome_file")["Sequence_abundance"]
+    genome_to_abundance.index = genome_to_abundance.index.map(lambda filepath:genomefilepath_to_genomeid[filepath])
+    genome_to_abundance.index.name = "id_genome"
+    genome_to_abundance = genome_to_abundance.to_frame("abundance")
+    if opts.output_format == "parquet":
+        genome_to_abundance.to_parquet(genome_abundance_filepath, index=True)
+    elif opts.output_format == "tsv":
+        genome_to_abundance.to_csv(genome_abundance_filepath, sep="\t")
+    
+    if config["contains_genome_cluster_mapping"]:
+        genomecluster_abundance_filepath = os.path.join(output_directory, "output", f"sequence_abundance.genome_clusters.{opts.output_format}")
+        if opts.output_format != "parquet":
+            genomecluster_abundance_filepath += ".gz"
+        logger.info(f"Aggregating sequence abundance for genome clusters: {genomecluster_abundance_filepath}")
+        genomecluster_to_abundance = genome_to_abundance["abundance"].groupby(genome_to_genomecluster).sum()
+        genomecluster_to_abundance.index.name = "id_genome_cluster"
+        genomecluster_to_abundance = genomecluster_to_abundance.to_frame("abundance")
+        if opts.output_format == "parquet":
+            genomecluster_to_abundance.to_parquet(genomecluster_abundance_filepath, index=True)
+        elif opts.output_format == "tsv":
+            genomecluster_to_abundance.to_csv(genomecluster_abundance_filepath, sep="\t")
+            
     # ========
     # Complete
     # ========    

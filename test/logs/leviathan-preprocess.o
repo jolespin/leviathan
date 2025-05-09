@@ -1,0 +1,19 @@
+2025-05-09 21:37:02,128 - leviathan preprocess - INFO - Command: ['/home/ubuntu/jolespin-volume/miniforge3/envs/leviathan/bin/leviathan-preprocess.py', '-i', '../../Analysis/leviathan_output/references/manifest.tsv', '-a', '../../Analysis/veba_output/annotation/intermediate/8__pykofamsearch/output.tsv.gz', '-o', '../../Analysis/leviathan_output/references/', '--annotation_format', 'pykofamsearch-reformatted']
+2025-05-09 21:37:02,128 - leviathan preprocess - INFO - Creating output directory: ../../Analysis/leviathan_output/references/
+2025-05-09 21:37:02,128 - leviathan preprocess - INFO - Reading input: ../../Analysis/leviathan_output/references/manifest.tsv
+2025-05-09 21:37:02,138 - leviathan preprocess - INFO - Writing genome filepaths: ../../Analysis/leviathan_output/references/genomes.tsv.gz
+2025-05-09 21:37:02,141 - leviathan preprocess - INFO - Reading annotations: ../../Analysis/veba_output/annotation/intermediate/8__pykofamsearch/output.tsv.gz [Format: pykofamsearch-reformatted]
+2025-05-09 21:37:43,058 - leviathan preprocess - WARNING - Number of genes in --annotations that do not have sequences from --input: 16
+2025-05-09 21:37:43,058 - leviathan preprocess - INFO - Number of CDS sequences with features: 33627
+2025-05-09 21:37:43,058 - leviathan preprocess - INFO - Building feature mappings: ../../Analysis/leviathan_output/references/feature_mapping.tsv.gz
+2025-05-09 21:37:43,377 - leviathan preprocess - INFO - Calculating md5 hashes: ../../Analysis/leviathan_output/references/md5hashes.json
+2025-05-09 21:37:43,397 - leviathan preprocess - INFO - Completed preprocessing input data for leviathan index: ../../Analysis/leviathan_output/references/
+2025-05-09 21:37:43,397 - leviathan preprocess - INFO - Directory size of leviathan preprocessing: 11.85 MB
+2025-05-09 21:37:43,397 - leviathan preprocess - INFO - Directory structure of leviathan preprocessing:
+references/
+|__ cds.fasta.gz
+|__ feature_mapping.tsv.gz
+|__ genes_missing_cds_sequences.list
+|__ genomes.tsv.gz
+|__ manifest.tsv
+|__ md5hashes.json

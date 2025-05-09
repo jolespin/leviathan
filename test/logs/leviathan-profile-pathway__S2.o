@@ -1,0 +1,57 @@
+2025-05-09 22:49:25,555 - leviathan profile-pathway - INFO - Command: ['/home/ubuntu/jolespin-volume/miniforge3/envs/leviathan/bin/leviathan-profile-pathway.py', '-1', '../../Analysis/veba_output/preprocess/S2/output/trimmed_1.fastq.gz', '-2', '../../Analysis/veba_output/preprocess/S2/output/trimmed_2.fastq.gz', '-n', 'S2', '-d', '../../Analysis/leviathan_output/references/index/', '-p=-1', '-o', '../../Analysis/leviathan_output/profiling/pathway/']
+2025-05-09 22:49:25,555 - leviathan profile-pathway - INFO - Setting --n_jobs to maximum threads 30
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - Checking Salmon index
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - [salmon_index] ../../Analysis/leviathan_output/references/index/salmon_index/seq.bin (8.62 MB)
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - [salmon_index] ../../Analysis/leviathan_output/references/index/salmon_index/info.json (1.02 KB)
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - [salmon_index] ../../Analysis/leviathan_output/references/index/salmon_index/pre_indexing.log (496.00 B)
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - [salmon_index] ../../Analysis/leviathan_output/references/index/salmon_index/ref_indexing.log (5.30 KB)
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - [salmon_index] ../../Analysis/leviathan_output/references/index/salmon_index/ctable.bin (2.47 MB)
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - [salmon_index] ../../Analysis/leviathan_output/references/index/salmon_index/refAccumLengths.bin (262.72 KB)
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - [salmon_index] ../../Analysis/leviathan_output/references/index/salmon_index/mphf.bin (21.18 MB)
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - [salmon_index] ../../Analysis/leviathan_output/references/index/salmon_index/versionInfo.json (127.00 B)
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - [salmon_index] ../../Analysis/leviathan_output/references/index/salmon_index/duplicate_clusters.tsv (41.21 KB)
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - [salmon_index] ../../Analysis/leviathan_output/references/index/salmon_index/ctg_offsets.bin (155.82 KB)
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - [salmon_index] ../../Analysis/leviathan_output/references/index/salmon_index/reflengths.bin (131.36 KB)
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - [salmon_index] ../../Analysis/leviathan_output/references/index/salmon_index/pos.bin (105.07 MB)
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - [salmon_index] ../../Analysis/leviathan_output/references/index/salmon_index/refseq.bin (9.49 MB)
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - [salmon_index] ../../Analysis/leviathan_output/references/index/salmon_index/complete_ref_lens.bin (131.36 KB)
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - [salmon_index] ../../Analysis/leviathan_output/references/index/salmon_index/rank.bin (4.31 MB)
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - Checking gene metadata: ../../Analysis/leviathan_output/references/index/database/gene_to_data.pkl.gz
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - Checking genome metadata: ../../Analysis/leviathan_output/references/index/database/genome_to_data.pkl.gz
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - Checking pathway metadata: ../../Analysis/leviathan_output/references/index/database/pathway_to_data.pkl.gz
+2025-05-09 22:49:25,556 - leviathan profile-pathway - INFO - Loading gene data
+2025-05-09 22:49:25,652 - leviathan profile-pathway - INFO - Loading genome data
+2025-05-09 22:49:25,652 - leviathan profile-pathway - INFO - Loading pathway data
+2025-05-09 22:49:25,663 - leviathan profile-pathway - INFO - Running Salmon quant
+2025-05-09 22:49:25,663 - leviathan profile-pathway - INFO - [salmon_quant] running command: /home/ubuntu/jolespin-volume/miniforge3/envs/leviathan/bin/salmon quant --meta --libType A --threads 30 --minScoreFraction 0.87 --index ../../Analysis/leviathan_output/references/index/salmon_index -1 ../../Analysis/veba_output/preprocess/S2/output/trimmed_1.fastq.gz -2 ../../Analysis/veba_output/preprocess/S2/output/trimmed_2.fastq.gz --writeUnmappedNames --output ../../Analysis/leviathan_output/profiling/pathway/S2/intermediate
+2025-05-09 22:49:32,035 - leviathan profile-pathway - INFO - [salmon_quant] duration: 6.371733665466309
+2025-05-09 22:49:32,035 - leviathan profile-pathway - INFO - [salmon_quant] peak memory: 177.02 B
+2025-05-09 22:49:32,035 - leviathan profile-pathway - INFO - [salmon_quant] dumping stdout, stderr, and return code: ../../Analysis/leviathan_output/profiling/pathway/S2/logs
+2025-05-09 22:49:32,035 - leviathan profile-pathway - INFO - [salmon_quant] checking return code status: 0
+2025-05-09 22:49:32,036 - leviathan profile-pathway - INFO - [level=genome] Reformatting gene abundance: ../../Analysis/leviathan_output/profiling/pathway/S2/output/gene_abundances.genomes.parquet
+2025-05-09 22:49:32,811 - leviathan profile-pathway - INFO - [level=genome] Calculating feature abundance: ../../Analysis/leviathan_output/profiling/pathway/S2/output/feature_abundances.genomes.parquet
+2025-05-09 22:49:33,109 - leviathan profile-pathway - INFO - [level=genome] Calculating feature prevalence: ../../Analysis/leviathan_output/profiling/pathway/S2/output/feature_prevalence.genomes.parquet
+2025-05-09 22:49:34,356 - leviathan profile-pathway - INFO - [level=genome] Reformatting binary feature prevalence: ../../Analysis/leviathan_output/profiling/pathway/S2/output/feature_prevalence-binary.genomes.parquet
+2025-05-09 22:49:35,640 - leviathan profile-pathway - INFO - [level=genome] Building binary feature prevalence to dictionary
+2025-05-09 22:49:35,643 - leviathan profile-pathway - INFO - [level=genome] Building feature to pathways dictionary
+2025-05-09 22:49:35,644 - leviathan profile-pathway - INFO - [level=genome] Calculating pathway coverage
+2025-05-09 22:49:37,882 - leviathan profile-pathway - INFO - [level=genome] Aggregating pathway abundances and appending coverages: ../../Analysis/leviathan_output/profiling/pathway/S2/output/pathway_abundances.genomes.parquet
+2025-05-09 22:49:38,510 - leviathan profile-pathway - INFO - [level=genome_cluster] Calculating feature abundance: ../../Analysis/leviathan_output/profiling/pathway/S2/output/feature_abundances.genome_clusters.parquet
+2025-05-09 22:49:38,534 - leviathan profile-pathway - INFO - [level=genome_cluster] Calculating feature prevalence ratios: ../../Analysis/leviathan_output/profiling/pathway/S2/output/feature_prevalence-ratio.genome_clusters.parquet
+2025-05-09 22:49:39,655 - leviathan profile-pathway - INFO - [level=genome_cluster] Calculating feature prevalence: ../../Analysis/leviathan_output/profiling/pathway/S2/output/feature_prevalence.genome_clusters.parquet
+2025-05-09 22:49:40,966 - leviathan profile-pathway - INFO - [level=genome_cluster] Reformatting binary feature prevalence: ../../Analysis/leviathan_output/profiling/pathway/S2/output/feature_prevalence-binary.genome_clusters.parquet
+2025-05-09 22:49:42,205 - leviathan profile-pathway - INFO - [level=genome_cluster] Building binary feature prevalence to dictionary
+2025-05-09 22:49:42,208 - leviathan profile-pathway - INFO - [level=genome_cluster] Building feature to pathways dictionary
+2025-05-09 22:49:42,209 - leviathan profile-pathway - INFO - [level=genome_cluster] Calculating pathway coverage
+2025-05-09 22:49:43,703 - leviathan profile-pathway - INFO - [level=genome_cluster] Aggregating pathway abundances and appending coverages: ../../Analysis/leviathan_output/profiling/pathway/S2/output/pathway_abundances.genome_clusters.parquet
+2025-05-09 22:49:44,100 - leviathan profile-pathway - INFO - Completed pathway profiling: S2
+2025-05-09 22:49:44,100 - leviathan profile-pathway - INFO - Output: ../../Analysis/leviathan_output/profiling/pathway/S2/output/feature_prevalence-ratio.genome_clusters.parquet (855.39 KB)
+2025-05-09 22:49:44,100 - leviathan profile-pathway - INFO - Output: ../../Analysis/leviathan_output/profiling/pathway/S2/output/feature_prevalence-binary.genome_clusters.parquet (821.18 KB)
+2025-05-09 22:49:44,100 - leviathan profile-pathway - INFO - Output: ../../Analysis/leviathan_output/profiling/pathway/S2/output/feature_prevalence-binary.genomes.parquet (832.06 KB)
+2025-05-09 22:49:44,100 - leviathan profile-pathway - INFO - Output: ../../Analysis/leviathan_output/profiling/pathway/S2/output/feature_abundances.genomes.parquet (149.35 KB)
+2025-05-09 22:49:44,100 - leviathan profile-pathway - INFO - Output: ../../Analysis/leviathan_output/profiling/pathway/S2/output/feature_abundances.genome_clusters.parquet (108.26 KB)
+2025-05-09 22:49:44,100 - leviathan profile-pathway - INFO - Output: ../../Analysis/leviathan_output/profiling/pathway/S2/output/feature_prevalence.genomes.parquet (832.06 KB)
+2025-05-09 22:49:44,100 - leviathan profile-pathway - INFO - Output: ../../Analysis/leviathan_output/profiling/pathway/S2/output/feature_prevalence.genome_clusters.parquet (818.03 KB)
+2025-05-09 22:49:44,100 - leviathan profile-pathway - INFO - Output: ../../Analysis/leviathan_output/profiling/pathway/S2/output/pathway_abundances.genomes.parquet (28.91 KB)
+2025-05-09 22:49:44,100 - leviathan profile-pathway - INFO - Output: ../../Analysis/leviathan_output/profiling/pathway/S2/output/gene_abundances.genomes.parquet (281.84 KB)
+2025-05-09 22:49:44,100 - leviathan profile-pathway - INFO - Output: ../../Analysis/leviathan_output/profiling/pathway/S2/output/pathway_abundances.genome_clusters.parquet (19.76 KB)

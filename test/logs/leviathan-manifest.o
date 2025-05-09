@@ -1,0 +1,11 @@
+2025-05-09 21:35:54,049 - leviathan compile-manifest-from-veba - INFO - Command: ['/home/ubuntu/jolespin-volume/miniforge3/envs/leviathan/bin/compile-manifest-from-veba.py', '-i', '../../Analysis/veba_output/', '-t', 'prokaryotic,eukaryotic', '-o', '../../Analysis/leviathan_output/references/manifest.tsv']
+2025-05-09 21:35:54,049 - leviathan compile-manifest-from-veba - INFO - Checking input directory: ../../Analysis/veba_output/
+2025-05-09 21:35:54,049 - leviathan compile-manifest-from-veba - INFO - Creating output: <_io.TextIOWrapper name='../../Analysis/leviathan_output/references/manifest.tsv' mode='wt' encoding='UTF-8'>
+2025-05-09 21:35:54,049 - leviathan compile-manifest-from-veba - INFO - Parsing organism types: ['prokaryotic', 'eukaryotic']
+2025-05-09 21:35:54,049 - leviathan compile-manifest-from-veba - INFO - Creating manifest from ../../Analysis/veba_output/binning/prokaryotic
+2025-05-09 21:35:54,060 - leviathan compile-manifest-from-veba - INFO - Creating manifest from ../../Analysis/veba_output/binning/eukaryotic
+2025-05-09 21:35:54,061 - leviathan compile-manifest-from-veba - INFO - Adding genome clusters from ../../Analysis/veba_output/cluster/output/global/mags_to_slcs.tsv
+2025-05-09 21:35:54,061 - leviathan compile-manifest-from-veba - INFO - Checking assembly and CDS files for manifest
+2025-05-09 21:35:54,062 - leviathan compile-manifest-from-veba - INFO - Checking clustering for genomes in manifest
+2025-05-09 21:35:54,062 - leviathan compile-manifest-from-veba - INFO - Writing manifest: <_io.TextIOWrapper name='../../Analysis/leviathan_output/references/manifest.tsv' mode='wt' encoding='UTF-8'>
+2025-05-09 21:35:54,062 - leviathan compile-manifest-from-veba - INFO - Completed generating manifest: <_io.TextIOWrapper name='../../Analysis/leviathan_output/references/manifest.tsv' mode='wt' encoding='UTF-8'>

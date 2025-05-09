@@ -1,0 +1,69 @@
+2025-05-09 22:53:01,239 - leviathan merge - INFO - Command: ['/home/ubuntu/jolespin-volume/miniforge3/envs/leviathan/bin/leviathan-merge.py', '-t', '../..//Analysis/leviathan_output/profiling/taxonomy/', '-p', '../..//Analysis/leviathan_output/profiling/pathway/', '-o', '../../Analysis/leviathan_output/artifacts/']
+2025-05-09 22:53:01,239 - leviathan merge - INFO - Creating taxonomic profiling output directory (if it does not exist): ../../Analysis/leviathan_output/artifacts/
+2025-05-09 22:53:01,239 - leviathan merge - INFO - Creating pathway profiling output directory (if it does not exist): ../../Analysis/leviathan_output/artifacts/
+2025-05-09 22:53:01,239 - leviathan merge - INFO - Merging taxonomic profiles for level=genomes
+2025-05-09 22:53:01,239 - leviathan merge - INFO - No level=genomes files found in ../..//Analysis/leviathan_output/profiling/taxonomy/: Could not find any taxonomic_abundance.genomes.tsv.gz files in ../..//Analysis/leviathan_output/profiling/taxonomy/
+2025-05-09 22:53:01,239 - leviathan merge - INFO - Merging taxonomic profiles for level=genome_clusters
+2025-05-09 22:53:01,239 - leviathan merge - INFO - No level=genome_clusters files found in ../..//Analysis/leviathan_output/profiling/taxonomy/: Could not find any taxonomic_abundance.genome_clusters.tsv.gz files in ../..//Analysis/leviathan_output/profiling/taxonomy/
+2025-05-09 22:53:01,239 - leviathan merge - INFO - Completed merging taxonomic profiling tables: ../../Analysis/leviathan_output/artifacts/
+2025-05-09 22:53:01,371 - leviathan merge - INFO - Pathway profiles for level=genomes, data_type=feature_abundances, metric=number_of_reads have 4 samples, 23 genomes, and 5389 features
+2025-05-09 22:53:01,371 - leviathan merge - INFO - Setting gzip compression: 4
+2025-05-09 22:53:01,371 - leviathan merge - INFO - Adding DataArray (number_of_reads) to DataSet group ('feature', 'genomes')
+2025-05-09 22:53:01,372 - leviathan merge - INFO - Writing output: ../../Analysis/leviathan_output/artifacts/feature.genomes.nc [mode=w]
+2025-05-09 22:53:01,670 - leviathan merge - INFO - Pathway profiles for level=genomes, data_type=feature_abundances, metric=tpm have 4 samples, 23 genomes, and 5389 features
+2025-05-09 22:53:01,670 - leviathan merge - INFO - Setting gzip compression: 4
+2025-05-09 22:53:01,670 - leviathan merge - INFO - Adding DataArray (tpm) to DataSet group ('feature', 'genomes')
+2025-05-09 22:53:01,671 - leviathan merge - INFO - Writing output: ../../Analysis/leviathan_output/artifacts/feature.genomes.nc [mode=a]
+2025-05-09 22:53:01,761 - leviathan merge - INFO - Pathway profiles for level=genomes, data_type=pathway_abundances, metric=number_of_reads have 4 samples, 23 genomes, and 292 features
+2025-05-09 22:53:01,761 - leviathan merge - INFO - Setting gzip compression: 4
+2025-05-09 22:53:01,761 - leviathan merge - INFO - Adding DataArray (number_of_reads) to DataSet group ('pathway', 'genomes')
+2025-05-09 22:53:01,762 - leviathan merge - INFO - Writing output: ../../Analysis/leviathan_output/artifacts/pathway.genomes.nc [mode=w]
+2025-05-09 22:53:01,794 - leviathan merge - INFO - Pathway profiles for level=genomes, data_type=pathway_abundances, metric=tpm have 4 samples, 23 genomes, and 292 features
+2025-05-09 22:53:01,794 - leviathan merge - INFO - Setting gzip compression: 4
+2025-05-09 22:53:01,794 - leviathan merge - INFO - Adding DataArray (tpm) to DataSet group ('pathway', 'genomes')
+2025-05-09 22:53:01,795 - leviathan merge - INFO - Writing output: ../../Analysis/leviathan_output/artifacts/pathway.genomes.nc [mode=a]
+2025-05-09 22:53:01,827 - leviathan merge - INFO - Pathway profiles for level=genomes, data_type=pathway_abundances, metric=coverage have 4 samples, 23 genomes, and 292 features
+2025-05-09 22:53:01,827 - leviathan merge - INFO - Setting gzip compression: 4
+2025-05-09 22:53:01,827 - leviathan merge - INFO - Adding DataArray (coverage) to DataSet group ('pathway', 'genomes')
+2025-05-09 22:53:01,828 - leviathan merge - INFO - Writing output: ../../Analysis/leviathan_output/artifacts/pathway.genomes.nc [mode=a]
+2025-05-09 22:53:01,873 - leviathan merge - INFO - Pathway profiles for level=genome_clusters, data_type=feature_abundances, metric=number_of_reads have 4 samples, 19 genome_clusters, and 5389 features
+2025-05-09 22:53:01,873 - leviathan merge - INFO - Setting gzip compression: 4
+2025-05-09 22:53:01,873 - leviathan merge - INFO - Adding DataArray (number_of_reads) to DataSet group ('feature', 'genome_clusters')
+2025-05-09 22:53:01,873 - leviathan merge - INFO - Writing output: ../../Analysis/leviathan_output/artifacts/feature.genome_clusters.nc [mode=w]
+2025-05-09 22:53:01,928 - leviathan merge - INFO - Pathway profiles for level=genome_clusters, data_type=feature_abundances, metric=tpm have 4 samples, 19 genome_clusters, and 5389 features
+2025-05-09 22:53:01,929 - leviathan merge - INFO - Setting gzip compression: 4
+2025-05-09 22:53:01,929 - leviathan merge - INFO - Adding DataArray (tpm) to DataSet group ('feature', 'genome_clusters')
+2025-05-09 22:53:01,930 - leviathan merge - INFO - Writing output: ../../Analysis/leviathan_output/artifacts/feature.genome_clusters.nc [mode=a]
+2025-05-09 22:53:02,009 - leviathan merge - INFO - Pathway profiles for level=genome_clusters, data_type=pathway_abundances, metric=number_of_reads have 4 samples, 19 genome_clusters, and 292 features
+2025-05-09 22:53:02,009 - leviathan merge - INFO - Setting gzip compression: 4
+2025-05-09 22:53:02,009 - leviathan merge - INFO - Adding DataArray (number_of_reads) to DataSet group ('pathway', 'genome_clusters')
+2025-05-09 22:53:02,010 - leviathan merge - INFO - Writing output: ../../Analysis/leviathan_output/artifacts/pathway.genome_clusters.nc [mode=w]
+2025-05-09 22:53:02,041 - leviathan merge - INFO - Pathway profiles for level=genome_clusters, data_type=pathway_abundances, metric=tpm have 4 samples, 19 genome_clusters, and 292 features
+2025-05-09 22:53:02,042 - leviathan merge - INFO - Setting gzip compression: 4
+2025-05-09 22:53:02,042 - leviathan merge - INFO - Adding DataArray (tpm) to DataSet group ('pathway', 'genome_clusters')
+2025-05-09 22:53:02,042 - leviathan merge - INFO - Writing output: ../../Analysis/leviathan_output/artifacts/pathway.genome_clusters.nc [mode=a]
+2025-05-09 22:53:02,073 - leviathan merge - INFO - Pathway profiles for level=genome_clusters, data_type=pathway_abundances, metric=coverage have 4 samples, 19 genome_clusters, and 292 features
+2025-05-09 22:53:02,073 - leviathan merge - INFO - Setting gzip compression: 4
+2025-05-09 22:53:02,073 - leviathan merge - INFO - Adding DataArray (coverage) to DataSet group ('pathway', 'genome_clusters')
+2025-05-09 22:53:02,074 - leviathan merge - INFO - Writing output: ../../Analysis/leviathan_output/artifacts/pathway.genome_clusters.nc [mode=a]
+2025-05-09 22:53:03,511 - leviathan merge - INFO - Pathway profiles for level=genomes, data_type=feature_prevalence have 4 samples, 23 genomes, and 5389 features
+2025-05-09 22:53:03,511 - leviathan merge - INFO - Setting gzip compression: 4
+2025-05-09 22:53:03,511 - leviathan merge - INFO - Adding DataArray (prevalence) to DataSet group ('feature', 'genomes')
+2025-05-09 22:53:03,512 - leviathan merge - INFO - Writing output: ../../Analysis/leviathan_output/artifacts/feature.genomes.nc [mode=a]
+2025-05-09 22:53:04,977 - leviathan merge - INFO - Pathway profiles for level=genomes, data_type=feature_prevalence-binary have 4 samples, 23 genomes, and 5389 features
+2025-05-09 22:53:04,977 - leviathan merge - INFO - Setting gzip compression: 4
+2025-05-09 22:53:04,977 - leviathan merge - INFO - Adding DataArray (prevalence-binary) to DataSet group ('feature', 'genomes')
+2025-05-09 22:53:04,978 - leviathan merge - INFO - Writing output: ../../Analysis/leviathan_output/artifacts/feature.genomes.nc [mode=a]
+2025-05-09 22:53:06,486 - leviathan merge - INFO - Pathway profiles for level=genome_clusters, data_type=feature_prevalence have 4 samples, 19 genome_clusters, and 5389 features
+2025-05-09 22:53:06,486 - leviathan merge - INFO - Setting gzip compression: 4
+2025-05-09 22:53:06,486 - leviathan merge - INFO - Adding DataArray (prevalence) to DataSet group ('feature', 'genome_clusters')
+2025-05-09 22:53:06,488 - leviathan merge - INFO - Writing output: ../../Analysis/leviathan_output/artifacts/feature.genome_clusters.nc [mode=a]
+2025-05-09 22:53:07,982 - leviathan merge - INFO - Pathway profiles for level=genome_clusters, data_type=feature_prevalence-binary have 4 samples, 19 genome_clusters, and 5389 features
+2025-05-09 22:53:07,982 - leviathan merge - INFO - Setting gzip compression: 4
+2025-05-09 22:53:07,982 - leviathan merge - INFO - Adding DataArray (prevalence-binary) to DataSet group ('feature', 'genome_clusters')
+2025-05-09 22:53:07,983 - leviathan merge - INFO - Writing output: ../../Analysis/leviathan_output/artifacts/feature.genome_clusters.nc [mode=a]
+2025-05-09 22:53:09,453 - leviathan merge - INFO - Pathway profiles for level=genome_clusters, data_type=feature_prevalence-ratio have 4 samples, 19 genome_clusters, and 5389 features
+2025-05-09 22:53:09,453 - leviathan merge - INFO - Setting gzip compression: 4
+2025-05-09 22:53:09,454 - leviathan merge - INFO - Adding DataArray (prevalence-ratio) to DataSet group ('feature', 'genome_clusters')
+2025-05-09 22:53:09,455 - leviathan merge - INFO - Writing output: ../../Analysis/leviathan_output/artifacts/feature.genome_clusters.nc [mode=a]
+2025-05-09 22:53:09,572 - leviathan merge - INFO - Completed merging pathway profiling tables: ../../Analysis/leviathan_output/artifacts/

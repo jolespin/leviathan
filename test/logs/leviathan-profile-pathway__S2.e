@@ -1,0 +1,53 @@
+Command Successful: /home/ubuntu/jolespin-volume/miniforge3/envs/leviathan/bin/salmon quant --meta --libType A --threads 30 --minScoreFraction 0.87 --index ../../Analysis/leviathan_output/references/index/salmon_index -1 ../../Analysis/veba_output/preprocess/S2/output/trimmed_1.fastq.gz -2 ../../Analysis/veba_output/preprocess/S2/output/trimmed_2.fastq.gz --writeUnmappedNames --output ../../Analysis/leviathan_output/profiling/pathway/S2/intermediate
+Removing zero-abundance features: 0it [00:00, ?it/s]Removing zero-abundance features: 5287it [00:00, 52862.36it/s]Removing zero-abundance features: 10704it [00:00, 53624.78it/s]Removing zero-abundance features: 16067it [00:00, 53514.64it/s]Removing zero-abundance features: 21419it [00:00, 51570.93it/s]Removing zero-abundance features: 26587it [00:00, 49249.60it/s]Removing zero-abundance features: 31565it [00:00, 49421.00it/s]Removing zero-abundance features: 33627it [00:00, 50270.51it/s]
+Aggregating feature counts (Splitting abundances across features): 0it [00:00, ?it/s]Aggregating feature counts (Splitting abundances across features): 4081it [00:00, 40807.12it/s]Aggregating feature counts (Splitting abundances across features): 8325it [00:00, 41760.31it/s]Aggregating feature counts (Splitting abundances across features): 10495it [00:00, 41818.16it/s]
+  0%|          | 0/9429 [00:00<?, ?it/s]100%|██████████| 9429/9429 [00:00<00:00, 1505905.58it/s]
+Calculating pathway coverage: S1__BINETTE__P.1__bin_210:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: S1__BINETTE__P.1__bin_210:   2%|▏         | 9/491 [00:00<00:10, 47.90 Pathways/s]Calculating pathway coverage: S1__BINETTE__P.1__bin_210: 100%|██████████| 491/491 [00:00<00:00, 2201.52 Pathways/s]
+Calculating pathway coverage: S1__BINETTE__P.1__bin_291:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: S1__BINETTE__P.1__bin_291:   2%|▏         | 9/491 [00:00<00:06, 76.26 Pathways/s]Calculating pathway coverage: S1__BINETTE__P.1__bin_291: 100%|██████████| 491/491 [00:00<00:00, 2734.77 Pathways/s]
+Calculating pathway coverage: S1__BINETTE__P.1__bin_46:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: S1__BINETTE__P.1__bin_46:   0%|          | 1/491 [00:00<01:19,  6.20 Pathways/s]Calculating pathway coverage: S1__BINETTE__P.1__bin_46: 100%|██████████| 491/491 [00:00<00:00, 1898.64 Pathways/s]
+Calculating pathway coverage: S1__METABAT2__E.1__bin.1:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: S1__METABAT2__E.1__bin.1:   2%|▏         | 9/491 [00:00<00:06, 76.18 Pathways/s]Calculating pathway coverage: S1__METABAT2__E.1__bin.1: 100%|██████████| 491/491 [00:00<00:00, 2801.81 Pathways/s]
+Calculating pathway coverage: S2__BINETTE__P.1__bin_126:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: S2__BINETTE__P.1__bin_126:   0%|          | 1/491 [00:00<01:14,  6.54 Pathways/s]Calculating pathway coverage: S2__BINETTE__P.1__bin_126: 100%|██████████| 491/491 [00:00<00:00, 2112.62 Pathways/s]
+Calculating pathway coverage: S2__BINETTE__P.1__bin_35:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: S2__BINETTE__P.1__bin_35:   2%|▏         | 9/491 [00:00<00:09, 49.58 Pathways/s]Calculating pathway coverage: S2__BINETTE__P.1__bin_35: 100%|██████████| 491/491 [00:00<00:00, 2019.87 Pathways/s]
+Calculating pathway coverage: S2__BINETTE__P.6__bin_94:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: S2__BINETTE__P.6__bin_94:   2%|▏         | 9/491 [00:00<00:06, 75.50 Pathways/s]Calculating pathway coverage: S2__BINETTE__P.6__bin_94: 100%|██████████| 491/491 [00:00<00:00, 2688.78 Pathways/s]
+Calculating pathway coverage: S2__METABAT2__E.1__bin.2:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: S2__METABAT2__E.1__bin.2:   0%|          | 1/491 [00:00<01:16,  6.44 Pathways/s]Calculating pathway coverage: S2__METABAT2__E.1__bin.2: 100%|██████████| 491/491 [00:00<00:00, 1982.13 Pathways/s]
+Calculating pathway coverage: S3__BINETTE__P.1__bin_28:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: S3__BINETTE__P.1__bin_28: 100%|██████████| 491/491 [00:00<00:00, 572533.57 Pathways/s]
+Calculating pathway coverage: S3__BINETTE__P.2__bin_20:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: S3__BINETTE__P.2__bin_20: 100%|██████████| 491/491 [00:00<00:00, 859517.22 Pathways/s]
+Calculating pathway coverage: S3__BINETTE__P.3__bin_43:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: S3__BINETTE__P.3__bin_43: 100%|██████████| 491/491 [00:00<00:00, 1146661.06 Pathways/s]
+Calculating pathway coverage: S4__BINETTE__P.1__bin_320:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: S4__BINETTE__P.1__bin_320: 100%|██████████| 491/491 [00:00<00:00, 263519.29 Pathways/s]
+Calculating pathway coverage: S4__BINETTE__P.1__bin_39:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: S4__BINETTE__P.1__bin_39:   2%|▏         | 9/491 [00:00<00:06, 75.03 Pathways/s]Calculating pathway coverage: S4__BINETTE__P.1__bin_39:  86%|████████▌ | 423/491 [00:00<00:00, 2172.96 Pathways/s]Calculating pathway coverage: S4__BINETTE__P.1__bin_39: 100%|██████████| 491/491 [00:00<00:00, 2088.76 Pathways/s]
+Calculating pathway coverage: S4__BINETTE__P.1__bin_652:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: S4__BINETTE__P.1__bin_652:   2%|▏         | 9/491 [00:00<00:06, 74.04 Pathways/s]Calculating pathway coverage: S4__BINETTE__P.1__bin_652: 100%|██████████| 491/491 [00:00<00:00, 3328.09 Pathways/s]
+Calculating pathway coverage: S4__METABAT2__E.1__bin.1:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: S4__METABAT2__E.1__bin.1: 100%|██████████| 491/491 [00:00<00:00, 5335.31 Pathways/s]
+Calculating pathway coverage: ESLC-a2a3ed2541a4e0cbd4acd3a0c5b8853c:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: ESLC-a2a3ed2541a4e0cbd4acd3a0c5b8853c:   0%|          | 1/491 [00:00<01:18,  6.21 Pathways/s]Calculating pathway coverage: ESLC-a2a3ed2541a4e0cbd4acd3a0c5b8853c:  74%|███████▎  | 362/491 [00:00<00:00, 1700.50 Pathways/s]Calculating pathway coverage: ESLC-a2a3ed2541a4e0cbd4acd3a0c5b8853c: 100%|██████████| 491/491 [00:00<00:00, 1776.05 Pathways/s]
+Calculating pathway coverage: ESLC-c3b8ceb5683f66c621a0ba3600eef6e1:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: ESLC-c3b8ceb5683f66c621a0ba3600eef6e1: 100%|██████████| 491/491 [00:00<00:00, 4964.52 Pathways/s]
+Calculating pathway coverage: PSLC-17cb5194780e6b4058b2a99bc6353405:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: PSLC-17cb5194780e6b4058b2a99bc6353405:   0%|          | 1/491 [00:00<01:16,  6.44 Pathways/s]Calculating pathway coverage: PSLC-17cb5194780e6b4058b2a99bc6353405: 100%|██████████| 491/491 [00:00<00:00, 2264.80 Pathways/s]
+Calculating pathway coverage: PSLC-4eb3c98e3200dc634dcb265d6d108f74:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: PSLC-4eb3c98e3200dc634dcb265d6d108f74: 100%|██████████| 491/491 [00:00<00:00, 236061.81 Pathways/s]
+Calculating pathway coverage: PSLC-53fee7e73822dd3d6ec2ba276d55ae77:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: PSLC-53fee7e73822dd3d6ec2ba276d55ae77: 100%|██████████| 491/491 [00:00<00:00, 946416.94 Pathways/s]
+Calculating pathway coverage: PSLC-60c92043daf1cd37a2f8701fa8044766:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: PSLC-60c92043daf1cd37a2f8701fa8044766:   2%|▏         | 9/491 [00:00<00:06, 74.86 Pathways/s]Calculating pathway coverage: PSLC-60c92043daf1cd37a2f8701fa8044766:  24%|██▎       | 116/491 [00:00<00:00, 614.73 Pathways/s]Calculating pathway coverage: PSLC-60c92043daf1cd37a2f8701fa8044766: 100%|██████████| 491/491 [00:00<00:00, 1860.18 Pathways/s]
+Calculating pathway coverage: PSLC-9ba586d7dfe48f418bae0b8e6be27520:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: PSLC-9ba586d7dfe48f418bae0b8e6be27520:   2%|▏         | 9/491 [00:00<00:06, 69.99 Pathways/s]Calculating pathway coverage: PSLC-9ba586d7dfe48f418bae0b8e6be27520: 100%|██████████| 491/491 [00:00<00:00, 2724.11 Pathways/s]
+Calculating pathway coverage: PSLC-a21464940921e1aa86e8e071d918b264:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: PSLC-a21464940921e1aa86e8e071d918b264: 100%|██████████| 491/491 [00:00<00:00, 554348.12 Pathways/s]
+Calculating pathway coverage: PSLC-aef16b5a566c4b0f77d209912063e2d8:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: PSLC-aef16b5a566c4b0f77d209912063e2d8:   0%|          | 1/491 [00:00<01:18,  6.23 Pathways/s]Calculating pathway coverage: PSLC-aef16b5a566c4b0f77d209912063e2d8: 100%|██████████| 491/491 [00:00<00:00, 1997.99 Pathways/s]
+Calculating pathway coverage: PSLC-c16779c4156eaffb29ca82f5e2600197:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: PSLC-c16779c4156eaffb29ca82f5e2600197:   2%|▏         | 9/491 [00:00<00:06, 71.11 Pathways/s]Calculating pathway coverage: PSLC-c16779c4156eaffb29ca82f5e2600197: 100%|██████████| 491/491 [00:00<00:00, 2518.92 Pathways/s]
+Calculating pathway coverage: PSLC-db89655f50549f58412f19c42ede8fd1:   0%|          | 0/491 [00:00<?, ? Pathways/s]Calculating pathway coverage: PSLC-db89655f50549f58412f19c42ede8fd1: 100%|██████████| 491/491 [00:00<00:00, 847839.96 Pathways/s]
+	Command being timed: "leviathan-profile-pathway.py -1 ../../Analysis/veba_output/preprocess/S2/output/trimmed_1.fastq.gz -2 ../../Analysis/veba_output/preprocess/S2/output/trimmed_2.fastq.gz -n S2 -d ../../Analysis/leviathan_output/references/index/ -p=-1 -o ../../Analysis/leviathan_output/profiling/pathway/"
+	User time (seconds): 64.08
+	System time (seconds): 4.93
+	Percent of CPU this job got: 338%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:20.40
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2039224
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 666
+	Minor (reclaiming a frame) page faults: 623354
+	Voluntary context switches: 156694
+	Involuntary context switches: 2885208
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 70960
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

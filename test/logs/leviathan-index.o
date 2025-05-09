@@ -1,0 +1,60 @@
+2025-05-09 21:39:08,748 - leviathan index - INFO - Command: ['/home/ubuntu/jolespin-volume/miniforge3/envs/leviathan/bin/leviathan-index.py', '-f', '../../Analysis/leviathan_output/references/cds.fasta.gz', '-m', '../../Analysis/leviathan_output/references/feature_mapping.tsv.gz', '-g', '../../Analysis/leviathan_output/references/genomes.tsv.gz', '-d', '../../Analysis/leviathan_output/references/index/', '-p=-1', '--pathway_database', '/home/ubuntu/jolespin-volume/s3/newatlantis-raw-veba-db-prod/KEGG/v2024.11.11/KEGG-Pathway-Profiler/database.pkl.gz']
+2025-05-09 21:39:08,748 - leviathan index - INFO - Setting --n_jobs to maximum threads 30
+2025-05-09 21:39:08,749 - leviathan index - INFO - Database provided: /home/ubuntu/jolespin-volume/s3/newatlantis-raw-veba-db-prod/KEGG/v2024.11.11/KEGG-Pathway-Profiler/database.pkl.gz
+2025-05-09 21:39:08,749 - leviathan index - INFO - Setting up config
+2025-05-09 21:39:08,749 - leviathan index - INFO - Processing and checking input files
+Peak memory usage for process_genomic_databases_and_check_inputs: 164.33 B
+2025-05-09 21:39:09,356 - leviathan index - INFO - Pathway database provided and copying to index: /home/ubuntu/jolespin-volume/s3/newatlantis-raw-veba-db-prod/KEGG/v2024.11.11/KEGG-Pathway-Profiler/database.pkl.gz
+2025-05-09 21:39:10,068 - leviathan index - INFO - Number of features from data: 5398 [Exclusive: 4521]
+2025-05-09 21:39:10,068 - leviathan index - INFO - Number of features from pathways: 2747 [Exclusive: 1870]
+2025-05-09 21:39:10,068 - leviathan index - INFO - Number of features overlapping between data and pathways: 877
+2025-05-09 21:39:10,068 - leviathan index - INFO - Writing config and database files
+2025-05-09 21:39:10,330 - leviathan index - INFO - [salmon_indexer] running command: /home/ubuntu/jolespin-volume/miniforge3/envs/leviathan/bin/salmon index --keepDuplicates --threads 30 --transcripts ../../Analysis/leviathan_output/references/cds.fasta.gz --index ../../Analysis/leviathan_output/references/index/salmon_index
+2025-05-09 21:39:56,535 - leviathan index - INFO - [salmon_indexer] duration: 46.20466136932373
+2025-05-09 21:39:56,535 - leviathan index - INFO - [salmon_indexer] peak memory: 169.65 B
+2025-05-09 21:39:56,535 - leviathan index - INFO - [salmon_indexer] dumping stdout, stderr, and return code: ../../Analysis/leviathan_output/references/index/logs
+2025-05-09 21:39:56,536 - leviathan index - INFO - [salmon_indexer] checking return code status: 0
+2025-05-09 21:39:56,536 - leviathan index - INFO - Writing genome filepaths for Sylph
+2025-05-09 21:39:56,536 - leviathan index - INFO - Running Sylph genome sketcher
+2025-05-09 21:39:56,536 - leviathan index - INFO - [sylph_genomes_sketcher] running command: /home/ubuntu/jolespin-volume/miniforge3/envs/leviathan/bin/sylph sketch -t 30 --gl ../../Analysis/leviathan_output/references/index/tmp/genome_filepaths.list -o ../../Analysis/leviathan_output/references/index/database/genomes -k 31 --min-spacing 30 -c 200
+2025-05-09 21:39:56,746 - leviathan index - INFO - [sylph_genomes_sketcher] duration: 0.20957517623901367
+2025-05-09 21:39:56,746 - leviathan index - INFO - [sylph_genomes_sketcher] peak memory: 164.57 B
+2025-05-09 21:39:56,746 - leviathan index - INFO - [sylph_genomes_sketcher] dumping stdout, stderr, and return code: ../../Analysis/leviathan_output/references/index/logs
+2025-05-09 21:39:56,746 - leviathan index - INFO - [sylph_genomes_sketcher] checking return code status: 0
+2025-05-09 21:39:56,746 - leviathan index - INFO - Calculating md5 hashes: ../../Analysis/leviathan_output/references/index/md5hashes.json
+2025-05-09 21:39:57,004 - leviathan index - INFO - Completed building leviathan index: ../../Analysis/leviathan_output/references/index/
+2025-05-09 21:39:57,004 - leviathan index - INFO - Directory size of leviathan index: 159.42 MB
+2025-05-09 21:39:57,005 - leviathan index - INFO - Directory structure of leviathan index:
+index/
+|__ config.json
+|__ database/
+|   |__ gene_to_data.pkl.gz
+|   |__ genome_to_data.pkl.gz
+|   |__ genomes.syldb
+|   |__ pathway_to_data.pkl.gz
+|__ logs/
+|   |__ salmon_indexer.e
+|   |__ salmon_indexer.o
+|   |__ salmon_indexer.returncode
+|   |__ sylph_genomes_sketcher.e
+|   |__ sylph_genomes_sketcher.o
+|   |__ sylph_genomes_sketcher.returncode
+|__ md5hashes.json
+|__ salmon_index/
+|   |__ complete_ref_lens.bin
+|   |__ ctable.bin
+|   |__ ctg_offsets.bin
+|   |__ duplicate_clusters.tsv
+|   |__ info.json
+|   |__ mphf.bin
+|   |__ pos.bin
+|   |__ pre_indexing.log
+|   |__ rank.bin
+|   |__ ref_indexing.log
+|   |__ refAccumLengths.bin
+|   |__ reflengths.bin
+|   |__ refseq.bin
+|   |__ seq.bin
+|   |__ versionInfo.json
+|__ tmp/
+    |__ genome_filepaths.list

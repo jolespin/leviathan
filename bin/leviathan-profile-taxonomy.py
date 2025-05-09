@@ -200,7 +200,7 @@ def main(args=None):
     # Reformat taxonomic abundance tables
     # ===================================
     genome_abundance_filepath = os.path.join(output_directory, "output", f"taxonomic_abundance.genomes.{opts.output_format}")
-    if not opts.output_format != "parquet":
+    if opts.output_format != "parquet":
         genome_abundance_filepath += ".gz"
 
     
@@ -217,7 +217,7 @@ def main(args=None):
     
     if config["contains_genome_cluster_mapping"]:
         genomecluster_abundance_filepath = os.path.join(output_directory, "output", f"taxonomic_abundance.genome_clusters.{opts.output_format}")
-        if not opts.output_format != "parquet":
+        if opts.output_format != "parquet":
             genomecluster_abundance_filepath += ".gz"
         logger.info(f"Aggregating taxonomic abundance for genome clusters: {genomecluster_abundance_filepath}")
         genomecluster_to_abundance = genome_to_abundance["abundance"].groupby(genome_to_genomecluster).sum()
@@ -232,7 +232,7 @@ def main(args=None):
     # Reformat sequence abundance tables
     # ===================================
     genome_abundance_filepath = os.path.join(output_directory, "output", f"sequence_abundance.genomes.{opts.output_format}")
-    if not opts.output_format != "parquet":
+    if opts.output_format != "parquet":
         genome_abundance_filepath += ".gz"
 
     
@@ -249,7 +249,7 @@ def main(args=None):
     
     if config["contains_genome_cluster_mapping"]:
         genomecluster_abundance_filepath = os.path.join(output_directory, "output", f"sequence_abundance.genome_clusters.{opts.output_format}")
-        if not opts.output_format != "parquet":
+        if opts.output_format != "parquet":
             genomecluster_abundance_filepath += ".gz"
         logger.info(f"Aggregating sequence abundance for genome clusters: {genomecluster_abundance_filepath}")
         genomecluster_to_abundance = genome_to_abundance["abundance"].groupby(genome_to_genomecluster).sum()

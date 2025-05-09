@@ -188,8 +188,8 @@ def merge_taxonomic_profiling_tables_as_pandas(profiling_directory:str, level="g
         If no files are found in the specified directory.
 
     Files:
-    * taxonomic_abundance.genome_clusters.tsv.gz
-    * taxonomic_abundance.genomes.tsv.gz
+    * taxonomic_abundance.genome_clusters.parquet
+    * taxonomic_abundance.genomes.parquet
     """
     choices = {"genomes", "genome_clusters"}
     if level not in choices:
@@ -199,24 +199,26 @@ def merge_taxonomic_profiling_tables_as_pandas(profiling_directory:str, level="g
 
     # Genomes
     if level == "genomes":
-        filepaths = glob.glob(f"{profiling_directory}/*/output/taxonomic_abundance.genomes.tsv.gz")
+        filepaths = glob.glob(f"{profiling_directory}/*/output/taxonomic_abundance.genomes.parquet")
         if filepaths:
             for filepath in tqdm(filepaths, f"Merging {level}-level taxonomic abundances"):
                 id_sample = filepath.split("/")[-3]
-                output[id_sample] = pd.read_csv(filepath, sep="\t", index_col=0).squeeze("columns")
+                output[id_sample] = pd.read_parquet(filepath).squeeze("columns")
         else:
-            raise FileNotFoundError(f"Could not find any taxonomic_abundance.genomes.tsv.gz files in {profiling_directory}")
+            raise FileNotFoundError(f"Could not find any taxonomic_abundance.genomes.parquet files in {profiling_directory}")
      
     # Genome clusters
     elif level == "genome_clusters":
-        filepaths = glob.glob(f"{profiling_directory}/*/output/taxonomic_abundance.genome_clusters.tsv.gz")
+        filepaths = glob.glob(f"{profiling_directory}/*/output/taxonomic_abundance.genome_clusters.parquet")
         output = dict()
         if filepaths:
             for filepath in tqdm(filepaths, f"Merging {level}-level taxonomic abundances"):
                 id_sample = filepath.split("/")[-3]
-                output[id_sample] = pd.read_csv(filepath, sep="\t", index_col=0).squeeze("columns")
+                # output[id_sample] = pd.read_csv(filepath, sep="\t", index_col=0).squeeze("columns")
+                output[id_sample] = pd.read_parquet(filepath).squeeze("columns")
+
         else:
-            raise FileNotFoundError(f"Could not find any taxonomic_abundance.genome_clusters.tsv.gz files in {profiling_directory}")
+            raise FileNotFoundError(f"Could not find any taxonomic_abundance.genome_clusters.parquet files in {profiling_directory}")
         
     X = pd.DataFrame(output).T
     missing_value_fill=pd.NA

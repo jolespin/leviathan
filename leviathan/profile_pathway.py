@@ -229,16 +229,16 @@ def merge_pathway_profiling_tables_as_pandas(profiling_directory:str, data_type:
     Will raise a ValueError if an invalid combination of arguments is provided, such as level="genome_cluster" and data_type="gene_abundances".
     
     Files:
-    * feature_abundances.genome_clusters.tsv.gz
-    * feature_abundances.genomes.tsv.gz
-    * feature_prevalence-binary.genome_clusters.tsv.gz
-    * feature_prevalence-binary.genomes.tsv.gz
-    * feature_prevalence.genome_clusters.tsv.gz
-    * feature_prevalence.genomes.tsv.gz
-    * feature_prevalence-ratio.genome_clusters.tsv.gz
-    * gene_abundances.genomes.tsv.gz
-    * pathway_abundances.genome_clusters.tsv.gz
-    * pathway_abundances.genomes.tsv.gz
+    * feature_abundances.genome_clusters.parquet
+    * feature_abundances.genomes.parquet
+    * feature_prevalence-binary.genome_clusters.parquet
+    * feature_prevalence-binary.genomes.parquet
+    * feature_prevalence.genome_clusters.parquet
+    * feature_prevalence.genomes.parquet
+    * feature_prevalence-ratio.genome_clusters.parquet
+    * gene_abundances.genomes.parquet
+    * pathway_abundances.genome_clusters.parquet
+    * pathway_abundances.genomes.parquet
     """
 
     check_argument_choice(
@@ -264,7 +264,7 @@ def merge_pathway_profiling_tables_as_pandas(profiling_directory:str, data_type:
         raise ValueError(f"Invalid combination of arguments: level={level}, data_type={data_type}, metric={metric}")
     
     # Merge tables to produce output
-    filepaths = glob.glob(f"{profiling_directory}/*/output/{data_type}.{level}.tsv.gz")
+    filepaths = glob.glob(f"{profiling_directory}/*/output/{data_type}.{level}.parquet")
     if filepaths:
         output = dict()
         # Abundance/Coverage
@@ -279,7 +279,8 @@ def merge_pathway_profiling_tables_as_pandas(profiling_directory:str, data_type:
             description = "Merging {}-level {} {} values".format(level, data_type.replace("_", " "), metric)
             for filepath in tqdm(filepaths, description):
                 id_sample = filepath.split("/")[-3]
-                df = pd.read_csv(filepath, sep="\t", index_col=[0,1])
+                # df = pd.read_csv(filepath, sep="\t", index_col=[0,1])
+                df = pd.read_parquet(filepath)
                 output[id_sample] = df[column]
                 
         # Prevalence
@@ -287,7 +288,8 @@ def merge_pathway_profiling_tables_as_pandas(profiling_directory:str, data_type:
             description = "Merging {}-level {} values".format(level, data_type.replace("_", " "))
             for filepath in tqdm(filepaths, description):
                 id_sample = filepath.split("/")[-3]
-                df = pd.read_csv(filepath, sep="\t", index_col=0)
+                # df = pd.read_csv(filepath, sep="\t", index_col=0)
+                df = pd.read_parquet(filepath)
                 output[id_sample] = df.stack()
         X = pd.DataFrame(output).T
         
@@ -307,7 +309,7 @@ def merge_pathway_profiling_tables_as_pandas(profiling_directory:str, data_type:
         return X
                 
     else:
-        raise FileNotFoundError(f"Could not find any {data_type}.{level}.tsv.gz files in {profiling_directory}")
+        raise FileNotFoundError(f"Could not find any {data_type}.{level}.parquet files in {profiling_directory}")
 
 def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:str, level="genomes", metric="number_of_reads", fillna_with_zeros:bool=False):
     
@@ -337,18 +339,19 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
     Will raise a ValueError if an invalid combination of arguments is provided, such as level="genomes" and data_type="feature_prevalence-ratio".
     
     Files:
-    * feature_abundances.genome_clusters.tsv.gz
-    * feature_abundances.genomes.tsv.gz
-    * feature_prevalence-binary.genome_clusters.tsv.gz
-    * feature_prevalence-binary.genomes.tsv.gz
-    * feature_prevalence.genome_clusters.tsv.gz
-    * feature_prevalence.genomes.tsv.gz
-    * feature_prevalence-ratio.genome_clusters.tsv.gz
-    * pathway_abundances.genome_clusters.tsv.gz
-    * pathway_abundances.genomes.tsv.gz
+    * feature_abundances.genome_clusters.parquet
+    * feature_abundances.genomes.parquet
+    * feature_prevalence-binary.genome_clusters.parquet
+    * feature_prevalence-binary.genomes.parquet
+    * feature_prevalence.genome_clusters.parquet
+    * feature_prevalence.genomes.parquet
+    * feature_prevalence-ratio.genome_clusters.parquet
+    * gene_abundances.genomes.parquet
+    * pathway_abundances.genome_clusters.parquet
+    * pathway_abundances.genomes.parquet
     
     # Not supported: 
-    * gene_abundances.genomes.tsv.gz
+    * gene_abundances.genomes.parquet
 
     """
 
@@ -375,7 +378,7 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
         raise ValueError(f"Invalid combination of arguments: level={level}, data_type={data_type}, metric={metric}")
     
     # Merge tables to produce output
-    filepaths = glob.glob(f"{profiling_directory}/*/output/{data_type}.{level}.tsv.gz")
+    filepaths = glob.glob(f"{profiling_directory}/*/output/{data_type}.{level}.parquet")
     if filepaths:
         output = dict()
         # Abundance/Coverage
@@ -392,7 +395,8 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
             description = "Merging {}-level {} {} values".format(level, data_type.replace("_", " "), metric)
             for filepath in tqdm(filepaths, description):
                 id_sample = filepath.split("/")[-3]
-                df = pd.read_csv(filepath, sep="\t", index_col=[0,1])
+                # df = pd.read_csv(filepath, sep="\t", index_col=[0,1])
+                df = pd.read_parquet(filepath)
                 df = df[column].unstack()
 
                 output[id_sample] = xr.DataArray(data = df.values, coords = [(level, df.index), (variable_label, df.columns)])
@@ -404,7 +408,8 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
             description = "Merging {}-level {} values".format(level, data_type.replace("_", " "))
             for filepath in tqdm(filepaths, description):
                 id_sample = filepath.split("/")[-3]
-                df = pd.read_csv(filepath, sep="\t", index_col=0)
+                # df = pd.read_csv(filepath, sep="\t", index_col=0)
+                df = pd.read_parquet(filepath)
                 variable_label = data_type.split("_")[0] + "s"
                 output[id_sample] = xr.DataArray(data = df.values, coords = [(level, df.index), (variable_label, df.columns)])
         X = xr.concat(output.values(), dim="samples")
@@ -422,5 +427,5 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
         return X
                 
     else:
-        raise FileNotFoundError(f"Could not find any {data_type}.{level}.tsv.gz files in {profiling_directory}")
+        raise FileNotFoundError(f"Could not find any {data_type}.{level}.parquet files in {profiling_directory}")
 

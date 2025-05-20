@@ -78,7 +78,13 @@ def main(args=None):
     parser_salmon_quant = parser.add_argument_group('salmon quant arguments')
     parser_salmon_quant.add_argument("--salmon_executable", type=str, help="salmon executable [Default: $PATH]")
     parser_salmon_quant.add_argument("-m", "--minimum_score_fraction", type=float, default=0.87, help="The fraction of the optimal possible alignment score that a mapping must achieve in order to be considered \"valid\" --- should be in (0,1]. (relaxed: 0.65, strict: 0.87) [Default: 0.87]")
+    parser_salmon_quant.add_argument("--salmon_include_mappings", action="store_true", help="salmon quant| Include mappings")
     parser_salmon_quant.add_argument("--salmon_quant_options", type=str, default="", help="salmon quant| More options (e.g. --arg=1 ) https://salmon.readthedocs.io/en/latest/ [Default: '']")
+
+    # Samtools
+    parser_samtools = parser.add_argument_group('samtools arguments')
+    parser_samtools.add_argument("--samtools_executable", type=str, help="samtools executable [Default: $PATH]")
+    parser_samtools.add_argument("--alignment_format", type=str, choices={"sam", "bam", "sorted.bam"}, default="sorted.bam", help="samtools alignment format [Default: sorted.bam]")
 
     # Features
     parser_features = parser.add_argument_group('Features arguments')
@@ -109,6 +115,14 @@ def main(args=None):
         opts.salmon_executable = os.path.join(bin_directory, "salmon")
     if not os.path.exists(opts.salmon_executable):
         msg = f"salmon executable not doesn't exist: {opts.salmon_executable}"
+        logger.critical(msg)
+        raise FileNotFoundError(msg)
+
+    # * Samtools
+    if not opts.samtools_executable:
+        opts.samtools_executable = os.path.join(bin_directory, "samtools")
+    if not os.path.exists(opts.samtools_executable):
+        msg = f"samtools executable not doesn't exist: {opts.samtools_executable}"
         logger.critical(msg)
         raise FileNotFoundError(msg)
     
@@ -176,12 +190,15 @@ def main(args=None):
         logger=logger,
         log_directory=os.path.join(output_directory, "logs"), 
         salmon_executable=opts.salmon_executable, 
+        samtools_executable=opts.samtools_executable,
         n_jobs=opts.n_jobs, 
         output_directory=os.path.join(output_directory, "intermediate"), 
         index_directory=opts.index_directory,
         forward_reads=opts.forward_reads, 
         reverse_reads=opts.reverse_reads, 
         minimum_score_fraction=opts.minimum_score_fraction, 
+        include_mappings=opts.salmon_include_mappings,
+        alignment_format=opts.alignment_format,
         salmon_quant_options=opts.salmon_quant_options, 
     )
        

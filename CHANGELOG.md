@@ -1,6 +1,6 @@
 #### Daily Change Log:
-* (UNTESTED) [2025.5.18] - Added `--salmon_include_mappings` to `profile-pathway.py` and `run_salmon_quant`
-* (UNTESTED) [2025.5.18] - Added `taxonomic_abundance` and `sequence_abundance` levels to `taxonomic_abundance.*.parquet` files from `leviathan-merge.py`
+* [2025.5.18] - Added `--salmon_include_mappings` to `profile-pathway.py` and `run_salmon_quant`
+* [2025.5.18] - Added `taxonomic_abundance` and `sequence_abundance` levels to `taxonomic_abundances.*.nc` files from `leviathan-merge.py`
 * [2025.5.9] - Added `sequence_abundance.genomes.parquet` and `sequence_abundance.genome_clusters.parquet` to `leviathan-profile-taxonomy.py`
 * [2025.3.13] - Added `-f/--output_format` to `profile-taxonomy.py` and `profile-pathway.py` modules with `parquet` as default but continued support for `.tsv`
 * [2025.3.13] - Dropped gene_abundance merging because files are too big, sparse, and probably not that useful...

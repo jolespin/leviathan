@@ -122,8 +122,10 @@ Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 Sag
 ### Merged
 
 ##### Taxonomy profiles
- * `taxonomic_abundance.genome_clusters.parquet` - Genome-level taxonomic relative abundance profiles for all samples
- * `taxonomic_abundance.genomes.parquet` - Genome-level taxonomic relative abundance profiles for all samples
+Sequence abundances can be used to determine the proportion of reads that were detected in database.
+
+ * `taxonomic_abundance.genome_clusters.nc` - Genome-level taxonomic and sequence relative abundance profiles for all samples
+ * `taxonomic_abundance.genomes.nc` - Genome-level taxonomic and sequence relative abundance profiles for all samples.
 
 #### Functional profiles
 ##### Feature
@@ -134,6 +136,39 @@ Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 Sag
  * `pathway.genome_clusters.nc` - Pathway abundances (number of reads, tpm) and coverages of genome clusters for all samples
  * `pathway.genomes.nc` - Pathway abundances (number of reads, tpm) and coverages of genomes for all samples
 
+## Reading NetCDF files with Xarray
+
+```python
+import xarray as xr
+
+# Taxonomic abundances for genomes
+ds_taxonomic = xr.open_dataset("leviathan_output/artifacts/taxonomic_abundances.genomes.nc")
+ds_taxonomic
+
+<xarray.Dataset> Size: 3kB
+Dimensions:               (samples: 4, genomes: 23)
+Coordinates:
+  * samples               (samples) <U2 32B 'S3' 'S4' 'S1' 'S2'
+  * genomes               (genomes) <U26 2kB 'S1__BINETTE__P.1__bin_210' ... ...
+Data variables:
+    taxonomic_abundances  (samples, genomes) float32 368B ...
+    sequence_abundances   (samples, genomes) float32 368B ...
+
+# Pathway abundances and coverage for genome clusters
+ds_pathway = xr.open_dataset("leviathan_output/artifacts/pathway.genome_clusters.nc")
+ds_pathway
+<xarray.Dataset> Size: 276kB
+Dimensions:          (genome_clusters: 19, pathways: 292, samples: 4)
+Coordinates:
+  * genome_clusters  (genome_clusters) <U37 3kB 'ESLC-a2a3ed2541a4e0cbd4acd3a...
+  * pathways         (pathways) <U6 7kB 'M00001' 'M00002' ... 'M00982' 'M00983'
+  * samples          (samples) <U2 32B 'S3' 'S4' 'S1' 'S2'
+Data variables:
+    number_of_reads  (samples, genome_clusters, pathways) float32 89kB ...
+    tpm              (samples, genome_clusters, pathways) float32 89kB ...
+    coverage         (samples, genome_clusters, pathways) float32 89kB ...
+
+```
 
 ## Pathway Databases
 Currently, the only pathway database supported for pathway coverage calculations is the KEGG module database using KEGG orthologs as features.  This database can be pre-built using [KEGG Pathway Profiler](https://github.com/jolespin/kegg_pathway_profiler) or built with `leviathan index` if KEGG orthologs are used as features.  

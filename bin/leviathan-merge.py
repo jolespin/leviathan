@@ -16,7 +16,7 @@ from pyexeggutor import (
 )
 
 from leviathan.profile_taxonomy import (
-    merge_taxonomic_profiling_tables_as_pandas,
+    merge_taxonomic_profiling_tables_as_xarray,
 )
 from leviathan.profile_pathway import (
     merge_pathway_profiling_tables_as_xarray,
@@ -48,7 +48,6 @@ def main(args=None):
     parser.add_argument("-z","--fillna_with_zeros", action="store_true", help = "Fill missing values with 0.  This will take a lot longer to write to disk.")
     parser.add_argument("-e", "--xarray_engine", type=str, choices={"h5netcdf", "netcdf4"}, default="h5netcdf", help = "Xarray backend engine [Default: h5netcdf]")
     parser.add_argument("-c", "--xarray_compression_level", type=int, choices=set(range(0, 10)), default=4, help = "netCDF gzip compression level. Use 0 for no compression. [Default: 4]")
-    parser.add_argument("--no_transpose_taxonomic_profiling", action="store_true", help = "Do not transpose taxonomic profiling tables.  If you do not transpose them, it will use more time/memory to read/write")
     
     # ------------------
     # Pending options
@@ -117,29 +116,38 @@ def main(args=None):
             logger.info(f"Merging taxonomic profiles for level={level}")
 
             try:
-                X = merge_taxonomic_profiling_tables_as_pandas(
+                # Filepath
+                filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundances.{level}.nc")
+
+                X = merge_taxonomic_profiling_tables_as_xarray(
                     profiling_directory=opts.taxonomic_profiling_directory, 
                     level=level, 
                     fillna_with_zeros=bool(opts.fillna_with_zeros), 
-                    sparse=False,
                 )
-                
-                if X.empty:
-                    raise EmptyDataError(f"Merging taxonomic profiles for level={level} in {opts.taxonomic_profiling_directory} resulted in empty pd.DataFrame")
-                
-                if not opts.no_transpose_taxonomic_profiling:
-                    logger.info(f"Transposing taxonomic profiling tables for level={level}")
-                    X = X.T
-                    
-                logger.info(f"Taxonomic profiles for level={level} have {X.shape[0]} rows and {X.shape[1]} columns")
+                n = X.sizes["samples"]
+                m = X.sizes[level]
 
-                filepath = os.path.join(taxonomic_profiling_output_directory, f"taxonomic_abundance.{level}.parquet")
-                logger.info(f"Writing output: {filepath}")
-                X.to_parquet(filepath, index=True)
+                error_msg = f"Merging taxonomic profiles for level={level} in {opts.taxonomic_profiling_directory} resulted in empty xr.DataArray"
+                info_msg = f"Taxonomy profiles for level={level} have {n} samples, {m} {level}"
+
+                if len(X) == 0:
+                    raise EmptyDataError(error_msg)
+                    
+                logger.info(info_msg)
+
+                if opts.xarray_compression_level:
+                    logger.info(f"Setting gzip compression: {opts.xarray_compression_level}")
+                    X.encoding.update({"compression": "gzip", "compression_opts": opts.xarray_compression_level})
+                
+                # logger.info(f"Adding DataArray ({name}) to DataSet group {group}")
+                # group_to_dataset[group][name] = X
+                mode = "w"
+                logger.info(f"Writing output: {filepath} [mode={mode}]")
+                X.to_netcdf(filepath, engine=opts.xarray_engine, mode=mode)
                 del X
      
             except Exception as e:
-                logger.info(f"No level={level} files found in {opts.taxonomic_profiling_directory}: {e}")
+                logger.warning(f"No level={level} files found in {opts.taxonomic_profiling_directory}: {e}")
                 
         logger.info(f"Completed merging taxonomic profiling tables: {taxonomic_profiling_output_directory}")
 
@@ -203,7 +211,7 @@ def main(args=None):
                         error_msg = f"Merging pathway profiles for level={level}, data_type={data_type}, metric={metric} in {opts.pathway_profiling_directory} resulted in empty xr.DataArray"
                         info_msg = f"Pathway profiles for level={level}, data_type={data_type}, metric={metric} have {X.shape[0]} samples, {X.shape[1]} {level}, and {X.shape[2]} features"
 
-                    if X.size == 0:
+                    if len(X) == 0:
                         raise EmptyDataError(error_msg)
                     
                     logger.info(info_msg)

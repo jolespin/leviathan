@@ -2,6 +2,7 @@
 import sys,os, argparse, warnings, subprocess, glob
 from collections import defaultdict
 import pandas as pd
+import xarray as xr
 # from pandas.errors import EmptyDataError
 # from Bio.SeqIO.FastaIO import SimpleFastaParser
 from tqdm import tqdm

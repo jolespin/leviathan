@@ -25,8 +25,8 @@ __program__ = os.path.split(sys.argv[0])[-1]
 
 
 # Run Salmon quant (salmon quant --meta --libType A --index ${INDEX} -1 ${R1} -2 ${R2} --threads ${N_JOBS}  --minScoreFraction=0.87 --writeUnmappedNames)
-def run_salmon_quant(logger, log_directory, salmon_executable, n_jobs, output_directory, index_directory, forward_reads, reverse_reads, minimum_score_fraction, salmon_quant_options):
-    cmd = RunShellCommand(
+def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executable, n_jobs, output_directory, index_directory, forward_reads, reverse_reads, minimum_score_fraction, include_mappings, alignment_format, salmon_quant_options):
+    arguments = dict(
         command=[
             salmon_executable,
             "quant",
@@ -44,7 +44,7 @@ def run_salmon_quant(logger, log_directory, salmon_executable, n_jobs, output_di
             "-2",
             reverse_reads,
             "--writeUnmappedNames",
-            salmon_quant_options,
+            salmon_quant_options if salmon_quant_options else "", 
             "--output",
             output_directory,
             
@@ -57,6 +57,51 @@ def run_salmon_quant(logger, log_directory, salmon_executable, n_jobs, output_di
         validate_output_filepaths=[
             os.path.join(output_directory, "quant.sf"),
         ],
+    )
+    if include_mappings:
+        if alignment_format == "sam":
+            arguments["command"] += [
+                "--writeMappings",
+                ">",
+                os.path.join(output_directory, "mapped.sam"),
+            ]
+            arguments["validate_output_filepaths"].append(os.path.join(output_directory, "mapped.sam"))
+            
+        elif alignment_format == "bam":
+            arguments["command"] += [
+                "--writeMappings",
+                "|",
+                samtools_executable,
+                "view",
+                "-b",
+                "-h",
+                "-o",
+                os.path.join(output_directory, "mapped.bam"),
+            ]
+            arguments["validate_output_filepaths"].append(os.path.join(output_directory, "mapped.bam"))
+
+        elif alignment_format == "sorted.bam":
+            arguments["command"] += [
+                "--writeMappings",
+                "|",
+                samtools_executable,
+                "view",
+                "-b",
+                "-h",
+                "|",
+                samtools_executable,
+                "sort",
+                "-@",
+                n_jobs,
+                "-o",
+                os.path.join(output_directory, "mapped.sorted.bam"),
+                "-",
+            ]
+            arguments["validate_output_filepaths"].append(os.path.join(output_directory, "mapped.sorted.bam"))
+
+    
+    cmd = RunShellCommand(
+        **arguments,
     )
     
     # Run

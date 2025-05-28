@@ -1,2 +1,3 @@
 salmon
 sylph
+samtools

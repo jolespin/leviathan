@@ -76,7 +76,7 @@ def main(args=None):
 
     parser_sylph_profile = parser.add_argument_group('Sylph profile arguments')
     parser_sylph_profile.add_argument("--sylph_profile_minimum_ani", type=float, default=95, help="Sylph profile | Minimum adjusted ANI to consider (0-100). [Default: 95]")
-    parser_sylph_profile.add_argument("--sylph_profile_minimum_number_kmers", type=int, default=20, help="Sylph profile | Exclude genomes with less than this number of sampled k-mers.  Default is 50 in Sylph but lowering to 20 accounts for viruses and small CPR genomes. [Default: 20]")
+    parser_sylph_profile.add_argument("--sylph_profile_minimum_number_kmers", type=int, default=50, help="Sylph profile | Exclude genomes with less than this number of sampled k-mers.  Default is 50 in Sylph but lowering to 20 accounts for viruses and small CPR genomes. [Default: 50]")
     parser_sylph_profile.add_argument("--sylph_profile_minimum_count_correct", type=int, default=3, help="Sylph profile | Minimum k-mer multiplicity needed for coverage correction. Higher values gives more precision but lower sensitivity [Default: 3]")
     parser_sylph_profile.add_argument("--sylph_profile_options", type=str, default="", help="Sylph profile | More options for `sylph profile` (e.g. --arg 1 ) [Default: '']")
 
@@ -98,7 +98,7 @@ def main(args=None):
         opts.n_jobs = cpu_count()
         logger.info(f"Setting --n_jobs to maximum threads {opts.n_jobs}")
 
-    assert opts.n_jobs >= 1, "--n_jobs must be ≥ 1.  To select all available threads, use -1."
+    assert opts.n_jobs >= 1, "--n_jobs must be ??? 1.  To select all available threads, use -1."
     
     # Executables
     # * Sylph

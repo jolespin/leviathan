@@ -1,4 +1,5 @@
 #### Daily Change Log:
+* [2025.6.27] - Updated `--sylph_profile_minimum_number_kmers 20` to `--sylph_profile_minimum_number_kmers 50`
 * [2025.5.18] - Added `--salmon_include_mappings` to `profile-pathway.py` and `run_salmon_quant`
 * [2025.5.18] - Added `taxonomic_abundance` and `sequence_abundance` levels to `taxonomic_abundances.*.nc` files from `leviathan-merge.py`
 * [2025.5.9] - Added `sequence_abundance.genomes.parquet` and `sequence_abundance.genome_clusters.parquet` to `leviathan-profile-taxonomy.py`

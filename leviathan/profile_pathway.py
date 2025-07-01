@@ -48,6 +48,7 @@ def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executab
             "--output",
             output_directory,
             
+            
         ],
         name="salmon_quant",
         validate_input_filepaths=[
@@ -55,7 +56,7 @@ def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executab
             reverse_reads,
         ],
         validate_output_filepaths=[
-            os.path.join(output_directory, "quant.sf"),
+            os.path.join(output_directory, "quant.sf.gz"),
         ],
     )
     if include_mappings:
@@ -99,6 +100,12 @@ def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executab
             ]
             arguments["validate_output_filepaths"].append(os.path.join(output_directory, "mapped.sorted.bam"))
 
+    # Gzip quant.sf
+    arguments["command"] += [
+        "&&",
+        "gzip",
+        os.path.join(output_directory, "quant.sf"),
+    ]
     
     cmd = RunShellCommand(
         **arguments,

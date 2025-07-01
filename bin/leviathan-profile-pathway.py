@@ -213,7 +213,7 @@ def main(args=None):
         gene_abundance_filepath += ".gz"
     logger.info(f"[level={level}] Reformatting gene abundance: {gene_abundance_filepath}")
     
-    df_quant = pd.read_csv(os.path.join(output_directory, "intermediate", "quant.sf"), sep="\t", index_col=0)
+    df_quant = pd.read_csv(os.path.join(output_directory, "intermediate", "quant.sf.gz"), sep="\t", index_col=0)
     df_gene_abundance = reformat_gene_abundance(df_quant, gene_to_data)
     if opts.output_format == "parquet":
         df_gene_abundance.to_parquet(gene_abundance_filepath, index=True)

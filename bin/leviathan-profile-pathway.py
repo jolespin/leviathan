@@ -79,6 +79,8 @@ def main(args=None):
     parser_salmon_quant.add_argument("--salmon_executable", type=str, help="salmon executable [Default: $PATH]")
     parser_salmon_quant.add_argument("-m", "--minimum_score_fraction", type=float, default=0.87, help="The fraction of the optimal possible alignment score that a mapping must achieve in order to be considered \"valid\" --- should be in (0,1]. (relaxed: 0.65, strict: 0.87) [Default: 0.87]")
     parser_salmon_quant.add_argument("--salmon_include_mappings", action="store_true", help="salmon quant| Include mappings")
+    parser_salmon_quant.add_argument("--salmon_gzip", action="store_true", help="salmon quant | Gzip quant.sf")
+
     parser_salmon_quant.add_argument("--salmon_quant_options", type=str, default="", help="salmon quant| More options (e.g. --arg=1 ) https://salmon.readthedocs.io/en/latest/ [Default: '']")
 
     # Samtools
@@ -199,6 +201,7 @@ def main(args=None):
         minimum_score_fraction=opts.minimum_score_fraction, 
         include_mappings=opts.salmon_include_mappings,
         alignment_format=opts.alignment_format,
+        salmon_gzip=opts.salmon_gzip,
         salmon_quant_options=opts.salmon_quant_options, 
     )
        
@@ -213,7 +216,10 @@ def main(args=None):
         gene_abundance_filepath += ".gz"
     logger.info(f"[level={level}] Reformatting gene abundance: {gene_abundance_filepath}")
     
-    df_quant = pd.read_csv(os.path.join(output_directory, "intermediate", "quant.sf.gz"), sep="\t", index_col=0)
+    filepath_quantsf = os.path.join(output_directory, "intermediate", "quant.sf")
+    if opts.salmon_gzip:
+        filepath_quantsf += ".gz"
+    df_quant = pd.read_csv(filepath_quantsf, sep="\t", index_col=0)
     df_gene_abundance = reformat_gene_abundance(df_quant, gene_to_data)
     if opts.output_format == "parquet":
         df_gene_abundance.to_parquet(gene_abundance_filepath, index=True)

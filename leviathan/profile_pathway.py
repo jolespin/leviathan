@@ -25,7 +25,7 @@ __program__ = os.path.split(sys.argv[0])[-1]
 
 
 # Run Salmon quant (salmon quant --meta --libType A --index ${INDEX} -1 ${R1} -2 ${R2} --threads ${N_JOBS}  --minScoreFraction=0.87 --writeUnmappedNames)
-def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executable, n_jobs, output_directory, index_directory, forward_reads, reverse_reads, minimum_score_fraction, include_mappings, alignment_format, salmon_quant_options):
+def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executable, n_jobs, output_directory, index_directory, forward_reads, reverse_reads, minimum_score_fraction, include_mappings, alignment_format, salmon_gzip, salmon_quant_options):
     arguments = dict(
         command=[
             salmon_executable,
@@ -47,8 +47,6 @@ def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executab
             salmon_quant_options if salmon_quant_options else "", 
             "--output",
             output_directory,
-            
-            
         ],
         name="salmon_quant",
         validate_input_filepaths=[
@@ -56,7 +54,7 @@ def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executab
             reverse_reads,
         ],
         validate_output_filepaths=[
-            os.path.join(output_directory, "quant.sf.gz"),
+            os.path.join(output_directory, "quant.sf.gz") if salmon_gzip else os.path.join(output_directory, "quant.sf"),
         ],
     )
     if include_mappings:
@@ -99,13 +97,22 @@ def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executab
                 "-",
             ]
             arguments["validate_output_filepaths"].append(os.path.join(output_directory, "mapped.sorted.bam"))
-
-    # Gzip quant.sf
+            
+    # Remove unmapped reads
     arguments["command"] += [
         "&&",
-        "gzip",
-        os.path.join(output_directory, "quant.sf"),
+        "rm",
+        "-v",
+        os.path.join(output_directory, "aux_info", "unmapped_names.txt"),
     ]
+        
+    # Gzip quant.sf
+    if salmon_gzip:
+        arguments["command"] += [
+            "&&",
+            "gzip",
+            os.path.join(output_directory, "quant.sf"),
+        ]
     
     cmd = RunShellCommand(
         **arguments,

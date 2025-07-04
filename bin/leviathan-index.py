@@ -69,6 +69,7 @@ def main(args=None):
     # Utilities
     parser_utility = parser.add_argument_group('Utility arguments')
     parser_utility.add_argument("-p","--n_jobs", type=int, default=1,  help = "Number of threads to use.  Use -1 for all available. [Default: 1]")
+    parser_utility.add_argument("--no_check", action="store_true",  help = "Don't check to ensure --genomes set equals --feature_mapping genome set")
 
     # Salmon
     parser_salmon_index = parser.add_argument_group('salmon index arguments')
@@ -99,6 +100,32 @@ def main(args=None):
 
     # Commands
     logger.info(f"Command: {sys.argv}")
+
+    # Checks
+    if not opts.no_check:
+        genomes_with_filepaths = set()
+        with open_file_reader(opts.genomes) as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    id_genome, filepath = line.split("\t")
+                    genomes_with_filepaths.add(id_genome)
+
+        genomes_with_features = set()
+        with open_file_reader(opts.feature_mapping) as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    fields = line.split("\t")
+                    id_genome = fields[2]
+                    genomes_with_features.add(id_genome)
+        if genomes_with_filepaths == genomes_with_features:
+            msg = "All genomes in --genomes are in --feature_mapping"
+            logger.info(msg)
+        else:
+            msg = f"{len(genomes_with_filepaths) - len(genomes_with_features)} genomes in --genomes are missing from --feature_mapping"
+            logger.critical(msg)
+            parser.error(msg)
      
     # Post-processing argument dependencies
     if opts.update_with_genomes:
@@ -309,6 +336,7 @@ def main(args=None):
     logger.info(f"Completed building leviathan index: {opts.index_directory}")
     logger.info(f"Directory size of leviathan index: {format_bytes(get_directory_size(opts.index_directory))}")
     logger.info(f"Directory structure of leviathan index:\n{get_directory_tree(opts.index_directory, ascii=True)}")
+    logger.info(f"Finished running leviathan-index:{opts.index_directory}")
 
 if __name__ == "__main__":
     main()

@@ -83,7 +83,9 @@ def main(args=None):
         ds = xr.open_dataset(opts.netcdf, engine=opts.xarray_engine)
         print()
         print(ds)
-        
+
+    logger.info(f"Finished running leviathan-info: {opts.index_directory}")
+
         
 if __name__ == "__main__":
     main()

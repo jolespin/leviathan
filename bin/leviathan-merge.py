@@ -232,6 +232,7 @@ def main(args=None):
                         logger.warning(f"Not able to merge {data_type}.{level}.{metric} files from {opts.pathway_profiling_directory}: {e}")
                     
         logger.info(f"Completed merging pathway profiling tables: {pathway_profiling_output_directory}")
+    logger.info(f"Finished running leviathan-merge:{opts.output_directory}")
 
 
 if __name__ == "__main__":

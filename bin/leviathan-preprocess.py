@@ -96,10 +96,6 @@ def main(args=None):
     if "id_genome_cluster" in df_input.columns:
         genome_to_genomecluster = df_input["id_genome_cluster"].to_dict()
         
-    # Genomes
-    genomes_filepath = os.path.join(opts.output_directory, "genomes.tsv.gz")
-    logger.info(f"Writing genome filepaths: {genomes_filepath}")
-    df_input["assembly"].to_csv(genomes_filepath, sep="\t", header=None)
 
     # Annotations
     logger.info(f"Reading annotations: {opts.annotations} [Format: {opts.annotation_format}]")
@@ -134,6 +130,7 @@ def main(args=None):
     logger.info(f"Building feature mappings: {feature_mapping_filepath}")
 
     f_feature_mapping = open_file_writer(feature_mapping_filepath)
+    genomes_with_features = set()
     if genome_to_genomecluster:
         for id_gene, feature_set in tqdm(gene_to_features.items(), desc=f"Writing feature mapping table [Genome_Clusters = True]"): # [id_gene, feature_set, id_genome, (Optional: id_genome_cluster)] 
             if id_gene in cds_identifiers:
@@ -145,7 +142,8 @@ def main(args=None):
                     id_genome,
                     id_genome_cluster,
                 ]
-                print(*fields, sep="\t", file=f_feature_mapping)    
+                print(*fields, sep="\t", file=f_feature_mapping)  
+                genomes_with_features.add(id_genome)
     else:
         for id_gene, feature_set in tqdm(gene_to_features.items(), desc=f"Writing feature mapping table [Genome_Clusters = False]"): # [id_gene, feature_set, id_genome, (Optional: id_genome_cluster)] 
             if id_gene in cds_identifiers:
@@ -155,9 +153,31 @@ def main(args=None):
                     feature_set,
                     id_genome,
                 ]
-                print(*fields, sep="\t", file=f_feature_mapping)    
+                print(*fields, sep="\t", file=f_feature_mapping) 
+                genomes_with_features.add(id_genome)
+
     f_feature_mapping.close()
-    
+
+
+    # Genomes
+    genomes_with_filepaths = set(df_input.index)
+    genomes_without_features = genomes_with_filepaths - genomes_with_features
+    n_genomes_without_features = len(genomes_without_features)
+    if genomes_without_features:
+        logger.info(f"Including {df_input.shape[0] - n_genomes_without_features} genomes in index and excluding {n_genomes_without_features} genomes")
+        genomes_excluded_filepath = os.path.join(opts.output_directory, "genomes_excluded.list")
+        logger.info(f"Writing {n_genomes_without_features} excluded genomes: {genomes_excluded_filepath}")
+        with open_file_writer(genomes_excluded_filepath) as f:
+            for id in genomes_without_features:
+                print(id, file=f)
+    else:
+        logger.info(f"Including all {len(df_input.shape[0])} genomes in index")
+
+    genomes_filepath = os.path.join(opts.output_directory, "genomes.tsv.gz")
+    logger.info(f"Writing genome filepaths: {genomes_filepath}")
+    df_input = df_input.drop(list(genomes_without_features))
+    df_input["assembly"].to_csv(genomes_filepath, sep="\t", header=None)
+
     # ========
     # Hash
     # ========   
@@ -172,6 +192,7 @@ def main(args=None):
     logger.info(f"Completed preprocessing input data for leviathan index: {opts.output_directory}")
     logger.info(f"Directory size of leviathan preprocessing: {format_bytes(get_directory_size(opts.output_directory))}")
     logger.info(f"Directory structure of leviathan preprocessing:\n{get_directory_tree(opts.output_directory, ascii=True)}")
+    logger.info(f"Finished running leviathan-preprocess:{opts.output_directory}")
 
 if __name__ == "__main__":
     main()

@@ -171,7 +171,7 @@ def main(args=None):
             for id in genomes_without_features:
                 print(id, file=f)
     else:
-        logger.info(f"Including all {len(df_input.shape[0])} genomes in index")
+        logger.info(f"Including all {df_input.shape[0]} genomes in index")
 
     genomes_filepath = os.path.join(opts.output_directory, "genomes.tsv.gz")
     logger.info(f"Writing genome filepaths: {genomes_filepath}")

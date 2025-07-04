@@ -336,7 +336,7 @@ def main(args=None):
     logger.info(f"Completed building leviathan index: {opts.index_directory}")
     logger.info(f"Directory size of leviathan index: {format_bytes(get_directory_size(opts.index_directory))}")
     logger.info(f"Directory structure of leviathan index:\n{get_directory_tree(opts.index_directory, ascii=True)}")
-    logger.info(f"Finished running leviathan-index:{opts.index_directory}")
+    logger.info(f"Completed running leviathan-index: {opts.index_directory}")
 
 if __name__ == "__main__":
     main()

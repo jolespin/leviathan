@@ -268,7 +268,7 @@ def main(args=None):
     for filepath in glob.glob(os.path.join(output_directory, "output","*")):
         filesize = get_file_size(filepath, format=True)
         logger.info(f"Output: {filepath} ({filesize})")
-    logger.info(f"Finished running leviathan-profile-pathway for {opts.name}:{opts.project_directory}")
+    logger.info(f"Completed running leviathan-profile-pathway for {opts.name}: {opts.project_directory}")
 
 if __name__ == "__main__":
     main()

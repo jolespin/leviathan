@@ -84,7 +84,7 @@ def main(args=None):
         print()
         print(ds)
 
-    logger.info(f"Finished running leviathan-info: {opts.index_directory}")
+    logger.info(f"Completed running leviathan-info: {opts.index_directory}")
 
         
 if __name__ == "__main__":

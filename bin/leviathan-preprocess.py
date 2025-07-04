@@ -192,7 +192,7 @@ def main(args=None):
     logger.info(f"Completed preprocessing input data for leviathan index: {opts.output_directory}")
     logger.info(f"Directory size of leviathan preprocessing: {format_bytes(get_directory_size(opts.output_directory))}")
     logger.info(f"Directory structure of leviathan preprocessing:\n{get_directory_tree(opts.output_directory, ascii=True)}")
-    logger.info(f"Finished running leviathan-preprocess:{opts.output_directory}")
+    logger.info(f"Completed running leviathan-preprocess: {opts.output_directory}")
 
 if __name__ == "__main__":
     main()

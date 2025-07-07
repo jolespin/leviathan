@@ -13,16 +13,17 @@ Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 Sag
 
 
 ## Modules
-* `leviathan preprocess` - Preprocesses data into form than can be used by `leviathan index` 
-
+### `leviathan preprocess` - Preprocesses data into form than can be used by `leviathan index` 
+    
     ```
     leviathan-preprocess.py \
         -i references/manifest.tsv \
         -a references/pykofamsearch.pathways.tsv.gz \
         -o references/
     ```
+    
 
-* `leviathan index` - Build, update, and validate `leviathan` database
+### `leviathan index` - Build, update, and validate `leviathan` database
     ```
     leviathan-index.py \
         -f references/cds.fasta.gz \
@@ -31,11 +32,11 @@ Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 Sag
         -d references/index/ \
         -p=-1
     ```
-* `leviathan info` - Report information about `leviathan` database
+### `leviathan info` - Report information about `leviathan` database
     ```
     leviathan-info.py -d references/index/
     ```
-* `leviathan profile-taxonomy` - Profile taxonomy using `Sylph` with `leviathan` database
+### `leviathan profile-taxonomy` - Profile taxonomy using `Sylph` with `leviathan` database
     ```
     leviathan-profile-taxonomy.py \
         -1 ../Fastq/SRR12042303_1.fastq.gz \
@@ -45,7 +46,7 @@ Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 Sag
         -o leviathan_output/profiling/taxonomy/ \
         -p=-1
     ```
-* `leviathan profile-pathway` - Profile pathways using `Salmon` with `leviathan` database
+### `leviathan profile-pathway` - Profile pathways using `Salmon` with `leviathan` database
     ```
     leviathan-profile-pathway.py \
         -1 ../Fastq/SRR12042303_1.fastq.gz \
@@ -56,7 +57,7 @@ Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 Sag
         -p=-1
     ```
 
-* `leviathan merge` - Merge sample-specific taxonomic and/or pathway profiling
+### `leviathan merge` - Merge sample-specific taxonomic and/or pathway profiling
     ```
     leviathan-merge.py \
         -t leviathan_output/profiling/taxonomy/ \
@@ -282,8 +283,11 @@ For documentation for pathway theory or how `MultiDiGraph` objects are generated
 * In progress
 
 ## Contact:
-* jolespin@newatlantis.io
+* jol.espinoz@gmail.com
 
 ## Modules:
 ![Modules](images/modules.png)
+
+## Documentation:
+
 

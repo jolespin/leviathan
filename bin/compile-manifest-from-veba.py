@@ -23,7 +23,7 @@ def main(args=None):
     description = """
     Running: {} v{} via Python v{} | {}""".format(__program__, sys.version.split(" ")[0], python_executable, script_filename)
     usage = f"{__program__} -i path/to/veba_output/ -t prokaryotic,eukaryotic -o path/to/output.tsv"
-    epilog = "Copyright 2024 New Atlantis Labs (jolespin@newatlantis.io)"
+    epilog = "Copyright 2025 Josh L. Espinoza (jol.espinoz@gmail.com)"
 
     # Parser
     parser = argparse.ArgumentParser(description=description, usage=usage, epilog=epilog, formatter_class=argparse.RawTextHelpFormatter)

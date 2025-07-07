@@ -44,7 +44,7 @@ def main(args=None):
     description = """
     Running: {} v{} via Python v{} | {}""".format(__program__, sys.version.split(" ")[0], python_executable, script_filename)
     usage = f"{__program__} -i/--input path/to/input.tsv -a path/to/annotations.tsv -o/--output_directory path/to/output_directory/"
-    epilog = "Copyright 2024 New Atlantis Labs (jolespin@newatlantis.io)"
+    epilog = "Copyright 2025 Josh L. Espinoza (jol.espinoz@gmail.com)"
 
     # Parser
     parser = argparse.ArgumentParser(description=description, usage=usage, epilog=epilog, formatter_class=argparse.RawTextHelpFormatter)

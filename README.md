@@ -18,8 +18,8 @@ Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 Sag
 
 
 ## Modules
-### `leviathan preprocess`
-Preprocesses data into form than can be used by `leviathan index` 
+### `leviathan-preprocess`
+Preprocesses data into form than can be used by `leviathan-index` 
     
     leviathan-preprocess.py \
         -i references/manifest.tsv \
@@ -27,7 +27,7 @@ Preprocesses data into form than can be used by `leviathan index`
         -o references/
     
 
-### `leviathan index`
+### `leviathan-index`
 Build, update, and validate `leviathan` database
 
     leviathan-index.py \
@@ -37,12 +37,12 @@ Build, update, and validate `leviathan` database
         -d references/index/ \
         -p=-1
 
-### `leviathan info`
+### `leviathan-info`
 Report information about `leviathan` database
 
     leviathan-info.py -d references/index/
 
-### `leviathan profile-taxonomy`
+### `leviathan-profile-taxonomy`
 Profile taxonomy using `Sylph` with `leviathan` database
 
     leviathan-profile-taxonomy.py \
@@ -53,7 +53,7 @@ Profile taxonomy using `Sylph` with `leviathan` database
         -o leviathan_output/profiling/taxonomy/ \
         -p=-1
 
-### `leviathan profile-pathway`
+### `leviathan-profile-pathway`
 Profile pathways using `Salmon` with `leviathan` database
 
     leviathan-profile-pathway.py \
@@ -64,7 +64,7 @@ Profile pathways using `Salmon` with `leviathan` database
         -o leviathan_output/profiling/pathway/ \
         -p=-1
 
-### `leviathan merge`
+### `leviathan-merge`
 Merge sample-specific taxonomic and/or pathway profiling
 
     leviathan-merge.py \
@@ -85,7 +85,7 @@ Merge sample-specific taxonomic and/or pathway profiling
 #### Taxonomy profiles
 * Examples: 
     - Genome = Metagenome-assembled genome (MAG)
-    - Genome cluster = ANI ≥ 95% & Alignment Fraction ≥ 50%
+    - Genome cluster = ANI ??? 95% & Alignment Fraction ??? 50%
 
 ##### Taxonomic abundances - Relative abundance of a genome/genome-cluster within a sample
  * `taxonomic_abundance.genome_clusters.[parquet|tsv.gz]` - Genome-cluster-level taxonomic relative abundance profiles

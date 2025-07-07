@@ -1,6 +1,11 @@
 # Leviathan
 `Leviathan` is a fast, memory-efficient, and scalable taxonomic and pathway profiler for next generation sequencing (genome-resolved) metagenomics and metatranscriptomics.  `Leviathan` is powered by `Salmon` and `Sylph` in the backend.
 
+## Install
+```
+pip install leviathan
+```
+
 ## Benchmarking
 Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 SageMaker instance (ml.m5.4xlarge)
 
@@ -13,31 +18,33 @@ Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 Sag
 
 
 ## Modules
-### `leviathan preprocess` - Preprocesses data into form than can be used by `leviathan index` 
+### `leviathan preprocess`
+Preprocesses data into form than can be used by `leviathan index` 
     
-    ```
     leviathan-preprocess.py \
         -i references/manifest.tsv \
         -a references/pykofamsearch.pathways.tsv.gz \
         -o references/
-    ```
     
 
-### `leviathan index` - Build, update, and validate `leviathan` database
-    ```
+### `leviathan index`
+Build, update, and validate `leviathan` database
+
     leviathan-index.py \
         -f references/cds.fasta.gz \
         -m references/feature_mapping.tsv.gz \
         -g references/genomes.tsv.gz \
         -d references/index/ \
         -p=-1
-    ```
-### `leviathan info` - Report information about `leviathan` database
-    ```
+
+### `leviathan info`
+Report information about `leviathan` database
+
     leviathan-info.py -d references/index/
-    ```
-### `leviathan profile-taxonomy` - Profile taxonomy using `Sylph` with `leviathan` database
-    ```
+
+### `leviathan profile-taxonomy`
+Profile taxonomy using `Sylph` with `leviathan` database
+
     leviathan-profile-taxonomy.py \
         -1 ../Fastq/SRR12042303_1.fastq.gz \
         -2 ../Fastq/SRR12042303_2.fastq.gz \
@@ -45,9 +52,10 @@ Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 Sag
         -d references/index/ \
         -o leviathan_output/profiling/taxonomy/ \
         -p=-1
-    ```
-### `leviathan profile-pathway` - Profile pathways using `Salmon` with `leviathan` database
-    ```
+
+### `leviathan profile-pathway`
+Profile pathways using `Salmon` with `leviathan` database
+
     leviathan-profile-pathway.py \
         -1 ../Fastq/SRR12042303_1.fastq.gz \
         -2 ../Fastq/SRR12042303_2.fastq.gz \
@@ -55,24 +63,21 @@ Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 Sag
         -d references/index/ \
         -o leviathan_output/profiling/pathway/ \
         -p=-1
-    ```
 
-### `leviathan merge` - Merge sample-specific taxonomic and/or pathway profiling
-    ```
+### `leviathan merge`
+Merge sample-specific taxonomic and/or pathway profiling
+
     leviathan-merge.py \
         -t leviathan_output/profiling/taxonomy/ \
         -p leviathan_output/profiling/pathway/ \
-    ```
 
 ## Utility Scripts
 * `compile-manifest-from-veba.py` - Compiles manifest.tsv file for `leviathan preprocess` from `VEBA` binning output 
 
-    ```
     compile-manifest-from-veba.py \
         -i path/to/veba_output/binning/ \
         -t prokaryotic,eukaryotic \
         -o references/manifest.tsv
-    ```
 
 ## Output Description
 
@@ -287,7 +292,3 @@ For documentation for pathway theory or how `MultiDiGraph` objects are generated
 
 ## Modules:
 ![Modules](images/modules.png)
-
-## Documentation:
-
-

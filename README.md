@@ -2,7 +2,15 @@
 `Leviathan` is a fast, memory-efficient, and scalable taxonomic and pathway profiler for next generation sequencing (genome-resolved) metagenomics and metatranscriptomics.  `Leviathan` is powered by `Salmon` and `Sylph` in the backend.
 
 ## Install
+
 ```
+# Create environment with dependencies
+mamba create -n leviathan -c conda-forge -c bioconda python salmon sylph -y
+
+# Activate environment
+mamba activate leviathan
+
+# Install Leviathan
 pip install leviathan
 ```
 

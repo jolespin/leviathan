@@ -1,0 +1,73 @@
+workflow_name: "Leviathan Functional & Pathway Profiling"
+description: "A workflow to quantify gene expression from metagenomic reads and aggregate these measurements to the level of functional features (e.g., KOs) and metabolic pathways."
+
+stages:
+  - stage: 1
+    name: "Per-Sample Functional Profiling"
+    component: "leviathan-profile-pathway.py"
+    description: "For a single metagenomic sample, this stage quantifies gene abundances and then maps these to higher-level functional and pathway profiles, stratified by source genome or genome cluster."
+
+    inputs:
+      - name: "Metagenomic Reads"
+        format: "Paired-end FASTQ (.fq.gz)"
+        description: "The raw sequencing data for a single sample."
+      - name: "Leviathan Index Directory"
+        description: "The database constructed by 'leviathan-index'. This provides the gene catalog, functional annotations, and quantification index."
+        files_used:
+          - "salmon_index/"
+          - "database/gene_to_data.pkl.gz"
+          - "database/genome_to_data.pkl.gz"
+          - "database/pathway_to_data.pkl.gz (Optional)"
+
+    process_and_tools:
+      - process: "Gene Quantification"
+        description: "Aligns metagenomic reads to the indexed gene catalog (filtered CDS sequences) to determine the abundance (TPM, NumReads) of each gene."
+        tools_used:
+          - name: "Salmon quant"
+            purpose: "To perform rapid, alignment-based quantification of gene expression."
+      - process: "Abundance Aggregation (Feature Level)"
+        description: "Aggregates the abundances from individual genes up to the level of their assigned functional features (e.g., KOs). A gene's abundance is distributed among its associated features."
+        tools_used: []
+      - process: "Pathway Analysis (Optional)"
+        description: "If a pathway database is present in the index, two key metrics are calculated:
+          1. **Pathway Coverage:** The proportion of a pathway's required features that are detected in a given genome's expressed genes.
+          2. **Pathway Abundance:** The summed abundance of all features contributing to a specific pathway."
+        tools_used: []
+      - process: "Hierarchical Roll-up (Optional)"
+        description: "If genome clusters are defined in the index, all abundance and prevalence metrics are further aggregated from the genome level to the genome cluster level."
+        tools_used: []
+
+    outputs:
+      - name: "Per-Sample Profile Tables"
+        description: "A comprehensive set of tables detailing the functional profile of the sample at multiple biological levels."
+        format: "Parquet (default) or TSV"
+        contents:
+          - name: "Gene Abundance Table"
+            file: "gene_abundances.genomes.parquet"
+            description: "Abundance of each gene, indexed by its source genome."
+          - name: "Feature Abundance/Prevalence Tables"
+            file: "feature_*.parquet"
+            description: "Aggregated abundance and presence/absence of each functional feature, stratified by genome or genome cluster."
+          - name: "Pathway Abundance & Coverage Table"
+            file: "pathway_abundances.*.parquet"
+            description: "Combined abundance and coverage metrics for each pathway, stratified by genome or genome cluster."
+
+  - stage: 2
+    name: "Multi-Sample Aggregation (Downstream Utility)"
+    component: "leviathan.profile_pathway (Python API)"
+    description: "An auxiliary function to merge the rich, multi-level profiling results from multiple samples into a single, analysis-ready data object."
+
+    inputs:
+      - name: "Pathway Profiling Directory"
+        description: "A directory containing multiple output subdirectories, one for each sample processed by 'leviathan-profile-pathway'."
+
+    process:
+      - "Iterates through the per-sample output directories."
+      - "Selects a specific data type (e.g., 'pathway_abundances') and metric (e.g., 'coverage')."
+      - "Reads and unnests the specified data from each sample's output files."
+      - "Concatenates the data into a unified, multi-dimensional matrix (e.g., samples x genomes x pathways)."
+
+    outputs:
+      - name: "Combined Functional Matrix"
+        description: "A single data object containing the specified functional profiles for all samples, ready for advanced analysis."
+        format: "pandas.DataFrame or xarray.Dataset"

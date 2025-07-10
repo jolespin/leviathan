@@ -1,0 +1,67 @@
+workflow_name: "Leviathan Alignment-Free Taxonomic Profiling"
+description: "A workflow for quantifying the abundance of reference genomes within metagenomic samples using rapid, alignment-free k-mer-based methods."
+
+stages:
+  - stage: 1
+    name: "Per-Sample Taxonomic Profiling"
+    component: "leviathan-profile-taxonomy.py"
+    description: "For each individual metagenomic sample, this stage estimates the relative abundance and coverage of each genome present in the Leviathan Index."
+
+    inputs:
+      - name: "Metagenomic Reads"
+        format: "Paired-end FASTQ (.fq.gz) OR Pre-computed Sylph Sketch (.sylsp)"
+        description: "The input sequencing data for a single sample. The workflow can start from raw reads or an intermediate sketch file."
+      - name: "Leviathan Index Directory"
+        description: "The database constructed by 'leviathan-index'. This provides the reference genome sketches and metadata."
+        files_used:
+          - "database/genomes.syldb"
+          - "database/genome_to_data.pkl.gz"
+
+    process_and_tools:
+      - process: "Metagenome Sketching (Conditional)"
+        description: "If raw FASTQ files are provided, they are first converted into a compressed k-mer representation (a sketch)."
+        tools_used:
+          - name: "Sylph sketch"
+            purpose: "To generate a k-mer frequency sketch from the input reads."
+      - process: "Containment Analysis"
+        description: "The metagenome sketch is compared against the reference genome sketch database ('genomes.syldb') to identify shared k-mers."
+        tools_used:
+          - name: "Sylph profile"
+            purpose: "To estimate the abundance and coverage of each reference genome in the sample based on k-mer containment."
+      - process: "Abundance Post-processing"
+        description: "The raw output from Sylph is parsed. Genome filepaths are replaced with their corresponding IDs from the index. If genome clusters were defined during preprocessing, abundances are aggregated to the cluster level."
+        tools_used: []
+
+    outputs:
+      - name: "Per-Sample Abundance Tables"
+        description: "A set of tables for the sample, detailing the abundance of genomes and/or genome clusters."
+        format: "Parquet (default) or TSV"
+        contents:
+          - name: "Taxonomic Abundance (Genomes)"
+            file: "taxonomic_abundance.genomes.parquet"
+            description: "Relative abundance of each genome in the sample."
+          - name: "Sequence Abundance (Genomes)"
+            file: "sequence_abundance.genomes.parquet"
+            description: "Estimated proportion of reads in the sample originating from each genome."
+          - name: "Aggregated Abundances (Clusters, Optional)"
+            file: "*_abundance.genome_clusters.parquet"
+            description: "Abundances summed at the genome cluster level, if applicable."
+
+  - stage: 2
+    name: "Multi-Sample Aggregation (Downstream Utility)"
+    component: "leviathan.profile_taxonomy (Python API)"
+    description: "An auxiliary function to merge the profiling results from multiple samples into a single, analysis-ready matrix."
+
+    inputs:
+      - name: "Taxonomic Profiling Directory"
+        description: "A directory containing multiple output subdirectories, one for each sample processed by 'leviathan-profile-taxonomy'."
+
+    process:
+      - "Iterates through the per-sample output directories."
+      - "Reads the individual abundance tables (e.g., 'taxonomic_abundance.genomes.parquet') for each sample."
+      - "Concatenates the abundance vectors from all samples into a unified matrix (samples x genomes)."
+
+    outputs:
+      - name: "Combined Abundance Matrix"
+        description: "A single data object containing the abundance profiles for all samples, suitable for downstream statistical analysis and visualization."
+        format: "pandas.DataFrame or xarray.Dataset"

@@ -1,0 +1,102 @@
+workflow_name: "Leviathan Database Construction"
+description: "A two-stage workflow to build a comprehensive, multi-modal database from genomic and functional data for large-scale analysis."
+
+stages:
+  - stage: 1
+    name: "Data Preprocessing"
+    component: "leviathan-preprocess.py"
+    description: "Filters and formats user-provided raw data into a standardized structure for indexing. This step ensures that only relevant data (i.e., genes with functional annotations) is carried forward to the final database."
+
+    inputs:
+      - name: "Genome & Gene Locations"
+        format: "TSV file"
+        description: "A user-provided table mapping genome IDs to their respective assembly and CDS (Coding DNA Sequence) FASTA file paths."
+      - name: "Functional Annotations"
+        format: "TSV file"
+        description: "A table mapping gene IDs to functional features (e.g., KOs, Pfams, etc.). Typically sourced from annotation tools like PyKOfamSearch or PyHMMSearch."
+
+    process:
+      - "Parses functional annotations to create a gene-to-feature map."
+      - "Iterates through all provided CDS files, filtering to retain only sequences for genes that have a corresponding functional annotation."
+      - "Generates a unified CDS FASTA file containing only these relevant gene sequences."
+      - "Creates a master mapping table that links each gene ID to its set of features and its source genome ID."
+      - "Generates a filtered list of genome assembly filepaths."
+
+    outputs:
+      - name: "Preprocessed Data Directory"
+        description: "A directory containing the standardized intermediate files required for the main indexing stage."
+        contents:
+          - name: "Filtered CDS"
+            file: "cds.fasta.gz"
+            description: "A single FASTA file of all CDS sequences that have a known functional annotation."
+          - name: "Feature Mapping Table"
+            file: "feature_mapping.tsv.gz"
+            description: "A core table linking each gene ID to its set of features and source genome ID."
+          - name: "Genome Filepaths"
+            file: "genomes.tsv.gz"
+            description: "A table mapping genome IDs to their assembly FASTA filepaths, filtered to include only genomes that contain annotated features."
+
+  - stage: 2
+    name: "Database Indexing"
+    component: "leviathan-index.py"
+    description: "Constructs the final, queryable Leviathan database by integrating the preprocessed data and building specialized indices with external bioinformatics tools."
+
+    inputs:
+      - name: "Preprocessed Data Directory"
+        description: "The complete output directory from the 'Data Preprocessing' stage."
+      - name: "Pathway Database (Optional)"
+        format: "Pickle (.pkl.gz)"
+        description: "A pre-compiled pathway database. If not provided, one can be automatically generated for KEGG Orthologs (KOs)."
+
+    process_and_tools:
+      - process: "Internal Database Compilation"
+        description: "Compiles the feature mapping and genome information into efficient, internal database files (.pkl.gz) for rapid data access."
+        tools_used: []
+      - process: "Pathway Integration (Optional)"
+        description: "Downloads and integrates a KEGG pathway database if gene features are identified as KOs."
+        tools_used:
+          - name: "build-pathway-database.py"
+            purpose: "KEGG Pathway database construction."
+      - process: "Quantification Indexing"
+        description: "Builds a k-mer index from the filtered CDS sequences."
+        tools_used:
+          - name: "Salmon"
+            purpose: "To enable fast, mapping-based gene quantification from metagenomic data."
+      - process: "Genome Sketching (Optional)"
+        description: "Generates k-mer sketches from the whole genome assemblies."
+        tools_used:
+          - name: "Sylph"
+            purpose: "To enable rapid, alignment-free genome containment analysis in metagenomes."
+      - process: "Finalization"
+        description: "Generates a final configuration file (config.json) summarizing the database contents and statistics."
+        tools_used: []
+
+    outputs:
+      - name: "Leviathan Index Directory"
+        description: "A self-contained, multi-component database ready for querying with other Leviathan tools."
+        contents:
+          - name: "Internal Databases"
+            file: "database/*.pkl.gz"
+            description: "Serialized Python objects for fast lookup of gene, genome, and pathway relationships."
+          - name: "Quantification Index"
+            file: "salmon_index/"
+            description: "A Salmon index for gene expression profiling."
+          - name: "Genome Sketches"
+            file: "database/genomes.sylph"
+            description: "Sylph sketches for alignment-free genomic search."
+          - name: "Configuration File"
+            file: "config.json"
+            description: "A JSON file containing metadata and statistics about the built database."
+
+  - stage: 3
+    name: "Database Inspection (Utility)"
+    component: "leviathan-info.py"
+    description: "An auxiliary utility to provide a high-level summary of a constructed Leviathan Index, useful for verification and quality control."
+
+    inputs:
+      - name: "Leviathan Index Directory"
+        description: "The final output directory from the 'Database Indexing' stage."
+
+    outputs:
+      - name: "Console Summary"
+        description: "A human-readable report on the terminal detailing the database's size, contents (number of genomes, genes, features), and file integrity checksums."

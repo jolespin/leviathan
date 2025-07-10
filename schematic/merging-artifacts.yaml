@@ -1,0 +1,31 @@
+workflow_name: "Leviathan Profile Aggregation & Merging"
+description: "A data aggregation workflow that consolidates per-sample taxonomic and functional profiling results into unified, multi-dimensional datasets, enabling integrated, cross-sample analyses."
+
+stages:
+  - stage: 1
+    name: "Multi-Modal Profile Aggregation"
+    component: "leviathan-merge.py"
+    description: "Gathers and merges profiling outputs from numerous samples into a single, cohesive data store. It systematically processes all available data types, metrics, and aggregation levels."
+
+    inputs:
+      - name: "Taxonomic Profiling Directory (Optional)"
+        description: "The top-level output directory containing all per-sample results from 'leviathan-profile-taxonomy'."
+      - name: "Functional/Pathway Profiling Directory (Optional)"
+        description: "The top-level output directory containing all per-sample results from 'leviathan-profile-pathway'."
+
+    process:
+      - "Identifies all available profiling data across the provided directories."
+      - "Systematically processes all combinations of data types (e.g., 'taxonomic_abundances', 'feature_prevalence', 'pathway_abundances'), aggregation levels ('genomes', 'genome_clusters'), and metrics ('TPM', 'coverage', etc.)."
+      - "For each combination, it reads the corresponding flat table (e.g., Parquet file) from every individual sample subdirectory."
+      - "Constructs a multi-dimensional `xarray.Dataset` by assembling the data from all samples. This creates a unified matrix with labeled dimensions (e.g., `[samples, genomes, features]`)."
+      - "Groups related metrics into a single dataset. For instance, feature abundances (TPM, read counts) and feature prevalence (binary, ratio) at the genome level are bundled into a single `feature.genomes.nc` file."
+      - "Serializes the final `xarray.Dataset` objects into compressed NetCDF (.nc) files, an efficient and standard format for storing large, multi-dimensional scientific data."
+
+    outputs:
+      - name: "Unified DataStore Directory"
+        description: "A single directory containing the merged, analysis-ready datasets."
+        contents:
+          - name: "Consolidated NetCDF Datasets"
+            file: "*.nc"
+            description: "A collection of NetCDF files, each representing a specific data modality and aggregation level (e.g., `taxonomic_abundances.genomes.nc`, `feature.genomes.nc`, `pathway.genome_clusters.nc`)."
+            details: "Each `.nc` file is a self-contained data object that can store multiple related variables. For example, `pathway.genomes.nc` holds data arrays for pathway abundance (TPM), pathway abundance (read counts), and pathway coverage, all aligned along the same sample and genome dimensions."

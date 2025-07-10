@@ -1,5 +1,6 @@
 #### Daily Change Log:
 
+* [2025.7.10] - Updated `MIT` to `Apache 2.0`
 * [2025.7.3] - Remove genomes that do not have features in `leviathan-preprocess.py` and write excluded genomes to `genomes_excluded.list`.  Also checks in `leviathan-index.py` to make sure genomes in `feature_mapping.tsv.gz` matches those in `genomes.tsv.gz`
 * [2025.7.1] - Adding gzipping as an option to maintain consistent runtime benchmarking and removing `aux_info/unmapped_names.txt` from `Salmon` output
 * [2025.6.30] - Gzipped `quant.sf` from `Salmon` [Issue #12](https://github.com/jolespin/leviathan/issues/12)

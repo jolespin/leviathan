@@ -13,6 +13,9 @@ mamba activate leviathan
 # Install Leviathan
 pip install leviathan
 ```
+## Modules:
+![Flowchart](images/Flowchart.png)
+
 
 ## Benchmarking
 
@@ -339,14 +342,9 @@ If custom databases are built, then the following nested Python dictionary struc
 ```
 For documentation for pathway theory or how `MultiDiGraph` objects are generated, please refer to the source repository for [KEGG Pathway Completeness Tool](https://github.com/EBI-Metagenomics/kegg-pathways-completeness-tool) as [KEGG Pathway Profiler](https://github.com/jolespin/kegg_pathway_profiler) is a reimplementation for production.
 
-## Development Stage:
-* `beta`
-
 ## Citation:
-* In progress
+ Josh L. Espinoza. Leviathan: A fast, memory-efficient, and scalable taxonomic and pathway profiler for next generation sequencing (pan)genome-resolved metagenomics and metatranscriptomics. bioRxiv (Pending)
 
 ## Contact:
 * jol.espinoz@gmail.com
 
-## Modules:
-![Modules](images/modules.png)

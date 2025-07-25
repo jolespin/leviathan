@@ -353,3 +353,5 @@ For documentation for pathway theory or how `MultiDiGraph` objects are generated
 ## Contact:
 * jol.espinoz@gmail.com
 
+## Disclaimer:
+This software was developed at NewAtlantis Labs.

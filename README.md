@@ -20,6 +20,10 @@ pip install leviathan
 
 Leviathan: A fast, memory-efficient, and scalable taxonomic and pathway profiler for next generation sequencing (pan)genome-resolved metagenomics and metatranscriptomics. Josh L Espinoza. bioRxiv 2025.07.14.664802; doi: [https://doi.org/10.1101/2025.07.14.664802](https://doi.org/10.1101/2025.07.14.664802)
 
+## Notice
+
+I am still working out LICENSE details with NewAtlantis Labs legal team.  Apologies for any inconvenience.  Please feel free to use for any academic usage but this tool cannot (yet) be used for commercial usage until LICENSE is finalized. 
+
 ## Benchmarking
 
 ### Benchmarking against 10, 100, 1000, and 10000 genomes

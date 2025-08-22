@@ -1,6 +1,10 @@
 # Leviathan
 `Leviathan` is a fast, memory-efficient, and scalable taxonomic and pathway profiler for next generation sequencing (genome-resolved) metagenomics and metatranscriptomics.  `Leviathan` is powered by `Salmon` and `Sylph` in the backend.
 
+## License Notice
+
+You may have noticed that I have switched the code-based from public/private a few times.  *NewAtlantis Labs* is ending operations so I am coordinating with *NewAtlantis Labs* legal team to finalize license details for various assets including Leviathan.  Please feel free to use for any academic usage but the details for commercial usage have not been finalized yet. These details should be finalized within the next month.  Apologies for any inconvenience.  For any questions, please feel free to contact me at jol.espinoz@gmail.com
+
 ## Install
 
 ```
@@ -19,10 +23,6 @@ pip install leviathan
 ## Citation
 
 Leviathan: A fast, memory-efficient, and scalable taxonomic and pathway profiler for next generation sequencing (pan)genome-resolved metagenomics and metatranscriptomics. Josh L Espinoza. bioRxiv 2025.07.14.664802; doi: [https://doi.org/10.1101/2025.07.14.664802](https://doi.org/10.1101/2025.07.14.664802)
-
-## Notice
-
-I am still working out LICENSE details with NewAtlantis Labs legal team.  Apologies for any inconvenience.  Please feel free to use for any academic usage but this tool cannot (yet) be used for commercial usage until LICENSE is finalized. 
 
 ## Benchmarking
 

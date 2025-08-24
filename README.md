@@ -3,7 +3,7 @@
 
 ## License Notice
 
-You may have noticed that I have switched the code-based from public/private a few times.  *NewAtlantis Labs* is ending operations so I am coordinating with *NewAtlantis Labs* legal team to finalize license details for various assets including Leviathan.  Please feel free to use for any academic usage but the details for commercial usage have not been finalized yet so please reframe from any commercial usage. These details should be finalized within the next month.  I will upload package to PyPI once details are finalized.  Apologies for any inconvenience.  For any questions, please feel free to contact me at jol.espinoz@gmail.com
+You may have noticed that I have switched the code-base from public/private a few times.  *NewAtlantis Labs* is ending operations so I am coordinating with *NewAtlantis Labs* legal team to finalize license details for various assets including Leviathan.  Please feel free to use for any academic usage but the details for commercial usage have not been finalized yet so please reframe from any commercial usage. These details should be finalized within the next month.  I will upload package to PyPI once details are finalized.  Apologies for any inconvenience.  For any questions, please feel free to contact me at jol.espinoz@gmail.com
 
 ## Install
 

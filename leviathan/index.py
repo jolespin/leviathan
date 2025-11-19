@@ -30,6 +30,7 @@ from pyexeggutor import (
 def process_genomic_databases_and_check_inputs(fasta, feature_mapping, genomes, logger, config):  
    # Fasta
     genes_from_fasta = set()
+    genomes_from_feature_mapping = set()
     for id, seq in tqdm(pyfastx.Fasta(fasta, build_index=False), f"Loading fasta: {fasta}"):
         genes_from_fasta.add(id)
     
@@ -57,7 +58,7 @@ def process_genomic_databases_and_check_inputs(fasta, feature_mapping, genomes, 
                     gene_to_data[id_gene]["features"] = eval(features)
                     gene_to_data[id_gene]["id_genome"] = id_genome
                     gene_to_data[id_gene]["id_genome_cluster"] = None
-                    genome_to_data[id_genome][["id_genome_cluster"]] = None
+                    genome_to_data[id_genome]["id_genome_cluster"] = None
                     
         elif len(fields) == 4:
             id_gene, features, id_genome, id_genome_cluster  = fields

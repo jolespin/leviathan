@@ -55,7 +55,7 @@ def main(args=None):
     description = """
     Running: {} v{} via Python v{} | {}""".format(__program__, sys.version.split(" ")[0], python_executable, script_filename)
     usage = f"{__program__} -1 forward.fq[.gz] -2 reverse.fq[.gz] -n sample_name -o project_directory --index_directory path/to/leviathan_index/"
-    epilog = "Leviathan"
+    epilog = "https://github.com/jolespin/leviathan"
 
     # Parser
     parser = argparse.ArgumentParser(description=description, usage=usage, epilog=epilog, formatter_class=argparse.RawTextHelpFormatter)
@@ -242,7 +242,7 @@ def main(args=None):
     if opts.output_format != "parquet":
         feature_prevalence_filepath += ".gz"
     logger.info(f"[level={level}] Calculating feature prevalence: {feature_prevalence_filepath}")
-    df_feature_prevalence = build_wide_feature_prevalence_matrix(df_feature_abundance, threshold=0)
+    df_feature_prevalence = build_wide_feature_prevalence_matrix(df_gene_abundance, gene_to_data=gene_to_data, threshold=0)
     if opts.output_format == "parquet":
         df_feature_prevalence.to_parquet(feature_prevalence_filepath, index=True)
     elif opts.output_format == "tsv":

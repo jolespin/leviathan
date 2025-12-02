@@ -3,19 +3,25 @@
 
 ## License Notice
 
-You may have noticed that I have switched the code-base from public/private a few times.  *NewAtlantis Labs* is ending operations so I am coordinating with *NewAtlantis Labs* legal team to finalize license details for various assets including Leviathan.  Please feel free to use for any academic usage but the details for commercial usage have not been finalized yet so please reframe from any commercial usage. These details should be finalized within the next month.  I will upload package to PyPI once details are finalized.  Apologies for any inconvenience.  For any questions, please feel free to contact me at jol.espinoz@gmail.com
+You may have noticed that I have switched the code-base from public/private a few times.  *NewAtlantis Labs* is ending operations and IP is being absorbed by *Ocean BioMetrics*.  I am coordinating with *NewAtlantis Labs* and *Ocean BioMetrics* legal teams to finalize license details for various assets including `Leviathan`.  
+
+Please feel free to use for any academic usage but the details for commercial usage have not been finalized yet so please hold off on any commercial usage. These details should be finalized in the near future but the timeline is out of my control.  I am actively advocating for unrestricted open-source usage as this can be a useful resource for the community. 
+
+I will reupload package to PyPI once details are finalized.  Apologies for any inconvenience.  
+
+For any questions, please feel free to contact me at jol.espinoz@gmail.com
 
 ## Install
 
 ```
 # Create environment with dependencies
-mamba create -n leviathan -c conda-forge -c bioconda python salmon sylph -y
+mamba create -n leviathan -c conda-forge -c bioconda python salmon sylph samtools -y
 
 # Activate environment
 mamba activate leviathan
 
-# Install Leviathan
-pip install leviathan
+# Install Leviathan (see license note)
+pip install leviathan 
 ```
 ## Modules
 ![Flowchart](images/Flowchart.png)
@@ -24,10 +30,13 @@ pip install leviathan
 
 Leviathan: A fast, memory-efficient, and scalable taxonomic and pathway profiler for next generation sequencing (pan)genome-resolved metagenomics and metatranscriptomics. Josh L Espinoza. bioRxiv 2025.07.14.664802; doi: [https://doi.org/10.1101/2025.07.14.664802](https://doi.org/10.1101/2025.07.14.664802)
 
+## Usage: 
+[`Leviathan` Walkthrough](WALKTHROUGH.md) for a detailed explanation on how to run each module including downloading test data and interpreting output files. 
+
 ## Benchmarking
 
 ### Benchmarking against 10, 100, 1000, and 10000 genomes
-Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 SageMaker instance (ml.m5.4xlarge)
+Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 EC2 instance (ml.m5.4xlarge)
 
 | number_of_genomes | number_of_cds_with_features | preprocess | index | profile-taxonomy | profile-pathway |
 |-------------------|-----------------------------|------------|-------|------------------|-----------------|
@@ -179,11 +188,11 @@ Merge sample-specific taxonomic and/or pathway profiling
  * `feature_abundances.genomes.tpm.[parquet|tsv.gz]` - Feature abundances for each genome (TPM normalized abundances)
 
 ##### Feature prevalence - The number of genome/genome-clusters where a feature is detected
- * `feature_prevalence-binary.genome_clusters.[parquet|tsv.gz]` - Binary feature prevalence relative to genome clusters
- * `feature_prevalence-binary.genomes.[parquet|tsv.gz]` - Binary feature prevalence relative to genomes
+ * `feature_prevalence-binary.genome_clusters.[parquet|tsv.gz]` - Presence/absence of feature relative to genome clusters
+ * `feature_prevalence-binary.genomes.[parquet|tsv.gz]` - Presence/absence of feature relative to genomes
  * `feature_prevalence-ratio.genome_clusters.[parquet|tsv.gz]` - Ratio of genomes within a genome cluster with feature detected
- * `feature_prevalence.genome_clusters.[parquet|tsv.gz]` - Binary feature prevalence relative to genome clusters
- * `feature_prevalence.genomes.[parquet|tsv.gz]` - Feature prevalence relative to genomes
+ * `feature_prevalence.genome_clusters.[parquet|tsv.gz]` - The count of uniques that correspond to the features relative to the genome clusters
+ * `feature_prevalence.genomes.[parquet|tsv.gz]` - The count of uniques that correspond to the features relative to the genomes
 
 ##### Gene abundances - The abundance of individual genes within genome
  * `gene_abundances.genomes.number_of_reads.[parquet|tsv.gz]` - Number of reads aligned to a gene within a genome
@@ -191,10 +200,10 @@ Merge sample-specific taxonomic and/or pathway profiling
 
 ##### Pathway abundances - Pathway abundances for a genome and genome-cluster
 
- * `pathway_abundances.genome_clusters.coverage.[parquet|tsv.gz]` - Pathway coverage relative to genome clusters
+ * `pathway_abundances.genome_clusters.coverage.[parquet|tsv.gz]` - Pathway coverage (i.e., pathway completion ratio) relative to genome clusters
  * `pathway_abundances.genome_clusters.number_of_reads.[parquet|tsv.gz]` - Pathway abundances as the number of reads aligned relative to genome clusters
  * `pathway_abundances.genome_clusters.tpm.[parquet|tsv.gz]` - TPM normalized pathway abundances as the number of reads aligned relative to genome clusters
- * `pathway_abundances.genomes.coverage.[parquet|tsv.gz]` - Pathway coverage relative to genomes
+ * `pathway_abundances.genomes.coverage.[parquet|tsv.gz]` - Pathway coverage (i.e., pathway completion ratio) relative to genomes
  * `pathway_abundances.genomes.number_of_reads.[parquet|tsv.gz]` - Pathway abundances as the number of reads aligned relative to genomes
  * `pathway_abundances.genomes.tpm.[parquet|tsv.gz]` - TPM normalized pathway abundances as the number of reads aligned relative to genomes
 
@@ -215,39 +224,6 @@ Sequence abundances can be used to determine the proportion of reads that were d
  * `pathway.genome_clusters.nc` - Pathway abundances (number of reads, tpm) and coverages of genome clusters for all samples
  * `pathway.genomes.nc` - Pathway abundances (number of reads, tpm) and coverages of genomes for all samples
 
-## Reading NetCDF files with Xarray
-
-```python
-import xarray as xr
-
-# Taxonomic abundances for genomes
-ds_taxonomic = xr.open_dataset("leviathan_output/artifacts/taxonomic_abundances.genomes.nc")
-ds_taxonomic
-
-<xarray.Dataset> Size: 3kB
-Dimensions:               (samples: 4, genomes: 23)
-Coordinates:
-  * samples               (samples) <U2 32B 'S3' 'S4' 'S1' 'S2'
-  * genomes               (genomes) <U26 2kB 'S1__BINETTE__P.1__bin_210' ... ...
-Data variables:
-    taxonomic_abundances  (samples, genomes) float32 368B ...
-    sequence_abundances   (samples, genomes) float32 368B ...
-
-# Pathway abundances and coverage for genome clusters
-ds_pathway = xr.open_dataset("leviathan_output/artifacts/pathway.genome_clusters.nc")
-ds_pathway
-<xarray.Dataset> Size: 276kB
-Dimensions:          (genome_clusters: 19, pathways: 292, samples: 4)
-Coordinates:
-  * genome_clusters  (genome_clusters) <U37 3kB 'ESLC-a2a3ed2541a4e0cbd4acd3a...
-  * pathways         (pathways) <U6 7kB 'M00001' 'M00002' ... 'M00982' 'M00983'
-  * samples          (samples) <U2 32B 'S3' 'S4' 'S1' 'S2'
-Data variables:
-    number_of_reads  (samples, genome_clusters, pathways) float32 89kB ...
-    tpm              (samples, genome_clusters, pathways) float32 89kB ...
-    coverage         (samples, genome_clusters, pathways) float32 89kB ...
-
-```
 
 ## Pathway Databases
 Currently, the only pathway database supported for pathway coverage calculations is the KEGG module database using KEGG orthologs as features.  This database can be pre-built using [KEGG Pathway Profiler](https://github.com/jolespin/kegg_pathway_profiler) or built with `leviathan index` if KEGG orthologs are used as features.  
@@ -358,4 +334,5 @@ For documentation for pathway theory or how `MultiDiGraph` objects are generated
 * jol.espinoz@gmail.com
 
 ## Disclaimer:
-This software was developed at NewAtlantis Labs.
+This software was developed at *NewAtlantis Labs* which is now acquired by *Ocean BioMetrics*.
+

@@ -164,3 +164,8 @@ cython_debug/
 
 .DS_Store
 Icon\?
+
+*.fastq.gz
+*.fastq
+*.fq.gz
+*.fq

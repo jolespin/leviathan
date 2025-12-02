@@ -1,0 +1,29 @@
+2025-12-02 10:45:17,971 - leviathan profile-taxonomy - INFO - Command: ['/Users/josh/miniforge3/envs/leviathan/bin/leviathan-profile-taxonomy.py', '-1', '../databases/CAMI-II_Marine_n-100/sample_6/reads/reads_1.fastq.gz', '-2', '../databases/CAMI-II_Marine_n-100/sample_6/reads/reads_2.fastq.gz', '-n', 'sample_6', '-d', '../working/references/index/', '-p=2', '-o', '../working/leviathan_output/profiling/taxonomy/']
+2025-12-02 10:45:17,971 - leviathan profile-taxonomy - INFO - Auto-detecting reads format: paired
+2025-12-02 10:45:17,971 - leviathan profile-taxonomy - INFO - The following genomes database was found: ../working/references/index/database/genomes.syldb (14.49 MB)
+2025-12-02 10:45:17,971 - leviathan profile-taxonomy - INFO - The following genomes database was found: ../working/references/index/database/genome_to_data.pkl.gz (2.88 KB)
+2025-12-02 10:45:17,972 - leviathan profile-taxonomy - INFO - Sketching reads
+2025-12-02 10:45:17,972 - leviathan profile-taxonomy - INFO - [sylph_reads_sketcher] running command: /Users/josh/miniforge3/envs/leviathan/bin/sylph sketch -t 2 -k 31 -c 200 --min-spacing 30 -d ../working/leviathan_output/profiling/taxonomy/sample_6/intermediate -1 ../databases/CAMI-II_Marine_n-100/sample_6/reads/reads_1.fastq.gz -2 ../databases/CAMI-II_Marine_n-100/sample_6/reads/reads_2.fastq.gz && mv ../working/leviathan_output/profiling/taxonomy/sample_6/intermediate/reads_1.fastq.gz.paired.sylsp ../working/leviathan_output/profiling/taxonomy/sample_6/intermediate/reads.sylsp
+2025-12-02 10:45:22,104 - leviathan profile-taxonomy - INFO - [sylph_reads_sketcher] duration: 4.131966829299927
+2025-12-02 10:45:22,105 - leviathan profile-taxonomy - INFO - [sylph_reads_sketcher] peak memory: 187.64 B
+2025-12-02 10:45:22,105 - leviathan profile-taxonomy - INFO - [sylph_reads_sketcher] dumping stdout, stderr, and return code: ../working/leviathan_output/profiling/taxonomy/sample_6/logs
+2025-12-02 10:45:22,105 - leviathan profile-taxonomy - INFO - [sylph_reads_sketcher] checking return code status: 0
+2025-12-02 10:45:22,105 - leviathan profile-taxonomy - INFO - Setting --reads_sketch to ../working/leviathan_output/profiling/taxonomy/sample_6/intermediate/reads.sylsp
+2025-12-02 10:45:22,105 - leviathan profile-taxonomy - INFO - Running Sylph profiler
+2025-12-02 10:45:22,105 - leviathan profile-taxonomy - INFO - [sylph_profiler] running command: /Users/josh/miniforge3/envs/leviathan/bin/sylph profile --estimate-unknown -t 2 --minimum-ani 95 --min-number-kmers 50 --min-count-correct 3 ../working/references/index/database/genomes.syldb ../working/leviathan_output/profiling/taxonomy/sample_6/intermediate/reads.sylsp | gzip > ../working/leviathan_output/profiling/taxonomy/sample_6/output/sylph_profile.tsv.gz
+2025-12-02 10:45:23,507 - leviathan profile-taxonomy - INFO - [sylph_profiler] duration: 1.4018919467926025
+2025-12-02 10:45:23,507 - leviathan profile-taxonomy - INFO - [sylph_profiler] peak memory: 187.67 B
+2025-12-02 10:45:23,507 - leviathan profile-taxonomy - INFO - [sylph_profiler] dumping stdout, stderr, and return code: ../working/leviathan_output/profiling/taxonomy/sample_6/logs
+2025-12-02 10:45:23,508 - leviathan profile-taxonomy - INFO - [sylph_profiler] checking return code status: 0
+2025-12-02 10:45:23,508 - leviathan profile-taxonomy - INFO - Processing genome metadata
+2025-12-02 10:45:23,511 - leviathan profile-taxonomy - INFO - Reformatting taxonomic abundance: ../working/leviathan_output/profiling/taxonomy/sample_6/output/taxonomic_abundance.genomes.parquet
+2025-12-02 10:45:23,530 - leviathan profile-taxonomy - INFO - Aggregating taxonomic abundance for genome clusters: ../working/leviathan_output/profiling/taxonomy/sample_6/output/taxonomic_abundance.genome_clusters.parquet
+2025-12-02 10:45:23,532 - leviathan profile-taxonomy - INFO - Reformatting sequence abundance: ../working/leviathan_output/profiling/taxonomy/sample_6/output/sequence_abundance.genomes.parquet
+2025-12-02 10:45:23,533 - leviathan profile-taxonomy - INFO - Aggregating sequence abundance for genome clusters: ../working/leviathan_output/profiling/taxonomy/sample_6/output/sequence_abundance.genome_clusters.parquet
+2025-12-02 10:45:23,534 - leviathan profile-taxonomy - INFO - Completed taxonomic profiling: sample_6
+2025-12-02 10:45:23,534 - leviathan profile-taxonomy - INFO - Output: ../working/leviathan_output/profiling/taxonomy/sample_6/output/sequence_abundance.genome_clusters.parquet (1.38 KB)
+2025-12-02 10:45:23,534 - leviathan profile-taxonomy - INFO - Output: ../working/leviathan_output/profiling/taxonomy/sample_6/output/sylph_profile.tsv.gz (809.00 B)
+2025-12-02 10:45:23,534 - leviathan profile-taxonomy - INFO - Output: ../working/leviathan_output/profiling/taxonomy/sample_6/output/taxonomic_abundance.genomes.parquet (1.03 KB)
+2025-12-02 10:45:23,534 - leviathan profile-taxonomy - INFO - Output: ../working/leviathan_output/profiling/taxonomy/sample_6/output/sequence_abundance.genomes.parquet (1.03 KB)
+2025-12-02 10:45:23,534 - leviathan profile-taxonomy - INFO - Output: ../working/leviathan_output/profiling/taxonomy/sample_6/output/taxonomic_abundance.genome_clusters.parquet (1.38 KB)
+2025-12-02 10:45:23,534 - leviathan profile-taxonomy - INFO - Completed running leviathan-profile-pathway for sample_6: ../working/leviathan_output/profiling/taxonomy/

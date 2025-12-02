@@ -181,24 +181,53 @@ def reformat_feature_abundance(df_gene_abundances:pd.DataFrame, gene_to_data:dic
     df_output.index.names = ["id_genome", "id_feature"]
     return df_output
     
-def build_wide_feature_prevalence_matrix(df_feature_abundance:pd.DataFrame, threshold:float=0.0):
-    # Index
-    genomes = sorted(df_feature_abundance.index.get_level_values(0).unique())
-    features = sorted(df_feature_abundance.index.get_level_values(1).unique())
-    # Shape
-    number_of_genomes = len(genomes)
-    number_of_features = len(features)
-    # Lookup
-    genome_index_lookup = dict(zip(genomes, range(number_of_genomes)))
-    feature_index_lookup = dict(zip(features, range(number_of_features)))
-    # Zero-matrix
-    prevalence_matrix = np.zeros((number_of_genomes, number_of_features), dtype=int)
-    # Populate zero-matrix
-    for (id_genome, id_feature), value in tqdm(df_feature_abundance.iloc[:,0].items(), total=df_feature_abundance.shape[0]):
-        if value > threshold:
-            i = genome_index_lookup[id_genome]
-            j = feature_index_lookup[id_feature]
-            prevalence_matrix[i,j] += 1
+def build_wide_feature_prevalence_matrix(df_gene_abundance:pd.DataFrame, gene_to_data:dict, threshold:float=0.0):
+    """
+    Build a wide-format matrix counting how many genes in each genome contribute to each feature.
+    
+    Parameters:
+    -----------
+    df_gene_abundance : pd.DataFrame
+        Gene-level abundance data with MultiIndex (id_genome, id_gene)
+    gene_to_data : dict
+        Mapping of gene IDs to metadata including feature annotations
+    threshold : float
+        Minimum abundance threshold for a gene to be counted
+        
+    Returns:
+    --------
+    pd.DataFrame
+        Wide matrix (genomes × features) with gene counts
+    """
+    from collections import defaultdict
+    
+    # Count genes per (genome, feature) combination
+    genome_feature_counts = defaultdict(lambda: defaultdict(int))
+    
+    for (id_genome, id_gene), row in tqdm(df_gene_abundance.iterrows(), total=df_gene_abundance.shape[0], desc="Counting genes per feature"):
+        abundance = row.iloc[0]  # First column (number_of_reads or similar)
+        if abundance > threshold:
+            features = gene_to_data[id_gene].get("features", [])
+            for id_feature in features:
+                genome_feature_counts[id_genome][id_feature] += 1
+    
+    # Get sorted unique genomes and features
+    genomes = sorted(genome_feature_counts.keys())
+    all_features = set()
+    for feature_counts in genome_feature_counts.values():
+        all_features.update(feature_counts.keys())
+    features = sorted(all_features)
+    
+    # Build matrix
+    prevalence_matrix = np.zeros((len(genomes), len(features)), dtype=int)
+    genome_idx = {g: i for i, g in enumerate(genomes)}
+    feature_idx = {f: i for i, f in enumerate(features)}
+    
+    for id_genome, feature_counts in genome_feature_counts.items():
+        i = genome_idx[id_genome]
+        for id_feature, count in feature_counts.items():
+            j = feature_idx[id_feature]
+            prevalence_matrix[i, j] = count
       
     return pd.DataFrame(
         data=prevalence_matrix,
@@ -471,7 +500,9 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
                 df = pd.read_parquet(filepath)
                 variable_label = data_type.split("_")[0] + "s"
                 output[id_sample] = xr.DataArray(data = df.values, coords = [(level, df.index), (variable_label, df.columns)])
-        X = xr.concat(output.values(), dim="samples")
+        
+        # Explicitly use outer join to include all genomes/features across all samples
+        X = xr.concat(output.values(), dim="samples", join="outer")
         X["samples"] = list(output.keys())
         
         

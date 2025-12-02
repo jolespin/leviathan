@@ -1,0 +1,44 @@
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - Command: ['/Users/josh/miniforge3/envs/leviathan/bin/leviathan-profile-pathway.py', '-1', '../databases/CAMI-II_Marine_n-100/sample_5/reads/reads_1.fastq.gz', '-2', '../databases/CAMI-II_Marine_n-100/sample_5/reads/reads_2.fastq.gz', '-n', 'sample_5', '-d', '../working/references/index/', '-p=2', '-o', '../working/leviathan_output/profiling/pathway/']
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - Checking Salmon index
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - [salmon_index] ../working/references/index/salmon_index/seq.bin (10.23 MB)
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - [salmon_index] ../working/references/index/salmon_index/info.json (1.00 KB)
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - [salmon_index] ../working/references/index/salmon_index/pre_indexing.log (496.00 B)
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - [salmon_index] ../working/references/index/salmon_index/ref_indexing.log (3.83 KB)
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - [salmon_index] ../working/references/index/salmon_index/ctable.bin (2.50 MB)
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - [salmon_index] ../working/references/index/salmon_index/refAccumLengths.bin (302.55 KB)
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - [salmon_index] ../working/references/index/salmon_index/mphf.bin (24.14 MB)
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - [salmon_index] ../working/references/index/salmon_index/versionInfo.json (127.00 B)
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - [salmon_index] ../working/references/index/salmon_index/duplicate_clusters.tsv (16.27 KB)
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - [salmon_index] ../working/references/index/salmon_index/ctg_offsets.bin (310.23 KB)
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - [salmon_index] ../working/references/index/salmon_index/reflengths.bin (151.28 KB)
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - [salmon_index] ../working/references/index/salmon_index/pos.bin (119.80 MB)
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - [salmon_index] ../working/references/index/salmon_index/refseq.bin (10.19 MB)
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - [salmon_index] ../working/references/index/salmon_index/complete_ref_lens.bin (151.28 KB)
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - [salmon_index] ../working/references/index/salmon_index/rank.bin (5.11 MB)
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - Checking gene metadata: ../working/references/index/database/gene_to_data.pkl.gz
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - Checking genome metadata: ../working/references/index/database/genome_to_data.pkl.gz
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - Checking pathway metadata: ../working/references/index/database/pathway_to_data.pkl.gz
+2025-12-02 12:08:51,939 - leviathan profile-pathway - INFO - Loading gene data
+2025-12-02 12:08:51,958 - leviathan profile-pathway - INFO - Loading genome data
+2025-12-02 12:08:51,958 - leviathan profile-pathway - INFO - Loading pathway data
+2025-12-02 12:08:51,988 - leviathan profile-pathway - INFO - Running Salmon quant
+2025-12-02 12:08:51,988 - leviathan profile-pathway - INFO - [salmon_quant] running command: /Users/josh/miniforge3/envs/leviathan/bin/salmon quant --meta --libType A --threads 2 --minScoreFraction 0.87 --index ../working/references/index/salmon_index -1 ../databases/CAMI-II_Marine_n-100/sample_5/reads/reads_1.fastq.gz -2 ../databases/CAMI-II_Marine_n-100/sample_5/reads/reads_2.fastq.gz --writeUnmappedNames --output ../working/leviathan_output/profiling/pathway/sample_5/intermediate && rm -v ../working/leviathan_output/profiling/pathway/sample_5/intermediate/aux_info/unmapped_names.txt
+2025-12-02 12:09:28,691 - leviathan profile-pathway - INFO - [salmon_quant] duration: 36.70264005661011
+2025-12-02 12:09:28,694 - leviathan profile-pathway - INFO - [salmon_quant] peak memory: 220.78 B
+2025-12-02 12:09:28,694 - leviathan profile-pathway - INFO - [salmon_quant] dumping stdout, stderr, and return code: ../working/leviathan_output/profiling/pathway/sample_5/logs
+2025-12-02 12:09:28,695 - leviathan profile-pathway - INFO - [salmon_quant] checking return code status: 0
+2025-12-02 12:09:28,695 - leviathan profile-pathway - INFO - [level=genome] Reformatting gene abundance: ../working/leviathan_output/profiling/pathway/sample_5/output/gene_abundances.genomes.parquet
+2025-12-02 12:09:29,032 - leviathan profile-pathway - INFO - [level=genome] Calculating feature abundance: ../working/leviathan_output/profiling/pathway/sample_5/output/feature_abundances.genomes.parquet
+2025-12-02 12:09:29,074 - leviathan profile-pathway - INFO - [level=genome] Calculating feature prevalence: ../working/leviathan_output/profiling/pathway/sample_5/output/feature_prevalence.genomes.parquet
+2025-12-02 12:09:29,245 - leviathan profile-pathway - INFO - [level=genome] Reformatting binary feature prevalence: ../working/leviathan_output/profiling/pathway/sample_5/output/feature_prevalence-binary.genomes.parquet
+2025-12-02 12:09:29,360 - leviathan profile-pathway - INFO - [level=genome] Building binary feature prevalence to dictionary
+2025-12-02 12:09:29,361 - leviathan profile-pathway - INFO - [level=genome] Building feature to pathways dictionary
+2025-12-02 12:09:29,362 - leviathan profile-pathway - INFO - [level=genome] Calculating pathway coverage
+2025-12-02 12:09:30,682 - leviathan profile-pathway - INFO - [level=genome] Aggregating pathway abundances and appending coverages: ../working/leviathan_output/profiling/pathway/sample_5/output/pathway_abundances.genomes.parquet
+2025-12-02 12:09:30,929 - leviathan profile-pathway - INFO - Completed pathway profiling: sample_5
+2025-12-02 12:09:30,930 - leviathan profile-pathway - INFO - Output: ../working/leviathan_output/profiling/pathway/sample_5/output/feature_abundances.genomes.parquet (42.61 KB)
+2025-12-02 12:09:30,930 - leviathan profile-pathway - INFO - Output: ../working/leviathan_output/profiling/pathway/sample_5/output/feature_prevalence.genomes.parquet (168.08 KB)
+2025-12-02 12:09:30,930 - leviathan profile-pathway - INFO - Output: ../working/leviathan_output/profiling/pathway/sample_5/output/pathway_abundances.genomes.parquet (29.03 KB)
+2025-12-02 12:09:30,930 - leviathan profile-pathway - INFO - Output: ../working/leviathan_output/profiling/pathway/sample_5/output/gene_abundances.genomes.parquet (62.74 KB)
+2025-12-02 12:09:30,930 - leviathan profile-pathway - INFO - Output: ../working/leviathan_output/profiling/pathway/sample_5/output/feature_prevalence-binary.genomes.parquet (166.92 KB)
+2025-12-02 12:09:30,930 - leviathan profile-pathway - INFO - Completed running leviathan-profile-pathway for sample_5: ../working/leviathan_output/profiling/pathway/

@@ -44,11 +44,11 @@ def process_genomic_databases_and_check_inputs(fasta, feature_mapping, genomes, 
         fields = first_line.split("\t")
         assert len(fields) in {3,4}, "Expecting the following fields (No header): [id_gene, features, id_genome, (Optional: id_genome_cluster)]"
         if len(fields) == 3:
+            config["contains_genome_cluster_mapping"] = False
             id_gene, features, id_genome  = fields
             gene_to_data[id_gene]["features"] = eval(features)
             gene_to_data[id_gene]["id_genome"] = id_genome
             gene_to_data[id_gene]["id_genome_cluster"] = None
-            genomes_from_feature_mapping.add(id_genome)
             
             for line in tqdm(f, f"Loading feature mapping: {feature_mapping}"):
                 line = line.strip()
@@ -57,9 +57,10 @@ def process_genomic_databases_and_check_inputs(fasta, feature_mapping, genomes, 
                     gene_to_data[id_gene]["features"] = eval(features)
                     gene_to_data[id_gene]["id_genome"] = id_genome
                     gene_to_data[id_gene]["id_genome_cluster"] = None
-                    genome_to_data[id_genome][["id_genome_cluster"]] = None
+                    genome_to_data[id_genome]["id_genome_cluster"] = None
                     
         elif len(fields) == 4:
+            config["contains_genome_cluster_mapping"] = True
             id_gene, features, id_genome, id_genome_cluster  = fields
             gene_to_data[id_gene]["features"] = eval(features)
             gene_to_data[id_gene]["id_genome"] = id_genome
@@ -75,7 +76,6 @@ def process_genomic_databases_and_check_inputs(fasta, feature_mapping, genomes, 
                     gene_to_data[id_gene]["id_genome_cluster"] = id_genome_cluster
                     genome_to_data[id_genome]["id_genome_cluster"] = id_genome_cluster
                     
-        config["contains_genome_cluster_mapping"] = True
         
     for id_gene, data in gene_to_data.items():
         features_from_data.update(data["features"])
@@ -325,7 +325,6 @@ def run_kegg_pathway_downloader(logger, log_directory, pathway_database_download
             "--no_intermediate_files" if no_intermediate_files else "",
             "--database",
             os.path.join(index_directory, "database", "pathway_to_data.pkl.gz"),
-    
         ],
         name="kegg_pathway_downloader",
     )

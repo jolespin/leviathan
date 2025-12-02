@@ -1,0 +1,22 @@
+{
+    "read_files": "[ ../databases/CAMI-II_Marine_n-100/sample_1/reads/reads_1.fastq.gz, ../databases/CAMI-II_Marine_n-100/sample_1/reads/reads_2.fastq.gz]",
+    "expected_format": "IU",
+    "compatible_fragment_ratio": 1.0,
+    "num_compatible_fragments": 63757,
+    "num_assigned_fragments": 63757,
+    "num_frags_with_concordant_consistent_mappings": 51895,
+    "num_frags_with_inconsistent_or_orphan_mappings": 11866,
+    "strand_mapping_bias": 0.5010116581558917,
+    "MSF": 0,
+    "OSF": 0,
+    "ISF": 26000,
+    "MSR": 0,
+    "OSR": 0,
+    "ISR": 25895,
+    "SF": 5962,
+    "SR": 5904,
+    "MU": 0,
+    "OU": 0,
+    "IU": 0,
+    "U": 0
+}

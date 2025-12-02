@@ -1,0 +1,18 @@
+2025-12-02 12:08:04,997 - leviathan preprocess - INFO - Command: ['/Users/josh/miniforge3/envs/leviathan/bin/leviathan-preprocess.py', '-i', 'manifest.no_pangenomes.tsv.gz', '-a', '../databases/CAMI-II_Marine_n-100/analysis/pykofamsearch_output.pathways.tsv.gz', '-o', '../working//references', '--annotation_format', 'pykofamsearch']
+2025-12-02 12:08:04,997 - leviathan preprocess - INFO - Creating output directory: ../working//references
+2025-12-02 12:08:04,997 - leviathan preprocess - INFO - Reading input: manifest.no_pangenomes.tsv.gz
+2025-12-02 12:08:04,999 - leviathan preprocess - INFO - Reading annotations: ../databases/CAMI-II_Marine_n-100/analysis/pykofamsearch_output.pathways.tsv.gz [Format: pykofamsearch]
+2025-12-02 12:08:26,483 - leviathan preprocess - INFO - Number of CDS sequences with features: 38726
+2025-12-02 12:08:26,483 - leviathan preprocess - INFO - Building feature mappings: ../working//references/feature_mapping.tsv.gz
+2025-12-02 12:08:26,625 - leviathan preprocess - INFO - Including all 93 genomes in index
+2025-12-02 12:08:26,625 - leviathan preprocess - INFO - Writing genome filepaths: ../working//references/genomes.tsv.gz
+2025-12-02 12:08:26,627 - leviathan preprocess - INFO - Calculating md5 hashes: ../working//references/md5hashes.json
+2025-12-02 12:08:26,641 - leviathan preprocess - INFO - Completed preprocessing input data for leviathan index: ../working//references
+2025-12-02 12:08:26,641 - leviathan preprocess - INFO - Directory size of leviathan preprocessing: 11.99 MB
+2025-12-02 12:08:26,641 - leviathan preprocess - INFO - Directory structure of leviathan preprocessing:
+references/
+|__ cds.fasta.gz
+|__ feature_mapping.tsv.gz
+|__ genomes.tsv.gz
+|__ md5hashes.json
+2025-12-02 12:08:26,641 - leviathan preprocess - INFO - Completed running leviathan-preprocess: ../working//references

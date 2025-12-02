@@ -58,6 +58,8 @@ This step is light-weight and produces the following files:
 * genomes.tsv.gz - Filepath of all the genomes
 * md5hashes.json - md5 hash for all files for reproducibility
 
+For genome clustering into pangenomes, I recommend using the [cluster module of VEBA](https://github.com/jolespin/veba/blob/main/walkthroughs/docs/end-to-end_metagenomics.md#9-cluster-genomes-and-proteins) which will soon be a standalone method. 
+
 ```bash
 #!/usr/bin/env bash
 job_name="leviathan-preprocess"

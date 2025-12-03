@@ -7,7 +7,7 @@ You may have noticed that I have switched the code-base from public/private a fe
 
 Please feel free to use for any academic usage but the details for commercial usage have not been finalized yet so please hold off on any commercial usage. These details should be finalized in the near future but the timeline is out of my control.  I am actively advocating for unrestricted open-source usage as this can be a useful resource for the community. 
 
-I will reupload package to PyPI once details are finalized.  Apologies for any inconvenience.  
+Apologies for any inconvenience.  
 
 For any questions, please feel free to contact me at jol.espinoz@gmail.com
 
@@ -20,7 +20,7 @@ mamba create -n leviathan -c conda-forge -c bioconda python salmon sylph samtool
 # Activate environment
 mamba activate leviathan
 
-# Install Leviathan (see license note)
+# Install Leviathan
 pip install leviathan 
 ```
 ## Modules

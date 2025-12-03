@@ -34,7 +34,6 @@ Leviathan: A fast, memory-efficient, and scalable taxonomic and pathway profiler
 Detailed explanation on how to run each module including downloading test data and interpreting output files. 
 
 ## Benchmarking
-
 ### Benchmarking against 10, 100, 1000, and 10000 genomes
 Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 EC2 instance (ml.m5.4xlarge)
 

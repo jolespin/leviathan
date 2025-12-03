@@ -30,7 +30,8 @@ pip install leviathan
 Leviathan: A fast, memory-efficient, and scalable taxonomic and pathway profiler for (pan)genome-resolved metagenomics and metatranscriptomics. Josh L Espinoza. bioRxiv 2025.07.14.664802; doi: [https://doi.org/10.1101/2025.07.14.664802](https://doi.org/10.1101/2025.07.14.664802)
 
 ## Usage: 
-[`Leviathan` Walkthrough](WALKTHROUGH.md) for a detailed explanation on how to run each module including downloading test data and interpreting output files. 
+#### [End-to-End Walkthrough](WALKTHROUGH.md)
+Detailed explanation on how to run each module including downloading test data and interpreting output files. 
 
 ## Benchmarking
 

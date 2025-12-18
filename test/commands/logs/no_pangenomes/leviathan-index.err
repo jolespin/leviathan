@@ -1,6 +1,0 @@
-Loading fasta: ../working/references/cds.fasta.gz: 0it [00:00, ?it/s]Loading fasta: ../working/references/cds.fasta.gz: 38726it [00:00, 438280.80it/s]
-Loading feature mapping: ../working/references/feature_mapping.tsv.gz: 0it [00:00, ?it/s]Loading feature mapping: ../working/references/feature_mapping.tsv.gz: 21865it [00:00, 218639.26it/s]Loading feature mapping: ../working/references/feature_mapping.tsv.gz: 38725it [00:00, 221023.20it/s]
-Loading genomes: ../working/references/genomes.tsv.gz: 0it [00:00, ?it/s]Loading genomes: ../working/references/genomes.tsv.gz: 93it [00:00, 937668.92it/s]
-Command Successful: /Users/josh/miniforge3/envs/leviathan/bin/salmon index --keepDuplicates --threads 14 --transcripts ../working/references/cds.fasta.gz --index ../working/references/index/salmon_index
-Writing filepaths: ../working/references/index/tmp/genome_filepaths.list:   0%|          | 0/93 [00:00<?, ?it/s]Writing filepaths: ../working/references/index/tmp/genome_filepaths.list: 100%|██████████| 93/93 [00:00<00:00, 1130638.47it/s]
-Command Successful: /Users/josh/miniforge3/envs/leviathan/bin/sylph sketch -t 14 --gl ../working/references/index/tmp/genome_filepaths.list -o ../working/references/index/database/genomes -k 31 --min-spacing 30 -c 200

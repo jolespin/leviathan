@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-__version__ = "2025.12.2"
+__version__ = "2025.12.17"
 from . import utils
 from . import index
 from . import profile_taxonomy

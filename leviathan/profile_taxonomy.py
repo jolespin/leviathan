@@ -161,7 +161,7 @@ def run_sylph_profiler(logger, log_directory, sylph_executable, n_jobs, output_d
     cmd.check_status()
     return cmd
 
-def merge_taxonomic_profiling_tables_as_pandas(profiling_directory:str, level="genome", data_type:str="taxonomic_abundances", fillna_with_zeros:bool=False, sparse:bool=False):
+def merge_taxonomic_profiling_tables_as_pandas(profiling_directory:str, level="genomes", data_type:str="taxonomic_abundances", fillna_with_zeros:bool=False, sparse:bool=False, table_format:str = "parquet"):
     
     """
     Merge taxonomic profiling at the genome or genome cluster level.
@@ -179,7 +179,9 @@ def merge_taxonomic_profiling_tables_as_pandas(profiling_directory:str, level="g
         Whether to fill missing values with zeros. Default is False.
     sparse : bool, optional
         Whether to return a pd.Sparse type. Default is False.
-        
+    table_format : str
+        The --output_format used for `leviathan-profile-pathway.py` and `leviathan-profile-taxonomy.py` [Default: parquet]
+
     Returns
     -------
     pd.DataFrame
@@ -196,37 +198,53 @@ def merge_taxonomic_profiling_tables_as_pandas(profiling_directory:str, level="g
     * taxonomic_abundance.genome_clusters.parquet
     * taxonomic_abundance.genomes.parquet
     """
-    choices = {"genomes", "genome_clusters"}
-    if level not in choices:
-        raise KeyError(f"level must be in {choices}")
+    check_argument_choice(
+        query=level, 
+        choices={"genomes", "genome_clusters"},
+        )
+    check_argument_choice(
+        query=table_format, 
+        choices={"parquet", "tsv"},
+        )
     
+    if table_format == "parquet":
+        extension = "parquet"
+    elif table_format == "tsv":
+        extension = "tsv.gz"
 
     # Genomes
     if level == "genomes":
         output = dict()
 
-        filepaths = glob.glob(f"{profiling_directory}/*/output/{data_type[:-1]}.genomes.parquet")
+        filepaths = glob.glob(f"{profiling_directory}/*/output/{data_type[:-1]}.genomes.{extension}")
 
         if filepaths:
             for filepath in tqdm(filepaths, f"Merging {level}-level {data_type.replace("_", " ")}"):
                 id_sample = filepath.split("/")[-3]
-                output[id_sample] = pd.read_parquet(filepath).squeeze("columns")
+                if table_format == "parquet":
+                    data = pd.read_parquet(filepath).squeeze("columns")
+                elif table_format == "tsv":
+                    data = pd.read_csv(filepath, sep="\t", index_col=0).squeeze("columns")
+                output[id_sample] = data
         else:
-            raise FileNotFoundError(f"Could not find any {data_type[:-1]}.genomes.parquet files in {profiling_directory}")
+            raise FileNotFoundError(f"Could not find any {data_type[:-1]}.genomes.{extension} files in {profiling_directory}")
      
     # Genome clusters
     elif level == "genome_clusters":
         output = dict()
 
-        filepaths = glob.glob(f"{profiling_directory}/*/output/{data_type[:-1]}.genome_clusters.parquet")
+        filepaths = glob.glob(f"{profiling_directory}/*/output/{data_type[:-1]}.genome_clusters.{extension}")
 
         if filepaths:
             for filepath in tqdm(filepaths, f"Merging {level}-level {data_type.replace("_", " ")}"):
                 id_sample = filepath.split("/")[-3]
-                # output[id_sample] = pd.read_csv(filepath, sep="\t", index_col=0).squeeze("columns")
-                output[id_sample] = pd.read_parquet(filepath).squeeze("columns")
+                if table_format == "parquet":
+                    data = pd.read_parquet(filepath).squeeze("columns")
+                elif table_format == "tsv":
+                    data = pd.read_csv(filepath, sep="\t", index_col=0).squeeze("columns")
+                output[id_sample] = data
         else:
-            raise FileNotFoundError(f"Could not find any {data_type[:-1]}.genome_clusters.parquet files in {profiling_directory}")
+            raise FileNotFoundError(f"Could not find any {data_type[:-1]}.genome_clusters.{extension} files in {profiling_directory}")
         
     X = pd.DataFrame(output).T
     missing_value_fill=pd.NA
@@ -237,7 +255,7 @@ def merge_taxonomic_profiling_tables_as_pandas(profiling_directory:str, level="g
         X = X.astype(pd.SparseDtype("float", missing_value_fill))
     return X
 
-def merge_taxonomic_profiling_tables_as_xarray(profiling_directory:str, level="genomes", fillna_with_zeros:bool=False):
+def merge_taxonomic_profiling_tables_as_xarray(profiling_directory:str, level="genomes", fillna_with_zeros:bool=False, table_format="parquet"):
     
     """
     merges sample-level {data_type} values from multiple samples into a single DataFrame.
@@ -250,6 +268,8 @@ def merge_taxonomic_profiling_tables_as_xarray(profiling_directory:str, level="g
         Level of organization for {data_type}. One of {"genomes", "genome_cluster"}.
     fillna_with_zeros : bool, optional
         Whether to fill missing values with zeros. Default is False.
+    table_format : str
+        The --output_format used for `leviathan-profile-pathway.py` and `leviathan-profile-taxonomy.py` [Default: parquet]
 
     Returns
     -------
@@ -270,15 +290,25 @@ def merge_taxonomic_profiling_tables_as_xarray(profiling_directory:str, level="g
         query=level, 
         choices={"genomes", "genome_clusters"},
         )
+    check_argument_choice(
+        query=table_format, 
+        choices={"parquet", "tsv"},
+        )
+
+    if table_format == "parquet":
+        extension = "parquet"
+    elif table_format == "tsv":
+        extension = "tsv.gz"
 
     # Output data
-    taxonomic_abundance_filepaths = glob.glob(f"{profiling_directory}/*/output/taxonomic_abundance.{level}.parquet")
-    sequence_abundance_filepaths = glob.glob(f"{profiling_directory}/*/output/sequence_abundance.{level}.parquet")
+    taxonomic_abundance_filepaths = glob.glob(f"{profiling_directory}/*/output/taxonomic_abundance.{level}.{extension}")
+    sequence_abundance_filepaths = glob.glob(f"{profiling_directory}/*/output/sequence_abundance.{level}.{extension}")
+
 
     if not taxonomic_abundance_filepaths:
-        raise FileNotFoundError(f"Could not find any taxonomic_abundance.{level}.parquet files in {profiling_directory}")
+        raise FileNotFoundError(f"Could not find any taxonomic_abundance.{level}.{extension} files in {profiling_directory}")
     if not sequence_abundance_filepaths:
-        raise FileNotFoundError(f"Could not find any sequence_abundance.{level}.parquet files in {profiling_directory}")
+        raise FileNotFoundError(f"Could not find any sequence_abundance.{level}.{extension} files in {profiling_directory}")
 
 
     # Merge abundances
@@ -290,6 +320,7 @@ def merge_taxonomic_profiling_tables_as_xarray(profiling_directory:str, level="g
             data_type=variable_label, 
             fillna_with_zeros=fillna_with_zeros, 
             sparse=False,
+            table_format=table_format,
         )
         output[variable_label] = xr.DataArray(data = df.values, coords = [("samples", df.index), (level, df.columns)])
         del df

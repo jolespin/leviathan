@@ -288,7 +288,7 @@ def aggregate_feature_abundance_for_clusters(df_feature_abundance:pd.DataFrame, 
     df_output.index = pd.MultiIndex.from_tuples(df_output.index, names=["id_genome_cluster", "id_feature"])
     return df_output
 
-def merge_pathway_profiling_tables_as_pandas(profiling_directory:str, data_type:str, level="genomes", metric="number_of_reads", fillna_with_zeros:bool=False, sparse:bool=False):
+def merge_pathway_profiling_tables_as_pandas(profiling_directory:str, data_type:str, level="genomes", metric="number_of_reads", fillna_with_zeros:bool=False, sparse:bool=False, table_format:str = "parquet"):
     
     """
     merges sample-level {data_type} values from multiple samples into a single DataFrame.
@@ -307,6 +307,9 @@ def merge_pathway_profiling_tables_as_pandas(profiling_directory:str, data_type:
         Whether to fill missing values with zeros. Default is False.
     sparse : bool, optional
         Whether to return a pd.Sparse type. Default is False. 
+    table_format : str
+        The --output_format used for `leviathan-profile-pathway.py` [Default: parquet]
+
     Returns
     -------
     pd.DataFrame
@@ -341,6 +344,15 @@ def merge_pathway_profiling_tables_as_pandas(profiling_directory:str, data_type:
         query=metric, 
         choices={"number_of_reads", "tpm", "coverage"},
         )
+    check_argument_choice(
+        query=table_format, 
+        choices={"parquet", "tsv"},
+        )
+    
+    if table_format == "parquet":
+        extension = "parquet"
+    elif table_format == "tsv":
+        extension = "tsv.gz"
 
     illegal_conditions = [
         (level == "genome_cluster") and (data_type == "gene_abundances"),
@@ -352,7 +364,7 @@ def merge_pathway_profiling_tables_as_pandas(profiling_directory:str, data_type:
         raise ValueError(f"Invalid combination of arguments: level={level}, data_type={data_type}, metric={metric}")
     
     # Merge tables to produce output
-    filepaths = glob.glob(f"{profiling_directory}/*/output/{data_type}.{level}.parquet")
+    filepaths = glob.glob(f"{profiling_directory}/*/output/{data_type}.{level}.{extension}")
     if filepaths:
         output = dict()
         # Abundance/Coverage
@@ -367,8 +379,10 @@ def merge_pathway_profiling_tables_as_pandas(profiling_directory:str, data_type:
             description = "Merging {}-level {} {} values".format(level, data_type.replace("_", " "), metric)
             for filepath in tqdm(filepaths, description):
                 id_sample = filepath.split("/")[-3]
-                # df = pd.read_csv(filepath, sep="\t", index_col=[0,1])
-                df = pd.read_parquet(filepath)
+                if table_format == "parquet":
+                    df = pd.read_parquet(filepath)
+                elif table_format == "tsv":
+                    df = pd.read_csv(filepath, sep="\t", index_col=0)
                 output[id_sample] = df[column]
                 
         # Prevalence
@@ -376,8 +390,10 @@ def merge_pathway_profiling_tables_as_pandas(profiling_directory:str, data_type:
             description = "Merging {}-level {} values".format(level, data_type.replace("_", " "))
             for filepath in tqdm(filepaths, description):
                 id_sample = filepath.split("/")[-3]
-                # df = pd.read_csv(filepath, sep="\t", index_col=0)
-                df = pd.read_parquet(filepath)
+                if table_format == "parquet":
+                    df = pd.read_parquet(filepath)
+                elif table_format == "tsv":
+                    df = pd.read_csv(filepath, sep="\t", index_col=0)
                 output[id_sample] = df.stack()
         X = pd.DataFrame(output).T
         
@@ -397,9 +413,9 @@ def merge_pathway_profiling_tables_as_pandas(profiling_directory:str, data_type:
         return X
                 
     else:
-        raise FileNotFoundError(f"Could not find any {data_type}.{level}.parquet files in {profiling_directory}")
+        raise FileNotFoundError(f"Could not find any {data_type}.{level}.{extension} files in {profiling_directory}")
 
-def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:str, level="genomes", metric="number_of_reads", fillna_with_zeros:bool=False):
+def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:str, level="genomes", metric="number_of_reads", fillna_with_zeros:bool=False, table_format="parquet"):
     
     """
     merges sample-level {data_type} values from multiple samples into a single DataFrame.
@@ -416,6 +432,8 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
         Metric to use for {data_type}. One of {"number_of_reads", "tpm", "coverage"}.
     fillna_with_zeros : bool, optional
         Whether to fill missing values with zeros. Default is False.
+    table_format : str
+        The --output_format used for `leviathan-profile-pathway.py` [Default: parquet]
 
     Returns
     -------
@@ -455,6 +473,16 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
         query=metric, 
         choices={"number_of_reads", "tpm", "coverage"},
         )
+    check_argument_choice(
+        query=table_format, 
+        choices={"parquet", "tsv"},
+        )
+
+    if table_format == "parquet":
+        extension = "parquet"
+    elif table_format == "tsv":
+        extension = "tsv.gz"
+
 
     illegal_conditions = [
         # (level == "genome_cluster") and (data_type == "gene_abundances"),
@@ -466,7 +494,7 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
         raise ValueError(f"Invalid combination of arguments: level={level}, data_type={data_type}, metric={metric}")
     
     # Merge tables to produce output
-    filepaths = glob.glob(f"{profiling_directory}/*/output/{data_type}.{level}.parquet")
+    filepaths = glob.glob(f"{profiling_directory}/*/output/{data_type}.{level}.{extension}")
     if filepaths:
         output = dict()
         # Abundance/Coverage
@@ -483,8 +511,10 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
             description = "Merging {}-level {} {} values".format(level, data_type.replace("_", " "), metric)
             for filepath in tqdm(filepaths, description):
                 id_sample = filepath.split("/")[-3]
-                # df = pd.read_csv(filepath, sep="\t", index_col=[0,1])
-                df = pd.read_parquet(filepath)
+                if table_format == "parquet":
+                    df = pd.read_parquet(filepath)
+                elif table_format == "tsv":
+                    df = pd.read_csv(filepath, sep="\t", index_col=0)
                 df = df[column].unstack()
 
                 output[id_sample] = xr.DataArray(data = df.values, coords = [(level, df.index), (variable_label, df.columns)])
@@ -496,8 +526,10 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
             description = "Merging {}-level {} values".format(level, data_type.replace("_", " "))
             for filepath in tqdm(filepaths, description):
                 id_sample = filepath.split("/")[-3]
-                # df = pd.read_csv(filepath, sep="\t", index_col=0)
-                df = pd.read_parquet(filepath)
+                if table_format == "parquet":
+                    df = pd.read_parquet(filepath)
+                elif table_format == "tsv":
+                    df = pd.read_csv(filepath, sep="\t", index_col=0)
                 variable_label = data_type.split("_")[0] + "s"
                 output[id_sample] = xr.DataArray(data = df.values, coords = [(level, df.index), (variable_label, df.columns)])
         
@@ -517,5 +549,5 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
         return X
                 
     else:
-        raise FileNotFoundError(f"Could not find any {data_type}.{level}.parquet files in {profiling_directory}")
+        raise FileNotFoundError(f"Could not find any {data_type}.{level}.{extension} files in {profiling_directory}")
 

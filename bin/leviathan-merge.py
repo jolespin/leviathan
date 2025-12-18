@@ -48,7 +48,8 @@ def main(args=None):
     parser.add_argument("-z","--fillna_with_zeros", action="store_true", help = "Fill missing values with 0.  This will take a lot longer to write to disk.")
     parser.add_argument("-e", "--xarray_engine", type=str, choices={"h5netcdf", "netcdf4"}, default="h5netcdf", help = "Xarray backend engine [Default: h5netcdf]")
     parser.add_argument("-c", "--xarray_compression_level", type=int, choices=set(range(0, 10)), default=4, help = "netCDF gzip compression level. Use 0 for no compression. [Default: 4]")
-    
+    parser.add_argument("-f", "--table_format", type=str, choices={"parquet", "tsv"}, default="parquet", help = "The --output_format used for `leviathan-profile-pathway.py` and `leviathan-profile-taxonomy.py` [Default: parquet]")
+
     # ------------------
     # Pending options
     # ------------------
@@ -123,6 +124,7 @@ def main(args=None):
                     profiling_directory=opts.taxonomic_profiling_directory, 
                     level=level, 
                     fillna_with_zeros=bool(opts.fillna_with_zeros), 
+                    table_format=opts.table_format,
                 )
                 n = X.sizes["samples"]
                 m = X.sizes[level]
@@ -201,6 +203,7 @@ def main(args=None):
                         level=level, 
                         metric=metric, 
                         fillna_with_zeros=bool(opts.fillna_with_zeros), 
+                        table_format=opts.table_format,
                         )
 
                     if data_type in prevalence_data_types:

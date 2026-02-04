@@ -297,8 +297,10 @@ Data variables:
 # Load pathway abundances
 ds_pathway = xr.open_dataset("leviathan_output/artifacts/pathway.genome_clusters.nc")
 
-# Subset TPM and coverage data
-X_counts = ds_pathway["tpm"].stack(cols=["genome_clusters", "pathways"]).to_pandas().fillna(0)
+# Subset counts and coverage data
+X_counts = ds_pathway["tpm"].stack(cols=["genome_clusters", "pathways"]).to_pandas().fillna(0) # Normalized
+# X_counts = ds_pathway["number_of_reads"].stack(cols=["genome_clusters", "pathways"]).to_pandas().fillna(0) # Raw
+
 X_coverage = ds_pathway["coverage"].stack(cols=["genome_clusters", "pathways"]).to_pandas().fillna(0)
 assert np.all(X_counts.columns == X_coverage.columns)
 n_samples, m_features = X_coverage.shape
@@ -308,9 +310,10 @@ n_samples, m_features = X_coverage.shape
 # Josh L Espinoza, Manolito Torralba, Pamela Leong, Richard Saffery, Michelle Bockmann, Claire Kuelbs, Suren Singh, Toby Hughes, Jeffrey M Craig, Karen E Nelson, Chris L Dupont, Differential network analysis of oral microbiome metatranscriptomes identifies community scale metabolic restructuring in dental caries, PNAS Nexus, Volume 1, Issue 5, November 2022, pgac239, https://doi.org/10.1093/pnasnexus/pgac239
 tol_coverage = 0.75 # Only consider modules that are 75% complete in at least 50% of the samples
 tol_prevalence = 0.5 # You may need to adjust these depending on your analysis (e.g., 50% complete in at least 25% of the samples)
+n_samples_for_prevalence = tol_prevalence*n_samples
 
 # Subet
-features_passed_qc = (X_coverage > tol_coverage).sum(axis=0)[lambda x: x > tol_prevalence*n_samples].index
+features_passed_qc = (X_coverage > tol_coverage).sum(axis=0)[lambda x: x > n_samples_for_prevalence].index
 X_counts = X_counts.loc[:,features_passed_qc]
 X_coverage = X_coverage.loc[:,features_passed_qc]
 

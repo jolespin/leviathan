@@ -317,6 +317,15 @@ X_coverage = X_coverage.loc[:,features_passed_qc]
 # Downstream analysis with filtered `X_counts`
 ```
 
+### 7d. Selecting coverage `prevalence` cutoff
+
+```python
+import compositional as coda
+coda.plot_prevalence(X_coverage > tol_coverage, style="ggplot")
+
+# Find where the curve drops off and cut there
+```
+
 
 ## Utility
 ### Downloading fastq from SRA

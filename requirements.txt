@@ -5,7 +5,7 @@ pandas
 pyfastx
 networkx
 scipy
-kegg_pathway_profiler>=2025.12.18
+kegg_pathway_profiler>=2024.9.21
 pyexeggutor>=2025.11.7
 fastparquet
 xarray

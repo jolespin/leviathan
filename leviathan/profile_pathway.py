@@ -252,6 +252,7 @@ def build_feature_pathway_dictionary(pathway_to_data:dict):
 def calculate_pathway_coverage(genome_to_features:dict, pathway_to_data:dict):
     # Coverage
     coverages = dict()
+    step_coverages = defaultdict(dict)
     # Calculate pathway coverage for all genomes
     for id_genome, evaluation_features in genome_to_features.items():
         # Calculate pathway coverage for all pathways based on evaluation feature set
@@ -264,8 +265,11 @@ def calculate_pathway_coverage(genome_to_features:dict, pathway_to_data:dict):
         # Coverage
         for id_pathway, results in pathway_to_results.items():
             coverages[(id_genome, id_pathway)] = results["coverage"]
-    
-    return coverages
+            # Collect step coverage data
+            for step, value in results["step_coverage"].items():
+                step_label = f"{step[0]}-{step[1]}"
+                step_coverages[id_genome][(id_pathway, step_label)] = value
+    return coverages, step_coverages
 
 def aggregate_pathway_abundance_and_append_coverage(df_feature_abundance:pd.DataFrame, feature_to_pathways:dict, coverages:dict, index_names = ["id_genome", "id_pathway"]):
     abundance_matrix = defaultdict(lambda: np.zeros(3, dtype=float))

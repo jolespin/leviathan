@@ -1,5 +1,5 @@
 {
-    "read_files": "[ ../databases/CAMI-II_Marine_n-100/sample_7/reads/reads_1.fastq.gz, ../databases/CAMI-II_Marine_n-100/sample_7/reads/reads_2.fastq.gz]",
+    "read_files": "[ ../databases/CAMI-II_Marine_n-100//sample_7/reads/reads_1.fastq.gz, ../databases/CAMI-II_Marine_n-100//sample_7/reads/reads_2.fastq.gz]",
     "expected_format": "IU",
     "compatible_fragment_ratio": 1.0,
     "num_compatible_fragments": 199714,

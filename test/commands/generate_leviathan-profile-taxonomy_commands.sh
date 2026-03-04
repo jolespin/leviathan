@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
+manifest_type="$1"
+
 rm -f commands.leviathan-profile-taxonomy.list
-working_directory="../working"
+working_directory="../working/${manifest_type}"
 database_directory="../databases/CAMI-II_Marine_n-100/"
 
 index_directory="${working_directory}/references/index/"

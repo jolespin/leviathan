@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+manifest_type="$1"
+
 job_name="leviathan-index"
 
 # Databases
@@ -6,7 +8,7 @@ database_directory="../databases/CAMI-II_Marine_n-100/"
 pathway_database="${HOME}/Databases/KEGG-Pathway-Profiler/database.pkl.gz"
 
 # Output Directories
-working_directory="../working"
+working_directory="../working/${manifest_type}"
 reference_directory="${working_directory}/references"
 index_directory="${reference_directory}/index/"
 

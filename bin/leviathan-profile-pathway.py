@@ -265,8 +265,9 @@ def main(args=None):
         logger.info(f"[level={level}] Building feature to pathways dictionary")
         feature_to_pathways = build_feature_pathway_dictionary(pathway_to_data)
         logger.info(f"[level={level}] Calculating pathway coverage")
-        coverages = calculate_pathway_coverage(genome_to_features, pathway_to_data)
+        coverages, step_coverages = calculate_pathway_coverage(genome_to_features, pathway_to_data)
         
+        # Pathway abundances
         pathway_abundances_filepath = os.path.join(output_directory, "output", f"pathway_abundances.{level}s.{opts.output_format}")
         if opts.output_format != "parquet":
             pathway_abundances_filepath += ".gz"
@@ -276,6 +277,16 @@ def main(args=None):
             df_pathway_abundances.to_parquet(pathway_abundances_filepath, index=True)
         elif opts.output_format == "tsv":
             df_pathway_abundances.to_csv(pathway_abundances_filepath, sep="\t")
+
+        # Step coverage
+        step_coverage_filepath = os.path.join(output_directory, "output", f"step_coverage.{level}s.{opts.output_format}")
+        if opts.output_format != "parquet":
+            step_coverage_filepath += ".gz"
+        df_step_coverage = pd.DataFrame(step_coverages).T.fillna(0).astype(int)
+        if opts.output_format == "parquet":
+            df_step_coverage.to_parquet(step_coverage_filepath, index=True)
+        elif opts.output_format == "tsv":
+            df_step_coverage.to_csv(step_coverage_filepath, sep="\t")
 
     if config["contains_genome_cluster_mapping"]:
         level="genome_cluster"
@@ -331,8 +342,9 @@ def main(args=None):
             logger.info(f"[level={level}] Building feature to pathways dictionary")
             feature_to_pathways = build_feature_pathway_dictionary(pathway_to_data)
             logger.info(f"[level={level}] Calculating pathway coverage")
-            coverages = calculate_pathway_coverage(genome_to_features, pathway_to_data)
+            coverages, step_coverages = calculate_pathway_coverage(genome_to_features, pathway_to_data)
             
+            # Pathway abundances
             pathway_abundances_filepath = os.path.join(output_directory, "output", f"pathway_abundances.{level}s.{opts.output_format}")
             if opts.output_format != "parquet":
                 pathway_abundances_filepath += ".gz"
@@ -344,7 +356,16 @@ def main(args=None):
             elif opts.output_format == "tsv":
                 df_pathway_abundances.to_csv(pathway_abundances_filepath, sep="\t")
 
-
+            # Step coverage
+            step_coverage_filepath = os.path.join(output_directory, "output", f"step_coverage.{level}s.{opts.output_format}")
+            if opts.output_format != "parquet":
+                step_coverage_filepath += ".gz"
+            df_step_coverage = pd.DataFrame(step_coverages).T.fillna(0).astype(int)
+            if opts.output_format == "parquet":
+                df_step_coverage.to_parquet(step_coverage_filepath, index=True)
+            elif opts.output_format == "tsv":
+                df_step_coverage.to_csv(step_coverage_filepath, sep="\t")
+                
     # ========
     # Complete
     # ========    

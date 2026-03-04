@@ -1,5 +1,7 @@
 {
-    "../working//references/genomes.tsv.gz": "08efda0b2f2bf25940c6b87846294b9e",
-    "../working//references/cds.fasta.gz": "c09f8a1795f3492b31885e624ab4a4b5",
-    "../working//references/feature_mapping.tsv.gz": "0d2b875d9dd1bbdfc79f213989c64691"
+    "../working/with_pangenomes/references/.DS_Store": "194577a7e20bdcc7afbb718f502c134c",
+    "../working/with_pangenomes/references/genomes.tsv.gz": "2f59c70821250b3d01382dde41f8986c",
+    "../working/with_pangenomes/references/cds.fasta.gz": "617186fd1d4d50fdcc57e4d4ed4ea9df",
+    "../working/with_pangenomes/references/feature_mapping.tsv.gz": "452a5755bb48b3969e323fbad1783dee",
+    "../working/with_pangenomes/references/md5hashes.json": "0139c81fb6df4005f548ff523c8c2f91"
 }

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-working_directory="../working"
+manifest_type="$1"
+
+working_directory="../working/${manifest_type}"
 profiling_directory="${working_directory}/leviathan_output/profiling"
 artifact_directory="${working_directory}/leviathan_output/artifacts"
 job_name="leviathan-merge"

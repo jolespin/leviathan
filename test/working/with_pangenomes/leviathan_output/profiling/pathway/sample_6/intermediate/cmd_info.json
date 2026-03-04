@@ -4,10 +4,10 @@
     "libType": "A",
     "threads": "2",
     "minScoreFraction": "0.87",
-    "index": "../working/references/index/salmon_index",
-    "mates1": "../databases/CAMI-II_Marine_n-100/sample_6/reads/reads_1.fastq.gz",
-    "mates2": "../databases/CAMI-II_Marine_n-100/sample_6/reads/reads_2.fastq.gz",
+    "index": "../working/with_pangenomes/references/index/salmon_index",
+    "mates1": "../databases/CAMI-II_Marine_n-100//sample_6/reads/reads_1.fastq.gz",
+    "mates2": "../databases/CAMI-II_Marine_n-100//sample_6/reads/reads_2.fastq.gz",
     "writeUnmappedNames": [],
-    "output": "../working/leviathan_output/profiling/pathway/sample_6/intermediate",
+    "output": "../working/with_pangenomes/leviathan_output/profiling/pathway/sample_6/intermediate",
     "auxDir": "aux_info"
 }

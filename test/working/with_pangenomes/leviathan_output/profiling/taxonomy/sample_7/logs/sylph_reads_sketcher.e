@@ -1,4 +1,4 @@
-2025-12-02T18:45:18.898Z INFO  [sylph::sketch] Sketching paired sequences...
-2025-12-02T18:45:28.270Z INFO  [sylph::sketch] Sketching ../working/leviathan_output/profiling/taxonomy/sample_7/intermediate/reads_1.fastq.gz.paired.sylsp complete.
-2025-12-02T18:45:28.270Z INFO  [sylph::sketch] Finished.
+2026-03-03T23:48:36.862Z INFO  [sylph::sketch] Sketching paired sequences...
+2026-03-03T23:48:46.560Z INFO  [sylph::sketch] Sketching ../working/with_pangenomes/leviathan_output/profiling/taxonomy/sample_7/intermediate/reads_1.fastq.gz.paired.sylsp complete.
+2026-03-03T23:48:46.560Z INFO  [sylph::sketch] Finished.
 

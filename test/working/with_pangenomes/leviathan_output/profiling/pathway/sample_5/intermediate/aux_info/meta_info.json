@@ -8,8 +8,8 @@
         "IU"
     ],
     "frag_dist_length": 1001,
-    "frag_length_mean": 268.87843886199888,
-    "frag_length_sd": 27.692917804608283,
+    "frag_length_mean": 268.7899603854385,
+    "frag_length_sd": 27.629391477278476,
     "seq_bias_correct": false,
     "gc_bias_correct": false,
     "num_bias_bins": 4096,
@@ -45,6 +45,6 @@
     "num_alignments_below_threshold_for_mapped_fragments_vm": 100925,
     "percent_mapped": 4.3043782447985639,
     "call": "quant",
-    "start_time": "Tue Dec 02 10:47:38 2025",
-    "end_time": "Tue Dec 02 10:48:13 2025"
+    "start_time": "Tue Mar 03 15:48:50 2026",
+    "end_time": "Tue Mar 03 15:49:23 2026"
 }

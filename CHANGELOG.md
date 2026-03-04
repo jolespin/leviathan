@@ -1,4 +1,5 @@
 #### Daily Change Log:
+* [2026.3.3] - Added `step_coverage` output files [issue/#22](https://github.com/jolespin/leviathan/issues/22)
 * [2025.12.17] - Added `--table_format parquet|tsv` to `leviathan-merge.py` and merge functions in `leviathan-profile-pathway.py`/`leviathan-profile-taxonomy.py` [Issue #20](https://github.com/jolespin/leviathan/issues)
 * [2025.12.2] - Updated `xarray` concatenation to prepare for usage change in future versions [issue/#17](https://github.com/jolespin/leviathan/issues/17)
 * [2025.12.2] - Fixed [issue/#15](https://github.com/jolespin/leviathan/issues/15) where `parquet` files weren't being created when user is not using genome clusters (i.e., 4 column input).  Related to [issue/#18](https://github.com/jolespin/leviathan/issues/18) where `contains_genome_cluster_mapping` was set to `True` even when genome clusters were not provided.

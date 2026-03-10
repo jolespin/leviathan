@@ -1,4 +1,5 @@
 #### Daily Change Log:
+* [2026.3.10] - Added `--veba_major_version` to `compile-manifest-from-veba.py` since `cluster` output directory is changing
 * [2026.3.3] - Added `step_coverage` output files [issue/#22](https://github.com/jolespin/leviathan/issues/22)
 * [2025.12.17] - Added `--table_format parquet|tsv` to `leviathan-merge.py` and merge functions in `leviathan-profile-pathway.py`/`leviathan-profile-taxonomy.py` [Issue #20](https://github.com/jolespin/leviathan/issues)
 * [2025.12.2] - Updated `xarray` concatenation to prepare for usage change in future versions [issue/#17](https://github.com/jolespin/leviathan/issues/17)

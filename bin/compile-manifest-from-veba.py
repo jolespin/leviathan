@@ -33,7 +33,7 @@ def main(args=None):
     parser_io.add_argument("-i","--veba_directory", type=str, required=True, help = "path/to/veba_directory/ (e.g., veba_output/)")
     parser_io.add_argument("-t","--organism_types", type=str, default = "prokaryotic,eukaryotic", help="Comma-separated list of organism types.  Choose between {prokaryotic, eukaryotic, viral}(e.g., prokaryotic,eukaryotic).  viral is not recommended.")
     parser_io.add_argument("-o", "--output", type=str,  default="stdout", help = "path/to/output.tsv[.gz] [Default: stdout]")
-    parser_io.add_argument("--veba_major_version", choices={2,3},  default=2, help = "Major VEBA version [Default: 2]")
+    parser_io.add_argument("--veba_major_version", type=int, choices={2,3},  default=2, help = "Major VEBA version [Default: 2]")
 
     # Options
     opts = parser.parse_args()

@@ -27,7 +27,7 @@ def check_reads_format(forward_reads, reverse_reads, single_reads, reads_sketch,
         assert single_reads is None, "If running in --input_reads_format paired mode, you cannot provide -r/--single_reads"
         assert reads_sketch is None, "If running in --input_reads_format paired mode, you cannot provide -s/--reads_sketch"
         input_reads_format = "paired"
-    if reads_sketch is not None:
+    if single_reads is not None:
         assert forward_reads is None, "If running in --input_reads_format single mode, you cannot provide --forward_reads, --reverse_reads"
         assert reverse_reads is None, "If running in --input_reads_format single mode, you cannot provide --forward_reads, --reverse_reads"
         assert reads_sketch is None, "If running in --input_reads_format single mode, you cannot provide -s/--reads_sketch"

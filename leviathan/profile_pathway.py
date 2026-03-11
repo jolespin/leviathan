@@ -24,7 +24,7 @@ from pyexeggutor import (
 __program__ = os.path.split(sys.argv[0])[-1]
 
 
-def check_reads_format(forward_reads, reverse_reads, single_reads, reads_sketch, logger):
+def check_reads_format(forward_reads, reverse_reads, single_reads, logger):
     input_reads_format = None
     if any([forward_reads, reverse_reads]):
         assert forward_reads != reverse_reads, f"You probably mislabeled the input files because `forward_reads` should not be the same as `reverse_reads`: {forward_reads}"

@@ -24,39 +24,89 @@ from pyexeggutor import (
 __program__ = os.path.split(sys.argv[0])[-1]
 
 
+def check_reads_format(forward_reads, reverse_reads, single_reads, reads_sketch, logger):
+    input_reads_format = None
+    if any([forward_reads, reverse_reads]):
+        assert forward_reads != reverse_reads, f"You probably mislabeled the input files because `forward_reads` should not be the same as `reverse_reads`: {forward_reads}"
+        assert forward_reads is not None, "If running in --input_reads_format paired mode, --forward_reads and --reverse_reads are needed."
+        assert reverse_reads is not None, "If running in --input_reads_format paired mode, --forward_reads and --reverse_reads are needed."
+        assert single_reads is None, "If running in --input_reads_format paired mode, you cannot provide -r/--single_reads"
+        input_reads_format = "paired"
+    if reads_sketch is not None:
+        assert forward_reads is None, "If running in --input_reads_format single mode, you cannot provide --forward_reads, --reverse_reads"
+        assert reverse_reads is None, "If running in --input_reads_format single mode, you cannot provide --forward_reads, --reverse_reads"
+        input_reads_format = "single"
+    if input_reads_format is None:
+        msg = "Could not determine input reads format.  Please provide either paired or single-end fastq."
+        logger.critical(msg)
+        raise ValueError(msg)
+    logger.info(f"Auto-detecting reads format: {input_reads_format}")
+    return input_reads_format
+
 # Run Salmon quant (salmon quant --meta --libType A --index ${INDEX} -1 ${R1} -2 ${R2} --threads ${N_JOBS}  --minScoreFraction=0.87 --writeUnmappedNames)
-def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executable, n_jobs, output_directory, index_directory, forward_reads, reverse_reads, minimum_score_fraction, include_mappings, alignment_format, salmon_gzip, salmon_quant_options):
+def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executable, n_jobs, output_directory, index_directory, input_reads_format, forward_reads, reverse_reads, single_reads, minimum_score_fraction, include_mappings, alignment_format, salmon_gzip, salmon_quant_options):
     arguments = dict(
-        command=[
-            salmon_executable,
-            "quant",
-            "--meta",
-            "--libType",
-            "A",
-            "--threads",
-            n_jobs,
-            "--minScoreFraction",
-            minimum_score_fraction,
-            "--index",
-            os.path.join(index_directory, "salmon_index"),
-            "-1",
-            forward_reads,
-            "-2",
-            reverse_reads,
-            "--writeUnmappedNames",
-            salmon_quant_options if salmon_quant_options else "", 
-            "--output",
-            output_directory,
-        ],
+
         name="salmon_quant",
-        validate_input_filepaths=[
-            forward_reads,
-            reverse_reads,
-        ],
+
         validate_output_filepaths=[
             os.path.join(output_directory, "quant.sf.gz") if salmon_gzip else os.path.join(output_directory, "quant.sf"),
         ],
     )
+    if input_reads_format == "paired":
+        arguments["command"] =[
+                salmon_executable,
+                "quant",
+                "--meta",
+                "--libType",
+                "A",
+                "--threads",
+                n_jobs,
+                "--minScoreFraction",
+                minimum_score_fraction,
+                "--index",
+                os.path.join(index_directory, "salmon_index"),
+                "-1",
+                forward_reads,
+                "-2",
+                reverse_reads,
+                "--writeUnmappedNames",
+                salmon_quant_options if salmon_quant_options else "", 
+                "--output",
+                output_directory,
+            ]
+        arguments["validate_input_filepaths"] = [
+                forward_reads,
+                reverse_reads,
+            ]
+    elif input_reads_format == "single":
+        arguments["command"] =[
+                salmon_executable,
+                "quant",
+                "--meta",
+                "--libType",
+                "A",
+                "--threads",
+                n_jobs,
+                "--minScoreFraction",
+                minimum_score_fraction,
+                "--index",
+                os.path.join(index_directory, "salmon_index"),
+                "-u",
+                single_reads,
+                "--writeUnmappedNames",
+                salmon_quant_options if salmon_quant_options else "", 
+                "--output",
+                output_directory,
+            ]
+        arguments["validate_input_filepaths"] = [
+                single_reads,
+            ]
+    else:
+        logger.critical("Could not determine input reads format")
+        sys.exit(1)
+
+    
     if include_mappings:
         if alignment_format == "sam":
             arguments["command"] += [
@@ -97,6 +147,7 @@ def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executab
                 "-",
             ]
             arguments["validate_output_filepaths"].append(os.path.join(output_directory, "mapped.sorted.bam"))
+
             
     # Remove unmapped reads
     arguments["command"] += [

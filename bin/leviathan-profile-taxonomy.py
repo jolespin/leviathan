@@ -32,8 +32,7 @@ from pyexeggutor import (
 from leviathan.profile_taxonomy import(
     check_genome_database,
     check_reads_format,
-    run_sylph_reads_sketcher_paired,
-    run_sylph_reads_sketcher_single,
+    run_sylph_reads_sketcher,
     run_sylph_profiler,
 )
 
@@ -137,21 +136,23 @@ def main(args=None):
     os.makedirs(os.path.join(output_directory, "logs"), exist_ok=True)
     os.makedirs(os.path.join(output_directory, "tmp"), exist_ok=True)
 
-    if input_reads_format == "paired":
+    if input_reads_format in {"paired","single"}:
         # Process and check inputs
         logger.info("Sketching reads (paired)")
 
         # ===================================
-        # Build Sylph reads sketcher (paired)
+        # Build Sylph reads sketcher
         # ===================================
-        cmd_sylph_reads_sketcher = run_sylph_reads_sketcher_paired(
+        cmd_sylph_reads_sketcher = run_sylph_reads_sketcher(
                         logger=logger,
                         log_directory=os.path.join(output_directory, "logs"), 
                         sylph_executable=opts.sylph_executable, 
                         n_jobs=opts.n_jobs, 
                         output_directory=os.path.join(output_directory, "intermediate"), 
+                        input_reads_format=input_reads_format,
                         forward_reads=opts.forward_reads, 
                         reverse_reads=opts.reverse_reads,
+                        single_reads=opts.single_reads,
                         k=opts.sylph_k, 
                         minimum_spacing=opts.sylph_minimum_spacing, 
                         subsampling_rate=opts.sylph_subsampling_rate, 
@@ -160,33 +161,11 @@ def main(args=None):
         )
         opts.reads_sketch = os.path.join(output_directory, "intermediate", "reads.sylsp")
         logger.info(f"Setting --reads_sketch to {opts.reads_sketch}")
-    elif input_reads_format == "single":
-        # Process and check inputs
-        logger.info("Sketching reads (single)")
 
-        # ===================================
-        # Build Sylph reads sketcher (single)
-        # ===================================
-        cmd_sylph_reads_sketcher = run_sylph_reads_sketcher_single(
-                        logger=logger,
-                        log_directory=os.path.join(output_directory, "logs"), 
-                        sylph_executable=opts.sylph_executable, 
-                        n_jobs=opts.n_jobs, 
-                        output_directory=os.path.join(output_directory, "intermediate"), 
-                        single_reads=opts.single_reads, 
-                        k=opts.sylph_k, 
-                        minimum_spacing=opts.sylph_minimum_spacing, 
-                        subsampling_rate=opts.sylph_subsampling_rate, 
-                        sylph_sketch_options=opts.sylph_sketch_options, 
-
-        )
-        opts.reads_sketch = os.path.join(output_directory, "intermediate", "reads.sylsp")
-        logger.info(f"Setting --reads_sketch to {opts.reads_sketch}")
     else:
         logger.info(f"Skipping read sketching and using {opts.reads_sketch}")
         if opts.reads_sketch is None:
             raise ValueError("Please either provide -1/-2 paired reads or -s/--reads_sketch")
-
         
     # ====================
     # Build Sylph profiler

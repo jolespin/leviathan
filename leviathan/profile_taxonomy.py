@@ -19,16 +19,24 @@ from pyexeggutor import (
 )
 
     
-def check_reads_format(forward_reads, reverse_reads, reads_sketch, logger):
+def check_reads_format(forward_reads, reverse_reads, single_reads, reads_sketch, logger):
     input_reads_format = None
     if any([forward_reads, reverse_reads]):
         assert forward_reads != reverse_reads, f"You probably mislabeled the input files because `forward_reads` should not be the same as `reverse_reads`: {forward_reads}"
         assert forward_reads is not None, "If running in --input_reads_format paired mode, --forward_reads and --reverse_reads are needed."
         assert reverse_reads is not None, "If running in --input_reads_format paired mode, --forward_reads and --reverse_reads are needed."
+        assert single_reads is None, "If running in --input_reads_format paired mode, you cannot provide -r/--single_reads"
+        assert reads_sketch is None, "If running in --input_reads_format paired mode, you cannot provide -s/--reads_sketch"
         input_reads_format = "paired"
+    if reads_sketch is not None:
+        assert forward_reads is None, "If running in --input_reads_format single mode, you cannot provide --forward_reads, --reverse_reads"
+        assert reverse_reads is None, "If running in --input_reads_format single mode, you cannot provide --forward_reads, --reverse_reads"
+        assert reads_sketch is None, "If running in --input_reads_format single mode, you cannot provide -s/--reads_sketch"
+        input_reads_format = "single"
     if reads_sketch is not None:
         assert forward_reads is None, "If running in --input_reads_format sketch mode, you cannot provide --forward_reads, --reverse_reads"
         assert reverse_reads is None, "If running in --input_reads_format sketch mode, you cannot provide --forward_reads, --reverse_reads"
+        assert single_reads is None, "If running in --input_reads_format sketch mode, you cannot provide -r/--single_reads"
         input_reads_format = "sketch"
     if input_reads_format is None:
         msg = "Could not determine input reads format.  Please provide either paired fastq or a Sylph sketch."
@@ -60,7 +68,7 @@ def check_genome_database(index_directory, logger):
     
         
 # Run Sylph reads sketcher
-def run_sylph_reads_sketcher(logger, log_directory, sylph_executable, n_jobs, output_directory, forward_reads, reverse_reads, k, minimum_spacing, subsampling_rate, sylph_sketch_options):
+def run_sylph_reads_sketcher_paired(logger, log_directory, sylph_executable, n_jobs, output_directory, forward_reads, reverse_reads, k, minimum_spacing, subsampling_rate, sylph_sketch_options):
     forward_reads_filename = os.path.split(forward_reads)[-1]
     cmd = RunShellCommand(
         command=[
@@ -92,8 +100,54 @@ def run_sylph_reads_sketcher(logger, log_directory, sylph_executable, n_jobs, ou
             reverse_reads,
         ],
         validate_output_filepaths=[
-            forward_reads,
-            reverse_reads,
+            os.path.join(output_directory, "reads.sylsp"),
+        ],
+    )
+    
+    # Run
+    logger.info(f"[{cmd.name}] running command: {cmd.command}")
+    cmd.run()
+    logger.info(f"[{cmd.name}] duration: {cmd.duration_}")
+    logger.info(f"[{cmd.name}] peak memory: {format_bytes(cmd.peak_memory_)}")
+
+    # Dump
+    logger.info(f"[{cmd.name}] dumping stdout, stderr, and return code: {log_directory}")
+    cmd.dump(log_directory)
+    
+    # Validate
+    logger.info(f"[{cmd.name}] checking return code status: {cmd.returncode_}")
+    cmd.check_status()
+    return cmd
+
+def run_sylph_reads_sketcher_single(logger, log_directory, sylph_executable, n_jobs, output_directory, single_reads, k, minimum_spacing, subsampling_rate, sylph_sketch_options):
+    reads_filename = os.path.split(single_reads)[-1]
+    cmd = RunShellCommand(
+        command=[
+            sylph_executable,
+            "sketch",
+            "-t",
+            n_jobs,
+            "-k",
+            k,
+            "-c",
+            subsampling_rate,
+            "--min-spacing",
+            minimum_spacing,
+            "-d",
+            output_directory,
+            "-r",
+            single_reads,
+            "&&",
+            "mv",
+            os.path.join(output_directory, f"{reads_filename}.sylsp"),
+            os.path.join(output_directory, "reads.sylsp"),
+            
+        ],
+        name="sylph_reads_sketcher",
+        validate_input_filepaths=[
+            single_reads,
+        ],
+        validate_output_filepaths=[
             os.path.join(output_directory, "reads.sylsp"),
         ],
     )

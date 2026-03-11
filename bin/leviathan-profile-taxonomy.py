@@ -32,7 +32,8 @@ from pyexeggutor import (
 from leviathan.profile_taxonomy import(
     check_genome_database,
     check_reads_format,
-    run_sylph_reads_sketcher,
+    run_sylph_reads_sketcher_paired,
+    run_sylph_reads_sketcher_single,
     run_sylph_profiler,
 )
 
@@ -56,6 +57,7 @@ def main(args=None):
     parser_io = parser.add_argument_group('I/O arguments')
     parser_io.add_argument("-1","--forward_reads", type=str,  help = "path/to/forward_reads.fq[.gz] (Cannot be used with -s/--read_sketch)")
     parser_io.add_argument("-2","--reverse_reads", type=str,  help = "path/to/reverse_reads.fq[.gz] (Cannot be used with -s/--read_sketch)")
+    parser_io.add_argument("-r","--single_reads", type=str,  help = "path/to/reads.fq[.gz] (Cannot be used with -s/--read_sketch or -1/-2)")
     parser_io.add_argument("-s","--reads_sketch", type=str, help = "path/to/reads_sketch.sylsp (e.g., sylph sketch output) (Cannot be used with -1/--forward_reads and -2/--reverse_reads)")
     parser_io.add_argument("-n", "--name", type=str, required=True, help="Name of sample")
     parser_io.add_argument("-o","--project_directory", type=str, default="leviathan_output/profiling/taxonomy", help = "path/to/project_directory (e.g., leviathan_output/profiling/taxonomy]")
@@ -116,6 +118,7 @@ def main(args=None):
     input_reads_format = check_reads_format(
         forward_reads=opts.forward_reads, 
         reverse_reads=opts.reverse_reads, 
+        single_reads=opts.single_reads,
         reads_sketch=opts.reads_sketch,
         logger=logger,
         )
@@ -136,12 +139,12 @@ def main(args=None):
 
     if input_reads_format == "paired":
         # Process and check inputs
-        logger.info("Sketching reads")
+        logger.info("Sketching reads (paired)")
 
-        # ==========================
-        # Build Sylph reads sketcher
-        # ==========================
-        cmd_sylph_reads_sketcher = run_sylph_reads_sketcher(
+        # ===================================
+        # Build Sylph reads sketcher (paired)
+        # ===================================
+        cmd_sylph_reads_sketcher = run_sylph_reads_sketcher_paired(
                         logger=logger,
                         log_directory=os.path.join(output_directory, "logs"), 
                         sylph_executable=opts.sylph_executable, 
@@ -149,6 +152,28 @@ def main(args=None):
                         output_directory=os.path.join(output_directory, "intermediate"), 
                         forward_reads=opts.forward_reads, 
                         reverse_reads=opts.reverse_reads,
+                        k=opts.sylph_k, 
+                        minimum_spacing=opts.sylph_minimum_spacing, 
+                        subsampling_rate=opts.sylph_subsampling_rate, 
+                        sylph_sketch_options=opts.sylph_sketch_options, 
+
+        )
+        opts.reads_sketch = os.path.join(output_directory, "intermediate", "reads.sylsp")
+        logger.info(f"Setting --reads_sketch to {opts.reads_sketch}")
+    elif input_reads_format == "single":
+        # Process and check inputs
+        logger.info("Sketching reads (single)")
+
+        # ===================================
+        # Build Sylph reads sketcher (single)
+        # ===================================
+        cmd_sylph_reads_sketcher = run_sylph_reads_sketcher_single(
+                        logger=logger,
+                        log_directory=os.path.join(output_directory, "logs"), 
+                        sylph_executable=opts.sylph_executable, 
+                        n_jobs=opts.n_jobs, 
+                        output_directory=os.path.join(output_directory, "intermediate"), 
+                        single_reads=opts.single_reads, 
                         k=opts.sylph_k, 
                         minimum_spacing=opts.sylph_minimum_spacing, 
                         subsampling_rate=opts.sylph_subsampling_rate, 

@@ -92,7 +92,7 @@ def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executab
                 minimum_score_fraction,
                 "--index",
                 os.path.join(index_directory, "salmon_index"),
-                "-u",
+                "-r",
                 single_reads,
                 "--writeUnmappedNames",
                 salmon_quant_options if salmon_quant_options else "", 

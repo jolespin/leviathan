@@ -33,6 +33,7 @@ def main(args=None):
     parser_io.add_argument("-i","--veba_directory", type=str, required=True, help = "path/to/veba_directory/ (e.g., veba_output/)")
     parser_io.add_argument("-t","--organism_types", type=str, default = "prokaryotic,eukaryotic", help="Comma-separated list of organism types.  Choose between {prokaryotic, eukaryotic, viral}(e.g., prokaryotic,eukaryotic).  viral is not recommended.")
     parser_io.add_argument("-o", "--output", type=str,  default="stdout", help = "path/to/output.tsv[.gz] [Default: stdout]")
+    parser_io.add_argument("--veba_major_version", type=int, choices={2,3},  default=2, help = "Major VEBA version [Default: 2]")
 
     # Options
     opts = parser.parse_args()
@@ -90,8 +91,11 @@ def main(args=None):
         
     # Genome clusters
     contains_genome_clusters = False
-    genome_cluster_filepath = os.path.join(opts.veba_directory, "cluster", "output", "global", "mags_to_slcs.tsv")
-    
+    if opts.veba_major_version == 2:
+        genome_cluster_filepath = os.path.join(opts.veba_directory, "cluster", "output", "global", "mags_to_slcs.tsv")
+    elif opts.veba_major_version == 3:
+        genome_cluster_filepath = os.path.join(opts.veba_directory, "cluster", "output", "genomes_to_pangenomes.tsv.gz")
+
     if os.path.exists(genome_cluster_filepath):
         logger.info(f"Adding genome clusters from {genome_cluster_filepath}")
         with open_file_reader(genome_cluster_filepath) as f_in:

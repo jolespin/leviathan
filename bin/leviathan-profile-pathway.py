@@ -33,6 +33,7 @@ from leviathan.index import(
 )
 
 from leviathan.profile_pathway import(
+    check_reads_format,
     run_salmon_quant,
     reformat_gene_abundance,
     reformat_feature_abundance,
@@ -62,8 +63,9 @@ def main(args=None):
 
     # Pipeline
     parser_io = parser.add_argument_group('I/O arguments')
-    parser_io.add_argument("-1","--forward_reads", type=str,  help = "path/to/forward_reads.fq[.gz] (Cannot be used with -s/--read_sketch)")
-    parser_io.add_argument("-2","--reverse_reads", type=str,  help = "path/to/reverse_reads.fq[.gz] (Cannot be used with -s/--read_sketch)")
+    parser_io.add_argument("-1","--forward_reads", type=str,  help = "path/to/forward_reads.fq[.gz] (Cannot be used with single_reads)")
+    parser_io.add_argument("-2","--reverse_reads", type=str,  help = "path/to/reverse_reads.fq[.gz] (Cannot be used with single_reads)")
+    parser_io.add_argument("-r","--single_reads", type=str,  help = "path/to/reads.fq[.gz] (Cannot be used with paired-end reads -1/-2)")
     # parser_io.add_argument("--ont", type=str,  help = "path/to/ont_reads.fq[.gz] (Cannot be used with -s/--read_sketch)")
     parser_io.add_argument("-n", "--name", type=str, required=True, help="Name of sample")
     parser_io.add_argument("-o","--project_directory", type=str, default="leviathan_output/profiling/pathway", help = "path/to/project_directory (e.g., leviathan_output/profiling/pathway]")
@@ -131,6 +133,14 @@ def main(args=None):
     # Config
     config = read_json(os.path.join(opts.index_directory, "config.json"))
 
+    # Determine input reads format
+    input_reads_format = check_reads_format(
+        forward_reads=opts.forward_reads, 
+        reverse_reads=opts.reverse_reads, 
+        single_reads=opts.single_reads,
+        logger=logger,
+        )
+
     # Check Salmon database
     logger.info("Checking Salmon index") 
     check_salmon_index(
@@ -196,8 +206,10 @@ def main(args=None):
         n_jobs=opts.n_jobs, 
         output_directory=os.path.join(output_directory, "intermediate"), 
         index_directory=opts.index_directory,
+        input_reads_format=input_reads_format,
         forward_reads=opts.forward_reads, 
         reverse_reads=opts.reverse_reads, 
+        single_reads=opts.single_reads,
         minimum_score_fraction=opts.minimum_score_fraction, 
         include_mappings=opts.salmon_include_mappings,
         alignment_format=opts.alignment_format,

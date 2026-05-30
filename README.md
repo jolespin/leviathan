@@ -1,16 +1,6 @@
 # Leviathan
 `Leviathan` is a fast, memory-efficient, and scalable taxonomic and pathway profiler for next generation sequencing (genome-resolved) metagenomics and metatranscriptomics.  `Leviathan` is powered by `Salmon` and `Sylph` in the backend.
 
-## License Notice
-
-You may have noticed that I have switched the code-base from public/private a few times.  *NewAtlantis Labs* is ending operations and IP is being absorbed by *Ocean BioMetrics*.  I am coordinating with *NewAtlantis Labs* and *Ocean BioMetrics* legal teams to finalize license details for various assets including `Leviathan`.  
-
-Please feel free to use for any academic usage but the details for commercial usage have not been finalized yet so please hold off on any commercial usage. These details should be finalized in the near future but the timeline is out of my control.  I am actively advocating for unrestricted open-source usage as this can be a useful resource for the community. 
-
-Apologies for any inconvenience.  
-
-For any questions, please feel free to contact me at jol.espinoz@gmail.com
-
 ## Install
 
 ```
@@ -27,7 +17,7 @@ pip install leviathan
 ![Flowchart](images/Flowchart.png)
 
 ## Citation
-Leviathan: A fast, memory-efficient, and scalable taxonomic and pathway profiler for (pan)genome-resolved metagenomics and metatranscriptomics. Josh L Espinoza. bioRxiv 2025.07.14.664802; doi: [https://doi.org/10.1101/2025.07.14.664802](https://doi.org/10.1101/2025.07.14.664802)
+Leviathan: A fast, memory-efficient, and scalable taxonomic and pathway profiler for (pan)genome-resolved metagenomics and metatranscriptomics. Josh L Espinoza, Allan Phillips, Chris L. Dupont. bioRxiv; doi: [https://doi.org/10.1101/2025.07.14.664802](https://doi.org/10.1101/2025.07.14.664802)
 
 ## Usage: 
 #### [End-to-End Walkthrough](WALKTHROUGH.md)

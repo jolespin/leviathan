@@ -25,7 +25,7 @@ Detailed explanation on how to run each module including downloading test data a
 
 ## Benchmarking
 ### Benchmarking against 10, 100, 1000, and 10000 genomes
-Benchmarking using trimmed SRR12042303 sample with 4 threads on ram16GB-cpu4 EC2 instance (ml.m5.4xlarge)
+Benchmarking using trimmed `SRR12042303` sample with 4 threads (ml.m5.4xlarge)
 
 | number_of_genomes | number_of_cds_with_features | preprocess | index | profile-taxonomy | profile-pathway |
 |-------------------|-----------------------------|------------|-------|------------------|-----------------|
@@ -156,7 +156,7 @@ Merge sample-specific taxonomic and/or pathway profiling
 #### Taxonomy profiles
 * Examples: 
     - Genome = Metagenome-assembled genome (MAG)
-    - Genome cluster = ANI ??? 95% & Alignment Fraction ??? 50%
+    - Genome cluster = ANI ≥ 95% & Alignment Fraction ≥ 50%
 
 ##### Taxonomic abundances - Relative abundance of a genome/genome-cluster within a sample
  * `taxonomic_abundance.genome_clusters.[parquet|tsv.gz]` - Genome-cluster-level taxonomic relative abundance profiles

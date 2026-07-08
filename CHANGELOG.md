@@ -1,5 +1,7 @@
 #### Daily Change Log:
-* [2026.3.11] - Added support for `-r/--single_reads` in both `profile-taxonomy.py` and `profile-pathway.py`. However, the `profile-pathway.py` needs `oarfish` to use long reads. [issue/#24](https://github.com/jolespin/leviathan/issues/24)
+* [2026.7.8] - Added `--update_salmon_index` to `leviathan-index.py` and remove `-u` alias on `--update_with_genomes`
+* [2026.7.8] - **BREAKING CHANGE:** `Salmon` is reimplemented with `Rust` from `C++` so any `Leviathan` databases using `Salmon 1.x` will need to be updated.  `Leviathan` now requires `Salmon ≥ 2.x`.
+* [2026.3.11] - Added support for `-r/--single_reads` in both `profile-taxonomy.py` and `profile-pathway.py`. However, the `profile-pathway.py` needs `oarfish` to use long reads but there are no synthetic long-read metatranscriptomics to benchmark. [issue/#24](https://github.com/jolespin/leviathan/issues/24)
 * [2026.3.10] - Added `--veba_major_version` to `compile-manifest-from-veba.py` since `cluster` output directory is changing
 * [2026.3.3] - Added `step_coverage` output files [issue/#22](https://github.com/jolespin/leviathan/issues/22)
 * [2025.12.17] - Added `--table_format parquet|tsv` to `leviathan-merge.py` and merge functions in `leviathan-profile-pathway.py`/`leviathan-profile-taxonomy.py` [Issue #20](https://github.com/jolespin/leviathan/issues)

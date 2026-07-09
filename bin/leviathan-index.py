@@ -65,7 +65,7 @@ def main(args=None):
     parser_io.add_argument("-g","--genomes", type=str, help = "path/to/genomes.tsv [id_genome, path/to/genome] (No header)")
     parser_io.add_argument("-d","--index_directory", type=str, required=True, help = "path/to/index_directory/ (Recommended: leviathan_output/index/ if this will only be used for one project or a centralized location if it will be used for multiple projects)")
     parser_io.add_argument("--update_with_genomes", action="store_true",  help = "Update databases with genomes for Sylph sketches")
-    parser_io.add_argument("--update_salmon_index", action="store_true",  help = "Update the salmon index on an existing database (e.g., after a salmon version upgrade)")
+    parser_io.add_argument("--update_salmon_index", action="store_true",  help = "Update the Salmon index on an existing database (e.g., Leviathan databases prior to v2026.7.8 were built with Salmon v1.x and need to be updated with Salmon v2.x)")
 
     # Utilities
     parser_utility = parser.add_argument_group('Utility arguments')

@@ -250,16 +250,16 @@ Here are the output files:
 
 ## 7. Reading output files
 ### 7a. Reading Parquet files with Pandas
-
 ```python
-!pip install fastparquet
+!pip install pyarrow
 df = pd.read_parquet("path/to/file.parquet")
 ```
 
 ### 7b. Reading NetCDF files with Xarray
-
+> [!NOTE]
+> To load `.nc` files you must have `h5netcdf` installed before `xarray` is loaded
 ```python
-!pip install xarray
+!pip install xarray h5netcdf
 import xarray as xr
 
 # Taxonomic abundances for genomes
@@ -290,9 +290,24 @@ Data variables:
     coverage         (samples, genome_clusters, pathways) float32 89kB ...
 
 ```
+### 7c. Filtering functional profiling results with taxonomy gate
+```python
+# Load taxonomic profiling
+ds_taxonomic = xr.open_dataset("leviathan_output/artifacts/taxonomic_abundances.genome_clusters.nc")
 
-### 7c. Reformatting Xarray NetCDF files into Pandas DataFrames
+# Load functional profiling
+ds_pathway = xr.open_dataset("leviathan_output/artifacts/pathway.genome_clusters.nc")
 
+# Get (pan)genomes to retain from taxonomic abundances
+minimum_samples_detected = 2
+retained_organisms = (ds_taxonomic["taxonomic_abundances"].to_pandas() > 0).sum(axis=0)[lambda x: x >= minimum_samples_detected].index
+
+# Filter functional profiling with taxonomic abundance gate
+ds_pathway_filtered = ds_pathway.sel(genome_clusters=retained_organisms)
+```
+
+
+### 7d. Reformatting Xarray NetCDF files into Pandas DataFrames
 ```python
 # Load pathway abundances
 ds_pathway = xr.open_dataset("leviathan_output/artifacts/pathway.genome_clusters.nc")

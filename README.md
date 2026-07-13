@@ -24,69 +24,7 @@ Leviathan: A fast, memory-efficient, and scalable taxonomic and pathway profiler
 Detailed explanation on how to run each module including downloading test data and interpreting output files. 
 
 ## Benchmarking
-### Benchmarking against 10, 100, 1000, and 10000 genomes
-Benchmarking using trimmed `SRR12042303` sample with 4 threads (ml.m5.4xlarge)
-
-| number_of_genomes | number_of_cds_with_features | preprocess | index | profile-taxonomy | profile-pathway |
-|-------------------|-----------------------------|------------|-------|------------------|-----------------|
-| 10                | 1928                        | 0:03       | 0:09  | 0:41             | 2:09            |
-| 100               | 18410                       | 0:31       | 0:26  | 0:41             | 4:29            |
-| 1000              | 191155                      | 5:29       | 3:55  | 0:43             | 12:50           |
-| 10000             | 1684876                     | 46:00      | 39:10 | 0:48             | 18:14           |
-
-### Benchmarking against CAMI-I and CAMI-II using 16 threads
-All benchmarking and analysis was performed using a virtual machine with the following
-specifications: Linux Ubuntu 22.04 64-bit (x86_64), 30 Intel Xeon Platinum 8358 CPU, 222 GB
-memory, and 1 NVIDIA A10 GPU. Benchmarking and analysis was performed using 16 threads
-running 2 jobs simultaneously for *Leviathan* and *HUMAnN*. 
-
-#### Computational Performance
-|                 |          | Leviathan            |                    | HUMAnN               |                    | Fold   Improvement |        |
-|-----------------|----------|----------------------|--------------------|----------------------|--------------------|--------------------|--------|
-|                 |          | Duration   (minutes) | Peak   Memory (GB) | Duration   (minutes) | Peak   Memory (GB) | Duration           | Memory |
-| CAMI_high_toy   | H_S001   | 14.61                | 2.34               | 1083.57              | 32.31              | 74.19              | 13.84  |
-|                 | H_S002   | 14.89                | 2.35               | 949.73               | 32.28              | 63.78              | 13.75  |
-|                 | H_S003   | 14.96                | 2.34               | 875.83               | 32.64              | 58.56              | 13.97  |
-|                 | H_S004   | 15.02                | 2.35               | 852.18               | 32.33              | 56.72              | 13.79  |
-|                 | H_S005   | 15.27                | 2.33               | 826.25               | 32.23              | 54.13              | 13.82  |
-| CAMI_medium_toy | M2_S001  | 5.78                 | 1.62               | 219.25               | 15.95              | 37.96              | 9.83   |
-|                 | M2_S002  | 5.81                 | 1.62               | 174.12               | 16.96              | 29.95              | 10.45  |
-| CAMI_low_toy    | S_S001   | 3.29                 | 1.27               | 76.90                | 10.00              | 23.40              | 7.87   |
-| Marine          | sample_0 | 13.78                | 2.70               | 119.52               | 17.92              | 8.68               | 6.63   |
-|                 | sample_1 | 15.22                | 2.69               | 121.30               | 18.00              | 7.97               | 6.69   |
-|                 | sample_2 | 14.97                | 2.71               | 120.27               | 17.99              | 8.03               | 6.65   |
-|                 | sample_3 | 17.10                | 2.71               | 124.05               | 17.83              | 7.25               | 6.59   |
-|                 | sample_4 | 14.32                | 2.74               | 118.47               | 17.82              | 8.27               | 6.51   |
-|                 | sample_5 | 15.53                | 2.72               | 119.40               | 17.80              | 7.69               | 6.54   |
-|                 | sample_6 | 16.09                | 2.71               | 119.72               | 17.91              | 7.44               | 6.62   |
-|                 | sample_7 | 14.90                | 2.73               | 119.92               | 17.92              | 8.05               | 6.56   |
-|                 | sample_8 | 16.41                | 2.72               | 121.73               | 17.95              | 7.42               | 6.61   |
-|                 | sample_9 | 14.45                | 2.73               | 118.87               | 17.79              | 8.23               | 6.51   |
-
-#### Accuracy Performance
-Ranges from 0.0 - 1.0
-
-|                 | Accuracy | Leviathan |           | HUMAnN |           | Improvement |           |
-|-----------------|----------|-----------|-----------|--------|-----------|-------------|-----------|
-| Dataset         | SampleID | Genome    | Pangenome | Genome | Pangenome | Genome      | Pangenome |
-| CAMI_high_toy   | H_S001   | 0.9492    | 0.9970    | 0.9049 | 0.9610    | 0.0442      | 0.0360    |
-|                 | H_S002   | 0.9551    | 0.9899    | 0.8992 | 0.9591    | 0.0558      | 0.0308    |
-|                 | H_S003   | 0.9556    | 0.9888    | 0.9004 | 0.9598    | 0.0553      | 0.0290    |
-|                 | H_S004   | 0.9496    | 0.9872    | 0.8947 | 0.9588    | 0.0548      | 0.0284    |
-|                 | H_S005   | 0.9420    | 0.9877    | 0.8901 | 0.9573    | 0.0519      | 0.0304    |
-| CAMI_medium_toy | M2_S001  | 0.9692    | 0.9983    | 0.9101 | 0.9620    | 0.0591      | 0.0363    |
-|                 | M2_S002  | 0.9762    | 0.9988    | 0.9177 | 0.9650    | 0.0585      | 0.0338    |
-| CAMI_low_toy    | S_S001   | 1.0000    | 1.0000    | 0.9845 | 0.9845    | 0.0155      | 0.0155    |
-| Marine          | sample_0 | 0.9727    | 0.9933    | 0.8783 | 0.9538    | 0.0944      | 0.0396    |
-|                 | sample_1 | 0.9298    | 0.9922    | 0.8793 | 0.9554    | 0.0505      | 0.0367    |
-|                 | sample_2 | 0.9686    | 0.9817    | 0.8768 | 0.9393    | 0.0918      | 0.0424    |
-|                 | sample_3 | 0.9706    | 0.9842    | 0.8596 | 0.9517    | 0.1110      | 0.0325    |
-|                 | sample_4 | 0.9661    | 0.9880    | 0.8454 | 0.9389    | 0.1207      | 0.0491    |
-|                 | sample_5 | 0.9614    | 0.9856    | 0.8740 | 0.9612    | 0.0874      | 0.0244    |
-|                 | sample_6 | 0.9283    | 0.9869    | 0.8684 | 0.9574    | 0.0599      | 0.0295    |
-|                 | sample_7 | 0.9231    | 0.9942    | 0.8719 | 0.9466    | 0.0512      | 0.0476    |
-|                 | sample_8 | 0.9703    | 0.9889    | 0.8764 | 0.9488    | 0.0940      | 0.0401    |
-|                 | sample_9 | 0.9459    | 0.9859    | 0.8657 | 0.9548    | 0.0802      | 0.0311    |
+Please refer to the publication for benchmarking specs but you should be able to run this easily on a machine with 16GB of RAM. 
 
 ## Modules
 ### `leviathan-preprocess`

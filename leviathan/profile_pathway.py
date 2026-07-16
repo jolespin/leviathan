@@ -10,7 +10,7 @@ import xarray as xr
 # from memory_profiler import profile
 
 from kegg_pathway_profiler.pathways import (
-    pathway_coverage_wrapper,
+    profile_pathway_coverage,
 )
 
 from pyexeggutor import (
@@ -44,7 +44,7 @@ def check_reads_format(forward_reads, reverse_reads, single_reads, logger):
     return input_reads_format
 
 # Run Salmon quant (salmon quant --meta --libType A --index ${INDEX} -1 ${R1} -2 ${R2} --threads ${N_JOBS}  --minScoreFraction=0.87 --writeUnmappedNames)
-def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executable, n_jobs, output_directory, index_directory, input_reads_format, forward_reads, reverse_reads, single_reads, minimum_score_fraction, include_mappings, alignment_format, salmon_gzip, salmon_quant_options):
+def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executable, n_jobs, output_directory, index_directory, input_reads_format, forward_reads, reverse_reads, single_reads, minimum_score_fraction, include_mappings, alignment_format, salmon_gzip, salmon_quant_options, deterministic=False):
     arguments = dict(
 
         name="salmon_quant",
@@ -71,7 +71,8 @@ def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executab
                 "-2",
                 reverse_reads,
                 "--writeUnmappedNames",
-                salmon_quant_options if salmon_quant_options else "", 
+                "--deterministic" if deterministic else "",
+                salmon_quant_options if salmon_quant_options else "",
                 "--output",
                 output_directory,
             ]
@@ -95,7 +96,8 @@ def run_salmon_quant(logger, log_directory, salmon_executable, samtools_executab
                 "-r",
                 single_reads,
                 "--writeUnmappedNames",
-                salmon_quant_options if salmon_quant_options else "", 
+                "--deterministic" if deterministic else "",
+                salmon_quant_options if salmon_quant_options else "",
                 "--output",
                 output_directory,
             ]
@@ -300,27 +302,6 @@ def build_feature_pathway_dictionary(pathway_to_data:dict):
     return feature_to_pathways
             
         
-def calculate_pathway_coverage(genome_to_features:dict, pathway_to_data:dict):
-    # Coverage
-    coverages = dict()
-    step_coverages = defaultdict(dict)
-    # Calculate pathway coverage for all genomes
-    for id_genome, evaluation_features in genome_to_features.items():
-        # Calculate pathway coverage for all pathways based on evaluation feature set
-        pathway_to_results = pathway_coverage_wrapper(
-            evaluation_kos=evaluation_features,
-            database=pathway_to_data,
-            progressbar_description=f"Calculating pathway coverage: {id_genome}",
-        )
-
-        # Coverage
-        for id_pathway, results in pathway_to_results.items():
-            coverages[(id_genome, id_pathway)] = results["coverage"]
-            # Collect step coverage data
-            for step, value in results["step_coverage"].items():
-                step_label = f"{step[0]}-{step[1]}"
-                step_coverages[id_genome][(id_pathway, step_label)] = value
-    return coverages, step_coverages
 
 def aggregate_pathway_abundance_and_append_coverage(df_feature_abundance:pd.DataFrame, feature_to_pathways:dict, coverages:dict, index_names = ["id_genome", "id_pathway"]):
     abundance_matrix = defaultdict(lambda: np.zeros(3, dtype=float))

@@ -1,4 +1,6 @@
 #### Daily Change Log:
+* [2026.7.16] - Added parallelization support for pathway coverage using `profile_pathway_coverage` from `kegg_pathway_profiler>=2026.7.16` in `leviathan-profile-pathway.py`. The `--n_jobs` flag now applies to both `salmon quant` and pathway coverage computation.
+* [2026.7.16] - Added `--deterministic` flag to `leviathan-profile-pathway.py` which passes `--deterministic` to `salmon quant` for byte-identical results across runs and thread counts.
 * [2026.7.8] - Added `--update_salmon_index` to `leviathan-index.py` and remove `-u` alias on `--update_with_genomes`
 * [2026.7.8] - **BREAKING CHANGE:** `Salmon` is reimplemented with `Rust` from `C++` so any `Leviathan` databases using `Salmon 1.x` will need to be updated.  `Leviathan` now requires `Salmon ≥ 2.x`.
 * [2026.3.11] - Added support for `-r/--single_reads` in both `profile-taxonomy.py` and `profile-pathway.py`. However, the `profile-pathway.py` needs `oarfish` to use long reads but there are no synthetic long-read metatranscriptomics to benchmark. [issue/#24](https://github.com/jolespin/leviathan/issues/24)

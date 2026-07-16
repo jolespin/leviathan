@@ -32,6 +32,8 @@ from leviathan.index import(
     check_salmon_index,
 )
 
+from kegg_pathway_profiler.pathways import profile_pathway_coverage
+
 from leviathan.profile_pathway import(
     check_reads_format,
     run_salmon_quant,
@@ -40,7 +42,6 @@ from leviathan.profile_pathway import(
     build_wide_feature_prevalence_matrix,
     build_feature_prevalence_dictionary,
     build_feature_pathway_dictionary,
-    calculate_pathway_coverage,
     aggregate_pathway_abundance_and_append_coverage,
     aggregate_feature_abundance_for_clusters,
 )
@@ -83,6 +84,7 @@ def main(args=None):
     parser_salmon_quant.add_argument("--salmon_include_mappings", action="store_true", help="salmon quant| Include mappings")
     parser_salmon_quant.add_argument("--salmon_gzip", action="store_true", help="salmon quant | Gzip quant.sf")
 
+    parser_salmon_quant.add_argument("--deterministic", action="store_true", help="salmon quant | Deterministic quantification: byte-identical results across runs and thread counts [Default: False]")
     parser_salmon_quant.add_argument("--salmon_quant_options", type=str, default="", help="salmon quant| More options (e.g. --arg=1 ) https://salmon.readthedocs.io/en/latest/ [Default: '']")
 
     # Samtools
@@ -214,7 +216,8 @@ def main(args=None):
         include_mappings=opts.salmon_include_mappings,
         alignment_format=opts.alignment_format,
         salmon_gzip=opts.salmon_gzip,
-        salmon_quant_options=opts.salmon_quant_options, 
+        salmon_quant_options=opts.salmon_quant_options,
+        deterministic=opts.deterministic,
     )
        
     # ===============================
@@ -277,8 +280,13 @@ def main(args=None):
         logger.info(f"[level={level}] Building feature to pathways dictionary")
         feature_to_pathways = build_feature_pathway_dictionary(pathway_to_data)
         logger.info(f"[level={level}] Calculating pathway coverage")
-        coverages, step_coverages = calculate_pathway_coverage(genome_to_features, pathway_to_data)
-        
+        coverages, step_coverages, _ = profile_pathway_coverage(
+            genome_to_kos=genome_to_features,
+            database=pathway_to_data,
+            n_jobs=opts.n_jobs,
+            serialize_output=False,
+        )
+
         # Pathway abundances
         pathway_abundances_filepath = os.path.join(output_directory, "output", f"pathway_abundances.{level}s.{opts.output_format}")
         if opts.output_format != "parquet":
@@ -354,7 +362,12 @@ def main(args=None):
             logger.info(f"[level={level}] Building feature to pathways dictionary")
             feature_to_pathways = build_feature_pathway_dictionary(pathway_to_data)
             logger.info(f"[level={level}] Calculating pathway coverage")
-            coverages, step_coverages = calculate_pathway_coverage(genome_to_features, pathway_to_data)
+            coverages, step_coverages, _ = profile_pathway_coverage(
+                genome_to_kos=genome_to_features,
+                database=pathway_to_data,
+                n_jobs=opts.n_jobs,
+                serialize_output=False,
+            )
             
             # Pathway abundances
             pathway_abundances_filepath = os.path.join(output_directory, "output", f"pathway_abundances.{level}s.{opts.output_format}")

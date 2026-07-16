@@ -64,7 +64,8 @@ def main(args=None):
     parser_io.add_argument("-m","--feature_mapping", type=str,  help = "path/to/feature_mapping.tsv [id_gene, feature_set, id_genome, (Optional: id_genome_cluster)] (No header)")
     parser_io.add_argument("-g","--genomes", type=str, help = "path/to/genomes.tsv [id_genome, path/to/genome] (No header)")
     parser_io.add_argument("-d","--index_directory", type=str, required=True, help = "path/to/index_directory/ (Recommended: leviathan_output/index/ if this will only be used for one project or a centralized location if it will be used for multiple projects)")
-    parser_io.add_argument("-u", "--update_with_genomes", action="store_true",  help = "Update databases with genomes for Sylph sketches")
+    parser_io.add_argument("--update_with_genomes", action="store_true",  help = "Update databases with genomes for Sylph sketches")
+    parser_io.add_argument("--update_salmon_index", action="store_true",  help = "Update the Salmon index on an existing database (e.g., Leviathan databases prior to v2026.7.8 were built with Salmon v1.x and need to be updated with Salmon v2.x)")
 
     # Utilities
     parser_utility = parser.add_argument_group('Utility arguments')
@@ -102,7 +103,7 @@ def main(args=None):
     logger.info(f"Command: {sys.argv}")
 
     # Checks
-    if not opts.no_check:
+    if not opts.no_check and not opts.update_salmon_index:
         genomes_with_filepaths = set()
         with open_file_reader(opts.genomes) as f:
             for line in f:
@@ -143,6 +144,16 @@ def main(args=None):
             parser.error(msg)
         if not opts.genomes:
             logger.warning("--genomes not provided but can incoporated post hoc by rerunning with --update_with_genomes")
+
+    if opts.update_salmon_index:
+        if opts.update_with_genomes:
+            msg = "--update_salmon_index and --update_with_genomes are mutually exclusive"
+            logger.critical(msg)
+            parser.error(msg)
+        if not opts.fasta:
+            msg = "--fasta is required when --update_salmon_index is specified"
+            logger.critical(msg)
+            parser.error(msg)
 
     # Threads
     if opts.n_jobs == -1:
@@ -186,6 +197,7 @@ def main(args=None):
     if all([
         os.path.exists(opts.index_directory),
         not opts.update_with_genomes,
+        not opts.update_salmon_index,
         ]):
         msg = f"--index_directory {opts.index_directory} already exists.  If you want to update with genomes, please use --update_with_genomes or remove directory to overwrite"
         logger.critical(msg)
@@ -195,7 +207,22 @@ def main(args=None):
     os.makedirs(os.path.join(opts.index_directory, "logs"), exist_ok=True)
     os.makedirs(os.path.join(opts.index_directory, "tmp"), exist_ok=True)
 
-    if not opts.update_with_genomes:
+    if opts.update_salmon_index:
+        # ==================
+        # Rebuild Salmon Index
+        # ==================
+        logger.info("Rebuilding salmon index")
+        cmd_salmon_indexer = run_salmon_indexer(
+            logger=logger,
+            log_directory=os.path.join(opts.index_directory, "logs"),
+            salmon_executable=opts.salmon_executable,
+            n_jobs=opts.n_jobs,
+            fasta=opts.fasta,
+            index_directory=opts.index_directory,
+            index_options=opts.salmon_index_options,
+        )
+
+    elif not opts.update_with_genomes:
         # Setup config
         logger.info("Setting up config")
 
@@ -295,7 +322,9 @@ def main(args=None):
     # ==================
     # Build Sylph Sketch
     # ==================
-    if config["contains_genome_filepaths"]:
+    if opts.update_salmon_index:
+        logger.info("Skipping Sylph sketching (only updating salmon index)")
+    elif config["contains_genome_filepaths"]:
         logger.info("Writing genome filepaths for Sylph")
 
         # Write filepaths

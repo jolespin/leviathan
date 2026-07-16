@@ -213,9 +213,15 @@ def load_pathway_database_and_check_inputs(index_directory, gene_to_data, logger
 # Check salmon index files
 def check_salmon_index(salmon_index_directory, logger):
     expected_files = [
-        'seq.bin', 'info.json', 'pre_indexing.log', 'ref_indexing.log', 'ctable.bin', 'refAccumLengths.bin', 
-        'mphf.bin', 'versionInfo.json', 'duplicate_clusters.tsv', 'ctg_offsets.bin', 'reflengths.bin', 
-        'pos.bin', 'refseq.bin', 'complete_ref_lens.bin', 'rank.bin',
+        'refseq.bin', 
+        'refseq_offsets.json', 
+        'index.refinfo', 
+        'index.ectab', 
+        # 'duplicate_clusters.tsv', 
+        'info.json', 
+        'index.ctab', 
+        'index.ssi', 
+        'index.ssi.mphf',
         ]
     
     missing_files = list()

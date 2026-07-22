@@ -1,4 +1,5 @@
 #### Daily Change Log:
+* [2026.7.22] - Changed the `KEGG Pathwayer Profiler` database downloader in `leviathan-index.py`/`index.py` to use EBI's `kegg-pathways-completeness-tool`.
 * [2026.7.16] - Added parallelization support for pathway coverage using `profile_pathway_coverage` from `kegg_pathway_profiler>=2026.7.16` in `leviathan-profile-pathway.py`. The `--n_jobs` flag now applies to both `salmon quant` and pathway coverage computation.
 * [2026.7.16] - Added `--deterministic` flag to `leviathan-profile-pathway.py` which passes `--deterministic` to `salmon quant` for byte-identical results across runs and thread counts.
 * [2026.7.8] - Added `--update_salmon_index` to `leviathan-index.py` and remove `-u` alias on `--update_with_genomes`

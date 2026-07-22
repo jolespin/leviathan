@@ -89,7 +89,9 @@ def main(args=None):
     parser_pathways = parser.add_argument_group('Pathway database arguments')
     parser_pathways.add_argument("--pathway_database_downloader_executable", type=str, help="KEGG Pathway profiler `build-pathway-database.py` executable. Ignored if --database is provided. [Default: $PATH]")
     parser_pathways.add_argument("--no_intermediate_files", action="store_true",  help = "Don't write intermediate files when downloading database")
-    parser_pathways.add_argument("--pathway_database", type=str, default=DEFAULT_PATHWAY_DATABASE, help=f"Pathway database formatted as a Python pkl[.gz].  See documentation for details.  If no database is provided, then a database will be generated if KEGG orthologs are provided as features. [Default: {DEFAULT_PATHWAY_DATABASE}]")
+    parser_pathways.add_argument("--pathway_database", type=str, help=f"Pathway database formatted as a Python pkl[.gz].  See documentation for details.  If no database is provided, then a database will be generated if KEGG orthologs are provided as features.")
+    parser_pathways.add_argument("--ebi_kegg_build", type=str, default="latest", help=f"Download from EBI kegg-pathways-completeness-tool GitHub repository.  Accepts the following: latest (latest release), published release tag (e.g., '1.4.3'), or branch:<name> (e.g., 'branch:master') [Default: latest]")
+
 
     # Options
     opts = parser.parse_args()
@@ -258,11 +260,13 @@ def main(args=None):
             if config["feature_type_is_kegg_ortholog"]:
                 # Run KEGG Pathway Downloader
                 logger.info("Running KEGG Pathway downloader")
+
                 cmd_kegg_pathway_downloader = run_kegg_pathway_downloader(
                     logger=logger,
                     log_directory = os.path.join(opts.index_directory, "logs"),
                     pathway_database_downloader_executable=opts.pathway_database_downloader_executable,
                     index_directory=opts.index_directory,
+                    ebi_kegg_build=opts.ebi_kegg_build,
                     no_intermediate_files=bool(opts.no_intermediate_files),
                     )
                 config["contains_pathways"] = True

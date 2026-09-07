@@ -24,7 +24,7 @@ pip install leviathan
 
 
 ### Quick Start
-After [fetching databases (and annotating proteins)](docs/FETCH-ANNOTATE.md) you can [build a Leviathan database](docs/END-TO-END.md).  Once a database is built, you can easily profile each sample in parallel and merge the results into optimized data structures. 
+After [fetching databases (and annotating proteins)](docs/SETUP-DATABASES.md) you can [build a Leviathan database](docs/END-TO-END.md).  Once a database is built, you can easily profile each sample in parallel and merge the results into optimized data structures. 
 
 #### Profile taxonomy (per sample)
 ```
@@ -39,8 +39,9 @@ leviathan-profile-pathway.py -1 <r1-fastq[.gz]> -2 <r2-fastq[.gz]> -n <sample-na
 leviathan-merge.py -t <output-directory>/taxonomy/ -p <output-directory>/pathway/
 ```
 ### Walkthroughs
-* [Fetching and Annotating](docs/FETCH-ANNOTATE.md) - Fetching backend databases and annotating proteins
+* [Database Setup and Annotation](docs/SETUP-DATABASES.md) - Fetching backend databases and annotating proteins
 * [End-to-End](docs/END-TO-END.md) - Detailed walkthrough on how to run each module including downloading test data and interpreting output files. 
+* [Downloading Fastq](docs/DOWNLOADING-FASTQ.md) - Recommended methods for download fastq from SRA.  Though, you can of course use this with unpublished fastq.
 
 ## Documentation
 * [Modules](docs/MODULES.md) - Description of modules and basic usage
@@ -58,6 +59,9 @@ Patro R, Duggal G, Love MI, Irizarry RA, Kingsford C. Salmon provides fast and b
 #### Sylph
 Shaw J, Yu YW. Rapid species-level metagenome profiling and containment estimation with sylph. Nat Biotechnol. 2025 Aug;43(8):1348-1359. doi: 10.1038/s41587-024-02412-y
 
+#### MGNify
+Richardson L, Allen B, Baldi G, Beracochea M, Bileschi ML, Burdett T, et al. MGnify: the microbiome sequence data analysis resource in 2023. Vol. 51, Nucleic Acids Research. Oxford University Press (OUP); 2022. p. D753–9. doi: 10.1093/nar/gkac1080.
+
 ---
 
 ## Frequently Asked Questions
@@ -68,16 +72,19 @@ If you add CDS sequences and feature mapping (e.g., $gene_i$ → {$feature_1$, $
 
 If you add a [pathway database](docs/PATHWAYS.md) then you will get [the full functionality with pathway coverage and pathway abundances](docs/OUTPUTS.md).
 
-
 ### Do I need KEGG to run Leviathan?
 No, you can run the taxonomic and functional profiling.  However, the functional profiling will be limited unless you build a pathway database matching this [schema](docs/PATHWAYS.md).
 
 ### Can I use existing annotations with Leviathan?
-Yes, you can use any type of annotation but for full functionality you must [build a database with KOfam annotations with a pre-compiled pathway database](docs/FETCH-ANNOTATE.md) or [build a custom pathway database](docs/PATHWAYS.md).
+Yes, you can use any type of annotation but for full functionality you must [build a database with KOfam annotations with a pre-compiled pathway database](docs/SETUP-DATABASES.md) or [build a custom pathway database](docs/PATHWAYS.md).
 
+### Do I need to run taxonomic profiling before functional profiling versa? 
+No, but you can if you want.  The results are independent from each other but one recommended approach is to use a [taxonomy gate](docs/OUTPUTS.md) for the functional profiling (i.e., subset the functional profiling using robust hits from taxonomic profiling).
 
-### Why use parquet and netcdf files for the output?
-For small datasets, the tsv files should be fine but for larger datasetes these will get massive.  Parquet are excellent for tabular data and NetCDF files are great for multi-dimensional data.
+### Why use parquet/netcdf files for the output and how do I read them?
+For small datasets, the tsv files should be fine but for larger datasetes these will get massive.  Parquet are excellent for tabular data and NetCDF files are great for multi-dimensional data (e.g., number of reads, tpm, coverage).  
+
+For help reading and indexing parquet or NetCDF files, please refer to the [walkthrough](docs/OUTPUTS.md).
 
 
 ---

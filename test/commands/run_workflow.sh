@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
-manifest_type="with_pangenomes"
+source "$(dirname "$0")/config.sh"
 
 # Create manifest from VEBA
-# bash commands.leviathan-manifest.sh ${manifest_type}
+# bash commands.leviathan-manifest.sh
 
 # Preprocess from manifest to get files needed for building index
-bash commands.leviathan-preprocess.sh ${manifest_type}
+bash commands.leviathan-preprocess.sh
 
 # Build index
-bash commands.leviathan-index.sh ${manifest_type}
+bash commands.leviathan-index.sh
 
 # Generate the commands for taxonomic profiling and run in parallel
-bash generate_leviathan-profile-taxonomy_commands.sh ${manifest_type}
-cat commands.leviathan-profile-taxonomy.list | parallel -j 9
+bash generate_leviathan-profile-taxonomy_commands.sh
+cat commands.leviathan-profile-taxonomy.list | parallel -j ${N_CONCURRENT_TASKS}
 rm -f commands.leviathan-profile-taxonomy.list
 
 # Generate the commands for pathway profiling and run in parallel
-bash generate_leviathan-profile-pathway_commands.sh ${manifest_type}
-cat commands.leviathan-profile-pathway.list | parallel -j 9
+bash generate_leviathan-profile-pathway_commands.sh
+cat commands.leviathan-profile-pathway.list | parallel -j ${N_CONCURRENT_TASKS}
 rm -f commands.leviathan-profile-pathway.list
 
 # Merge sample-specific results into xarray datasets
-bash commands.leviathan-merge.sh ${manifest_type}
+bash commands.leviathan-merge.sh

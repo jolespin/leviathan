@@ -1,5 +1,5 @@
 {
-    "../working//references/genomes.tsv.gz": "cdf5fb30e11db11b5465f72fd5790cf0",
-    "../working//references/cds.fasta.gz": "ed233dbff7541ffcee3095a4f6dd5b52",
-    "../working//references/feature_mapping.tsv.gz": "6b3559c5fa074108ce05a8b675bd6d54"
+    "../inputs/no_pangenomes/references/genomes.tsv.gz": "80dcdfe5a65355dc622186d854dc52b1",
+    "../inputs/no_pangenomes/references/cds.fasta.gz": "c2f0f564b6482d17b3f2d8184eaba39b",
+    "../inputs/no_pangenomes/references/feature_mapping.tsv.gz": "a71b3cb61b22271a71983a0403fd92fe"
 }

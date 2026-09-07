@@ -1,5 +1,8 @@
 # Data
 CAMI-II_Marine_n-100/
+KEGG-Pathway-Profiler/
+outputs/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

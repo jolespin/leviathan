@@ -1,7 +1,7 @@
 # Walkthrough: Fetching databases and annotating proteins
 Leviathan does not require KEGG to run but this walkthrough shows how to use annotate proteins with KOfam, build a pathway database, and build a Leviathan database.  
 
-This walkthrough assumes you've downloaded the [`toy CAMI-II marine 100 genomes dataset`](https://zenodo.org/records/17783338).
+This walkthrough assumes you've downloaded the [`toy CAMI-II marine 100 genomes dataset`](https://zenodo.org/records/17783338) but this walkthrough can be applied to any dataset.
 
 
 ### 1. Download the KEGG Pathways hosted by [EBI](https://github.com/EBI-Metagenomics/kegg-pathways-completeness-tool)

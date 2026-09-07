@@ -27,7 +27,7 @@ cut -f2 test/databases/KEGG-Pathway-Profiler/test/databases/KEGG-Pathway-Profile
 ### 2. Annotate proteins with KEGG orthology
 If you don't have annotations already then you will need to annotate proteins yourself.  I recommend [`PyKOfamSearch`](https://github.com/jolespin/pykofamsearch) which is powered by [PyHMMER](https://doi.org/10.1093/bioinformatics/btad214). 
 
-If you're only annotating for `Leviathan` then keep the `--subset` argument but if you want full KEGG ortholog annotation then remove it (it will take longer to annotate against all KOfam).
+If you're only annotating for `Leviathan` then keep the `--subset` argument (~3.5k KOfam) but if you want all 28k+ KOfam database annotation then remove it (it will take ~8x longer to annotate against all KOfam).
 
 #### Install PyKOfamSearch
 ```

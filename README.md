@@ -91,8 +91,9 @@ For help reading and indexing parquet or NetCDF files, please refer to the [walk
 
 
 ---
+## License
+CC BY-NC-SA 4.0
 
-### Disclaimer
 This software was developed at *NewAtlantis Labs* which is now acquired by *Ocean BioMetrics*.
 
 For any questions about licensing, please contact: jol.espinoz [A|T] gmail [dot] com

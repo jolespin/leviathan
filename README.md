@@ -46,7 +46,7 @@ leviathan-merge.py -t <output-directory>/taxonomy/ -p <output-directory>/pathway
 ## Documentation
 * [Modules](docs/MODULES.md) - Description of modules and basic usage
 * [Outputs](docs/OUTPUTS.md) - Description of output tables and objects
-* [Pahthways](docs/WALKTHROUGH.md) - Pathway database structure for building custom pathway databases
+* [Pathways](docs/WALKTHROUGH.md) - Pathway database structure for building custom pathway databases
 
 
 ## Citations
@@ -80,6 +80,9 @@ Yes, you can use any type of annotation but for full functionality you must [bui
 
 ### Do I need to run taxonomic profiling before functional profiling versa? 
 No, but you can if you want.  The results are independent from each other but one recommended approach is to use a [taxonomy gate](docs/OUTPUTS.md) for the functional profiling (i.e., subset the functional profiling using robust hits from taxonomic profiling).
+
+### Why do some of the walkthroughs use `-1` for the number of processors?
+Setting `-p/--n_jobs` to `-1` uses all available processors
 
 ### Why use parquet/netcdf files for the output and how do I read them?
 For small datasets, the tsv files should be fine but for larger datasetes these will get massive.  Parquet are excellent for tabular data and NetCDF files are great for multi-dimensional data (e.g., number of reads, tpm, coverage).  

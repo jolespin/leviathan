@@ -1,0 +1,5 @@
+{
+    "../inputs/with_pangenomes/references/genomes.tsv.gz": "f9a1d59b476daaf6a747f52af16bfac9",
+    "../inputs/with_pangenomes/references/cds.fasta.gz": "158e674b93cffcca4f4229d894e76ae5",
+    "../inputs/with_pangenomes/references/feature_mapping.tsv.gz": "8c623fd5034c1a15391414e076a5cc3d"
+}

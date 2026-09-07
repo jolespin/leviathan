@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
-manifest_type="$1"
+source "$(dirname "$0")/config.sh"
+manifest_type="${MANIFEST_TYPE}"
 
-working_directory="../working/${manifest_type}"
-profiling_directory="${working_directory}/leviathan_output/profiling"
-artifact_directory="${working_directory}/leviathan_output/artifacts"
+output_directory="../outputs/${manifest_type}"
+profiling_directory="${output_directory}/profiling"
+artifact_directory="${output_directory}/artifacts"
 job_name="leviathan-merge"
 table_format="parquet"
 taxonomy_directory="${profiling_directory}/taxonomy/"
 pathway_directory="${profiling_directory}/pathway/"
 leviathan-merge.py -t ${taxonomy_directory} -p ${pathway_directory} -o ${artifact_directory} -f ${table_format}
-
-

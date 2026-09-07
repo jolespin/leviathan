@@ -322,11 +322,12 @@ def run_sylph_genomes_sketcher(logger, log_directory, sylph_executable, n_jobs, 
 
     
 # Download KEGG Pathway Database
-def run_kegg_pathway_downloader(logger, log_directory, pathway_database_downloader_executable,  index_directory, no_intermediate_files):
+def run_kegg_pathway_downloader(logger, log_directory, pathway_database_downloader_executable,  index_directory, ebi_kegg_build, no_intermediate_files):
     cmd = RunShellCommand(
         command=[
             pathway_database_downloader_executable,
-            "--download",
+            "--ebi",
+            ebi_kegg_build,
             "--force",
             "--no_intermediate_files" if no_intermediate_files else "",
             "--database",

@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-manifest_type="$1"
+source "$(dirname "$0")/config.sh"
+manifest_type="${MANIFEST_TYPE}"
 
 rm -f commands.leviathan-profile-taxonomy.list
-working_directory="../working/${manifest_type}"
-database_directory="../databases/CAMI-II_Marine_n-100/"
+input_directory="../inputs/${manifest_type}"
+dataset_directory="../datasets/CAMI-II_Marine_n-100/"
+output_directory="../outputs/${manifest_type}"
 
-index_directory="${working_directory}/references/index/"
-profiling_directory="${working_directory}/leviathan_output/profiling"
+index_directory="${input_directory}/references/index/"
+profiling_directory="${output_directory}/profiling"
 mkdir -p ${profiling_directory}
 table_format="parquet"
 
@@ -14,8 +16,8 @@ for id in $(cat identifiers.list);
 do
 	job_name="leviathan-profile-taxonomy__${id}"
 	echo $job_name
-	r1="${database_directory}/${id}/reads/reads_1.fastq.gz"
-	r2="${database_directory}/${id}/reads/reads_2.fastq.gz"
+	r1="${dataset_directory}/${id}/reads/reads_1.fastq.gz"
+	r2="${dataset_directory}/${id}/reads/reads_2.fastq.gz"
 	cmd="leviathan-profile-taxonomy.py -1 ${r1} -2 ${r2} -n ${id} -d ${index_directory} -p=2 -o ${profiling_directory}/taxonomy/ -f ${table_format}"
 	echo $cmd >> commands.leviathan-profile-taxonomy.list
 done

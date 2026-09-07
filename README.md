@@ -1,7 +1,15 @@
 # Leviathan
-`Leviathan` is a fast, memory-efficient, and scalable taxonomic and pathway profiler for next generation sequencing (genome-resolved) metagenomics and metatranscriptomics.  `Leviathan` is powered by `Salmon` and `Sylph` in the backend.
+### A fast, memory-efficient, and scalable taxonomic and pathway profiler for (pan)genome-resolved metagenomics and metatranscriptomics 
 
-## Install
+`Leviathan` is for performing taxonomic or functional profiling on genome-resolved catalogs.  This toolkit was designed for targeted genomic catalogs but supports general catalogs.  However, only highly similar organisms will be detected as this tool (currently) does not support remote homology.
+
+> [!NOTE]
+> `Leviathan` is powered by [`Salmon`](https://doi.org/10.1038/nmeth.4197) and [`Sylph`](https://doi.org/10.1038/s41587-024-02412-y) Rust backends.
+
+![Flowchart](images/Flowchart.png)
+
+## Usage
+### Install
 
 ```
 # Create environment with dependencies
@@ -13,253 +21,68 @@ mamba activate leviathan
 # Install Leviathan
 pip install leviathan 
 ```
-## Modules
-![Flowchart](images/Flowchart.png)
-
-## Citation
-Leviathan: A fast, memory-efficient, and scalable taxonomic and pathway profiler for (pan)genome-resolved metagenomics and metatranscriptomics. Josh L Espinoza, Allan Phillips, Chris L. Dupont. bioRxiv; doi: [https://doi.org/10.1101/2025.07.14.664802](https://doi.org/10.1101/2025.07.14.664802)
-
-## Usage: 
-#### [End-to-End Walkthrough](WALKTHROUGH.md)
-Detailed explanation on how to run each module including downloading test data and interpreting output files. 
-
-## Benchmarking
-Please refer to the publication for benchmarking specs but you should be able to run this easily on a machine with 16GB of RAM. 
-
-## Modules
-### `leviathan-preprocess`
-Preprocesses data into form than can be used by `leviathan-index` 
-    
-    leviathan-preprocess.py \
-        -i references/manifest.tsv \
-        -a references/pykofamsearch.pathways.tsv.gz \
-        -o references/
-    
-
-### `leviathan-index`
-Build, update, and validate `leviathan` database
-
-    leviathan-index.py \
-        -f references/cds.fasta.gz \
-        -m references/feature_mapping.tsv.gz \
-        -g references/genomes.tsv.gz \
-        -d references/index/ \
-        -p=-1
-
-### `leviathan-info`
-Report information about `leviathan` database
-
-    leviathan-info.py -d references/index/
-
-### `leviathan-profile-taxonomy`
-Profile taxonomy using `Sylph` with `leviathan` database
-
-    leviathan-profile-taxonomy.py \
-        -1 ../Fastq/SRR12042303_1.fastq.gz \
-        -2 ../Fastq/SRR12042303_2.fastq.gz \
-        -n SRR12042303 \
-        -d references/index/ \
-        -o leviathan_output/profiling/taxonomy/ \
-        -p=-1
-
-### `leviathan-profile-pathway`
-Profile pathways using `Salmon` with `leviathan` database
-
-    leviathan-profile-pathway.py \
-        -1 ../Fastq/SRR12042303_1.fastq.gz \
-        -2 ../Fastq/SRR12042303_2.fastq.gz \
-        -n SRR12042303 \
-        -d references/index/ \
-        -o leviathan_output/profiling/pathway/ \
-        -p=-1
-
-### `leviathan-merge`
-Merge sample-specific taxonomic and/or pathway profiling
-
-    leviathan-merge.py \
-        -t leviathan_output/profiling/taxonomy/ \
-        -p leviathan_output/profiling/pathway/ \
-
-## Utility Scripts
-* `compile-manifest-from-veba.py` - Compiles manifest.tsv file for `leviathan preprocess` from `VEBA` binning output 
-
-    compile-manifest-from-veba.py \
-        -i path/to/veba_output/binning/ \
-        -t prokaryotic,eukaryotic \
-        -o references/manifest.tsv
-
-## Output Description
-
-### Sample Specific
-#### Taxonomy profiles
-* Examples: 
-    - Genome = Metagenome-assembled genome (MAG)
-    - Genome cluster = ANI ≥ 95% & Alignment Fraction ≥ 50%
-
-##### Taxonomic abundances - Relative abundance of a genome/genome-cluster within a sample
- * `taxonomic_abundance.genome_clusters.[parquet|tsv.gz]` - Genome-cluster-level taxonomic relative abundance profiles
- * `taxonomic_abundance.genomes.[parquet|tsv.gz]` - Genome-level taxonomic relative abundance profiles
-
-**Note:** `Sylph` is run with `--estimate-unknown` so relative abundances do not sum to 100% and the remaining % represents the unassigned reads.
-
-#### Functional profiles
-
-* Examples:
-    - Feature = KEGG ortholog
-    - Pathway = KEGG module
-
-##### Feature abundances - The (normalized) abundance of a feature relative to a genome/genome-cluster
- * `feature_abundances.genome_clusters.number_of_reads.[parquet|tsv.gz]` - Feature abundances for each genome cluster (number of reads aligned)
- * `feature_abundances.genome_clusters.tpm.[parquet|tsv.gz]` - Feature abundances for each genome cluster (TPM normalized abundances)
- * `feature_abundances.genomes.number_of_reads.[parquet|tsv.gz]` - Feature abundances for each genome (number of reads aligned)
- * `feature_abundances.genomes.tpm.[parquet|tsv.gz]` - Feature abundances for each genome (TPM normalized abundances)
-
-##### Feature prevalence - The number of genome/genome-clusters where a feature is detected
- * `feature_prevalence-binary.genome_clusters.[parquet|tsv.gz]` - Presence/absence of feature relative to genome clusters
- * `feature_prevalence-binary.genomes.[parquet|tsv.gz]` - Presence/absence of feature relative to genomes
- * `feature_prevalence-ratio.genome_clusters.[parquet|tsv.gz]` - Ratio of genomes within a genome cluster with feature detected
- * `feature_prevalence.genome_clusters.[parquet|tsv.gz]` - The count of uniques that correspond to the features relative to the genome clusters
- * `feature_prevalence.genomes.[parquet|tsv.gz]` - The count of uniques that correspond to the features relative to the genomes
-
-##### Gene abundances - The abundance of individual genes within genome
- * `gene_abundances.genomes.number_of_reads.[parquet|tsv.gz]` - Number of reads aligned to a gene within a genome
- * `gene_abundances.genomes.tpm.[parquet|tsv.gz]` - TPM normalized abundance of reads aligned to a gene within a genome
-
-##### Pathway abundances - Pathway abundances for a genome and genome-cluster
-
- * `pathway_abundances.genome_clusters.coverage.[parquet|tsv.gz]` - Pathway coverage (i.e., pathway completion ratio) relative to genome clusters
- * `pathway_abundances.genome_clusters.number_of_reads.[parquet|tsv.gz]` - Pathway abundances as the number of reads aligned relative to genome clusters
- * `pathway_abundances.genome_clusters.tpm.[parquet|tsv.gz]` - TPM normalized pathway abundances as the number of reads aligned relative to genome clusters
- * `pathway_abundances.genomes.coverage.[parquet|tsv.gz]` - Pathway coverage (i.e., pathway completion ratio) relative to genomes
- * `pathway_abundances.genomes.number_of_reads.[parquet|tsv.gz]` - Pathway abundances as the number of reads aligned relative to genomes
- * `pathway_abundances.genomes.tpm.[parquet|tsv.gz]` - TPM normalized pathway abundances as the number of reads aligned relative to genomes
-
-### Merged
-
-##### Taxonomy profiles
-Sequence abundances can be used to determine the proportion of reads that were detected in database.
-
- * `taxonomic_abundance.genome_clusters.nc` - Genome-level taxonomic and sequence relative abundance profiles for all samples
- * `taxonomic_abundance.genomes.nc` - Genome-level taxonomic and sequence relative abundance profiles for all samples.
-
-#### Functional profiles
-##### Feature
- * `feature.genome_clusters.nc` - Feature abundances (number of reads, tpm) and prevalences (binary, total, ratio) of genome clusters for all samples
- * `feature.genomes.nc` - Feature abundances (number of reads, tpm) and prevalences (binary, total, ratio) of genomes for all samples
-
-##### Pathway
- * `pathway.genome_clusters.nc` - Pathway abundances (number of reads, tpm) and coverages of genome clusters for all samples
- * `pathway.genomes.nc` - Pathway abundances (number of reads, tpm) and coverages of genomes for all samples
 
 
-## Pathway Databases
-Currently, the only pathway database supported for pathway coverage calculations is the KEGG module database using KEGG orthologs as features.  This database can be pre-built using [KEGG Pathway Profiler](https://github.com/jolespin/kegg_pathway_profiler) or built with `leviathan index` if KEGG orthologs are used as features.  
+### Quick Start
+After [fetching databases (and annotating proteins)](docs/FETCH-ANNOTATE.md) you can [build a Leviathan database](docs/END-TO-END.md).  Once a database is built, you can easily profile each sample in parallel and merge the results into optimized data structures. 
 
-To maintain generalizability for custom feature sets (e.g., enzymes, reactions), the pathway database is not required but if it is not used when building `leviathan index` then the `leviathan profile-pathway` skips the pathway abundance and coverage calculations.
-
-If custom databases are built, then the following nested Python dictionary structure needs to be followed: 
-
-```python
-# General Example
-{
-    id_pathway:{
-        "name":Name of pathway,
-        "definition":KEGG module definition,
-        "classes":KEGG module classes,
-        "graph":NetworkX MultiDiGraph,
-        "ko_to_nodes": Dictionary of KEGG ortholog to nodes in graph,
-        "optional_kos": Set of optional KEGG orthologs
-    },
-    }
-
-# Specific Example
-{
-    'M00001': {
-        'name': 'Glycolysis (Embden-Meyerhof pathway), glucose => pyruvate',
-        'definition': (
-            '(K00844,K12407,K00845,K25026,K00886,K08074,K00918) '
-            '(K01810,K06859,K13810,K15916) '
-            '(K00850,K16370,K21071,K00918) '
-            '(K01623,K01624,K11645,K16305,K16306) '
-            'K01803 ((K00134,K00150) K00927,K11389) '
-            '(K01834,K15633,K15634,K15635) '
-            '(K01689,K27394) '
-            '(K00873,K12406)'
-        ),
-        'classes': 'Pathway modules; Carbohydrate metabolism; Central carbohydrate metabolism',
-        'graph': <networkx.classes.multidigraph.MultiDiGraph object at 0x132d2a9e0>,
-        'ko_to_nodes': {
-            'K00844': [[0, 2]],
-            'K12407': [[0, 2]],
-            'K00845': [[0, 2]],
-            'K25026': [[0, 2]],
-            'K00886': [[0, 2]],
-            'K08074': [[0, 2]],
-            'K00918': [[0, 2], [3, 4]],
-            'K01810': [[2, 3]],
-            'K06859': [[2, 3]],
-            'K13810': [[2, 3]],
-            'K15916': [[2, 3]],
-            'K00850': [[3, 4]],
-            'K16370': [[3, 4]],
-            'K21071': [[3, 4]],
-            'K01623': [[4, 5]],
-            'K01624': [[4, 5]],
-            'K11645': [[4, 5]],
-            'K16305': [[4, 5]],
-            'K16306': [[4, 5]],
-            'K01803': [[5, 6]],
-            'K00134': [[6, 8]],
-            'K00150': [[6, 8]],
-            'K00927': [[8, 7]],
-            'K11389': [[6, 7]],
-            'K01834': [[7, 9]],
-            'K15633': [[7, 9]],
-            'K15634': [[7, 9]],
-            'K15635': [[7, 9]],
-            'K01689': [[9, 10]],
-            'K27394': [[9, 10]],
-            'K00873': [[10, 1]],
-            'K12406': [[10, 1]]
-        },
-        'optional_kos': set()
-    },
-    'M00002': {
-        'name': 'Glycolysis, core module involving three-carbon compounds',
-        'definition': (
-            'K01803 ((K00134,K00150) K00927,K11389) '
-            '(K01834,K15633,K15634,K15635) '
-            '(K01689,K27394) '
-            '(K00873,K12406)'
-        ),
-        'classes': 'Pathway modules; Carbohydrate metabolism; Central carbohydrate metabolism',
-        'graph': <networkx.classes.multidigraph.MultiDiGraph object at 0x10d51b160>,
-        'ko_to_nodes': {
-            'K01803': [[0, 2]],
-            'K00134': [[2, 4]],
-            'K00150': [[2, 4]],
-            'K00927': [[4, 3]],
-            'K11389': [[2, 3]],
-            'K01834': [[3, 5]],
-            'K15633': [[3, 5]],
-            'K15634': [[3, 5]],
-            'K15635': [[3, 5]],
-            'K01689': [[5, 6]],
-            'K27394': [[5, 6]],
-            'K00873': [[6, 1]],
-            'K12406': [[6, 1]]
-        },
-        'optional_kos': set()
-    },
-    ...
-}
-
+#### Profile taxonomy (per sample)
 ```
-For documentation for pathway theory or how `MultiDiGraph` objects are generated, please refer to the source repository for [KEGG Pathway Completeness Tool](https://github.com/EBI-Metagenomics/kegg-pathways-completeness-tool) as [KEGG Pathway Profiler](https://github.com/jolespin/kegg_pathway_profiler) is a reimplementation for production.
+leviathan-profile-taxonomy.py -1 <r1-fastq[.gz]> -2 <r2-fastq[.gz]> -n <sample-name> -d <leviathan-database> -o <output-directory>/taxonomy/ -p=-1
+```
+#### Profile pathways (per sample)
+```
+leviathan-profile-pathway.py -1 <r1-fastq[.gz]> -2 <r2-fastq[.gz]> -n <sample-name> -d <leviathan-database> -o <output-directory>/taxonomy/ -p=-1
+```
+#### Merge artifacts from individual samples
+```
+leviathan-merge.py -t <output-directory>/taxonomy/ -p <output-directory>/pathway/
+```
+### Walkthroughs
+* [Fetching and Annotating](docs/FETCH-ANNOTATE.md) - Fetching backend databases and annotating proteins
+* [End-to-End](docs/END-TO-END.md) - Detailed walkthrough on how to run each module including downloading test data and interpreting output files. 
 
-## Contact:
-* jol.espinoz@gmail.com
+## Documentation
+* [Modules](docs/MODULES.md) - Description of modules and basic usage
+* [Outputs](docs/OUTPUTS.md) - Description of output tables and objects
+* [Pahthways](docs/WALKTHROUGH.md) - Pathway database structure for building custom pathway databases
 
-## Disclaimer:
+
+## Citations
+#### Leviathan
+Leviathan: A fast, memory-efficient, and scalable taxonomic and pathway profiler for (pan)genome-resolved metagenomics and metatranscriptomics. Josh L Espinoza, Allan Phillips, Chris L. Dupont. bioRxiv; doi: 10.1101/2025.07.14.664802. Accepted at `mSystems`
+
+#### Salmon
+Patro R, Duggal G, Love MI, Irizarry RA, Kingsford C. Salmon provides fast and bias-aware quantification of transcript expression. Nat Methods. 2017 Apr;14(4):417-419. doi: 10.1038/nmeth.4197
+
+#### Sylph
+Shaw J, Yu YW. Rapid species-level metagenome profiling and containment estimation with sylph. Nat Biotechnol. 2025 Aug;43(8):1348-1359. doi: 10.1038/s41587-024-02412-y
+
+---
+
+## Frequently Asked Questions
+### What is needed to run Leviathan?
+The bare minimum to build a database, you need genome-level fasta to build a database.  With genome-level fasta alone you can run the taxonomic profiling and if you add pangenome cluster assignments you will get both [genome and pangenome-level abundances](docs/OUTPUTS.md).
+
+If you add CDS sequences and feature mapping (e.g., $gene_i$ → {$feature_1$, $feature_2$}) you can the functional profiling which will produce feature-level counts but not pathway-level counts or coverage. 
+
+If you add a [pathway database](docs/PATHWAYS.md) then you will get [the full functionality with pathway coverage and pathway abundances](docs/OUTPUTS.md).
+
+
+### Do I need KEGG to run Leviathan?
+No, you can run the taxonomic and functional profiling.  However, the functional profiling will be limited unless you build a pathway database matching this [schema](docs/PATHWAYS.md).
+
+### Can I use existing annotations with Leviathan?
+Yes, you can use any type of annotation but for full functionality you must [build a database with KOfam annotations with a pre-compiled pathway database](docs/FETCH-ANNOTATE.md) or [build a custom pathway database](docs/PATHWAYS.md).
+
+
+### Why use parquet and netcdf files for the output?
+For small datasets, the tsv files should be fine but for larger datasetes these will get massive.  Parquet are excellent for tabular data and NetCDF files are great for multi-dimensional data.
+
+
+---
+
+### Disclaimer
 This software was developed at *NewAtlantis Labs* which is now acquired by *Ocean BioMetrics*.
 
+For any questions about licensing, please contact: jol.espinoz [A|T] gmail [dot] com

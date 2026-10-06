@@ -49,7 +49,7 @@ leviathan-merge.py -t <output-directory>/taxonomy/ -p <output-directory>/pathway
 
 ## Citations
 #### Leviathan
-Leviathan: A fast, memory-efficient, and scalable taxonomic and pathway profiler for (pan)genome-resolved metagenomics and metatranscriptomics. Josh L Espinoza, Allan Phillips, Chris L. Dupont. bioRxiv; doi: 10.1101/2025.07.14.664802. Accepted at `mSystems`
+Espinoza JL, Phillips AJ, Dupont CL.0.Leviathan: fast, memory-efficient, and scalable taxonomic and pathway profiling for (pan)genome-resolved metagenomics and metatranscriptomics. mSystems0:e00970-26. [doi:10.1128/msystems.00970-26](https://doi.org/10.1128/msystems.00970-26)
 
 #### Salmon
 Patro R, Duggal G, Love MI, Irizarry RA, Kingsford C. Salmon provides fast and bias-aware quantification of transcript expression. Nat Methods. 2017 Apr;14(4):417-419. doi: 10.1038/nmeth.4197
@@ -66,7 +66,7 @@ Richardson L, Allen B, Baldi G, Beracochea M, Bileschi ML, Burdett T, et al. MGn
 ### What is needed to run Leviathan?
 The bare minimum to build a database requires only genome-level fasta to build a database.  With genome-level fasta alone you can run the taxonomic profiling and if you add pangenome cluster assignments you will get both [genome and pangenome-level abundances](docs/OUTPUTS.md).
 
-If you add CDS sequences and feature mapping (e.g., $gene_i$ → { $feature_1$, $feature_2$ }) you can the functional profiling which will produce feature-level counts but not pathway-level counts or coverage. 
+If you add CDS sequences and feature mapping (e.g., $gene_i$ → { $feature_1$ , $feature_2$ } ) you can the functional profiling which will produce feature-level counts but not pathway-level counts or coverage. 
 
 If you add a [pathway database](docs/PATHWAYS.md) then you will get [the full functionality of Leviathan with pathway coverage and pathway abundances](docs/OUTPUTS.md).
 

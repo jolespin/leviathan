@@ -1,5 +1,5 @@
 # Leviathan
-### A fast, memory-efficient, and scalable taxonomic and pathway profiler for (pan)genome-resolved metagenomics and metatranscriptomics 
+### Fast, memory-efficient, and scalable taxonomic and pathway profiling for (pan)genome-resolved metagenomics and metatranscriptomics 
 
 `Leviathan` is for performing taxonomic or functional profiling on genome-resolved catalogs.  This toolkit was designed for targeted genomic catalogs but supports general catalogs.  However, only highly similar organisms will be detected as this tool (currently) does not support remote homology.
 

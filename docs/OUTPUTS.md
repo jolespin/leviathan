@@ -45,6 +45,10 @@
  * `pathway_abundances.genomes.number_of_reads.[parquet|tsv.gz]` - Pathway abundances as the number of reads aligned relative to genomes
  * `pathway_abundances.genomes.tpm.[parquet|tsv.gz]` - TPM normalized pathway abundances as the number of reads aligned relative to genomes
 
+##### Step coverage - Binary indicator of whether each step in a pathway is covered
+ * `step_coverage.genome_clusters.[parquet|tsv.gz]` - Step-level pathway coverage relative to genome clusters
+ * `step_coverage.genomes.[parquet|tsv.gz]` - Step-level pathway coverage relative to genomes
+
 ### Merged
 
 ##### Taxonomy profiles
@@ -61,6 +65,10 @@ Sequence abundances can be used to determine the proportion of reads that were d
 ##### Pathway
  * `pathway.genome_clusters.nc` - Pathway abundances (number of reads, tpm) and coverages of genome clusters for all samples
  * `pathway.genomes.nc` - Pathway abundances (number of reads, tpm) and coverages of genomes for all samples
+
+##### Step Coverage
+ * `step_coverage.genome_clusters.nc` - Binary step coverage for pathway steps across genome clusters for all samples
+ * `step_coverage.genomes.nc` - Binary step coverage for pathway steps across genomes for all samples
 
 ## Reading output files
 ### Reading Parquet files with Pandas
@@ -159,6 +167,28 @@ X_coverage = X_coverage.loc[:,features_passed_qc]
 
 # Downstream analysis with filtered `X_counts`
 ```
+
+### Reading step coverage NetCDF files
+```python
+import xarray as xr
+
+# Load step coverage for genome clusters
+ds_step_coverage = xr.open_dataset("../outputs/with_pangenomes/artifacts/step_coverage.genome_clusters.nc")
+ds_step_coverage
+
+# pathway_steps coordinates are delimiter-joined strings (default: "|")
+# e.g., "M00001|0-2" represents pathway M00001, step 0-2
+
+# To split back into pathway and step components:
+import pandas as pd
+pathway_steps = ds_step_coverage["pathway_steps"].values
+pathway_step_tuples = [ps.split("|") for ps in pathway_steps]
+df_index = pd.DataFrame(pathway_step_tuples, columns=["id_pathway", "step_label"])
+```
+
+> [!NOTE]
+> The default delimiter is `|`. Recommended delimiters are `|` and `_`. 
+> Avoid using `-` since step labels already contain `-` (e.g., `"0-2"`).
 
 ### Selecting coverage `prevalence` cutoff
 

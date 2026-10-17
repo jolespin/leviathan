@@ -1,4 +1,5 @@
 #### Daily Change Log:
+* [2026.10.17] - Added `step_coverage` merging support to `leviathan-merge.py` with `merge_step_coverage_as_xarray()` and `merge_step_coverage_as_pandas()` functions. MultiIndex columns are flattened with a configurable delimiter (`-d/--pathway_step_delimiter`, default `|`). [issue/#46](https://github.com/jolespin/leviathan/issues/46)
 * [2026.9.7] - Cleaned up documentation for publication
 * [2026.7.22] - Changed the `KEGG Pathway Profiler` database downloader in `leviathan-index.py`/`index.py` to use EBI's [`kegg-pathways-completeness-tool`](https://github.com/EBI-Metagenomics/kegg-pathways-completeness-tool).
 * [2026.7.16] - Added parallelization support for pathway coverage using `profile_pathway_coverage` from `kegg_pathway_profiler>=2026.7.16` in `leviathan-profile-pathway.py`. The `--n_jobs` flag now applies to both `salmon quant` and pathway coverage computation.

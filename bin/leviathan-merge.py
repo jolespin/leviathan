@@ -20,6 +20,7 @@ from leviathan.profile_taxonomy import (
 )
 from leviathan.profile_pathway import (
     merge_pathway_profiling_tables_as_xarray,
+    merge_step_coverage_as_xarray,
 )
 
 __program__ = os.path.split(sys.argv[0])[-1]
@@ -49,6 +50,7 @@ def main(args=None):
     parser.add_argument("-e", "--xarray_engine", type=str, choices={"h5netcdf", "netcdf4"}, default="h5netcdf", help = "Xarray backend engine [Default: h5netcdf]")
     parser.add_argument("-c", "--xarray_compression_level", type=int, choices=set(range(0, 10)), default=4, help = "netCDF gzip compression level. Use 0 for no compression. [Default: 4]")
     parser.add_argument("-f", "--table_format", type=str, choices={"parquet", "tsv"}, default="parquet", help = "The --output_format used for `leviathan-profile-pathway.py` and `leviathan-profile-taxonomy.py` [Default: parquet]")
+    parser.add_argument("-d", "--pathway_step_delimiter", type=str, default="|", help = "Delimiter for joining pathway step MultiIndex columns (e.g., '|' produces 'M00001|0-2'). Recommended: '|' or '_' [Default: |]")
 
     # ------------------
     # Pending options
@@ -71,6 +73,9 @@ def main(args=None):
 
     # Commands
     logger.info(f"Command: {sys.argv}")
+
+    if opts.pathway_step_delimiter == "-":
+        logger.warning("Using '-' as the pathway step delimiter is not recommended because step labels already contain '-' (e.g., '0-2'). Consider using '|' or '_' instead.")
      
     # I/O
     # if opts.output_format == "parquet":
@@ -235,6 +240,46 @@ def main(args=None):
                         logger.warning(f"Not able to merge {data_type}.{level}.{metric} files from {opts.pathway_profiling_directory}: {e}")
                     
         logger.info(f"Completed merging pathway profiling tables: {pathway_profiling_output_directory}")
+
+        # Step Coverage
+        for level in ["genomes", "genome_clusters"]:
+            logger.info(f"Merging step coverage for level={level}")
+            try:
+                filepath = os.path.join(pathway_profiling_output_directory, f"step_coverage.{level}.nc")
+
+                X = merge_step_coverage_as_xarray(
+                    profiling_directory=opts.pathway_profiling_directory,
+                    level=level,
+                    fillna_with_zeros=bool(opts.fillna_with_zeros),
+                    table_format=opts.table_format,
+                    delimiter=opts.pathway_step_delimiter,
+                )
+                n = X.sizes["samples"]
+                m = X.sizes[level]
+                p = X.sizes["pathway_steps"]
+
+                error_msg = f"Merging step coverage for level={level} in {opts.pathway_profiling_directory} resulted in empty xr.DataArray"
+                info_msg = f"Step coverage for level={level} has {n} samples, {m} {level}, and {p} pathway steps"
+
+                if len(X) == 0:
+                    raise EmptyDataError(error_msg)
+
+                logger.info(info_msg)
+
+                if opts.xarray_compression_level:
+                    logger.info(f"Setting gzip compression: {opts.xarray_compression_level}")
+                    X.encoding.update({"compression": "gzip", "compression_opts": opts.xarray_compression_level})
+
+                mode = "w"
+                logger.info(f"Writing output: {filepath} [mode={mode}]")
+                X.to_netcdf(filepath, engine=opts.xarray_engine, mode=mode)
+                del X
+
+            except Exception as e:
+                logger.warning(f"Not able to merge step_coverage.{level} files from {opts.pathway_profiling_directory}: {e}")
+
+        logger.info(f"Completed merging step coverage tables: {pathway_profiling_output_directory}")
+
     logger.info(f"Completed running leviathan-merge: {opts.output_directory}")
 
 

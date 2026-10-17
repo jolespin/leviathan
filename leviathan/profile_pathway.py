@@ -583,7 +583,144 @@ def merge_pathway_profiling_tables_as_xarray(profiling_directory:str, data_type:
             if fillna_with_zeros:
                 X = X.fillna(0.0)
         return X
-                
+
     else:
         raise FileNotFoundError(f"Could not find any {data_type}.{level}.{extension} files in {profiling_directory}")
 
+def merge_step_coverage_as_pandas(profiling_directory:str, level="genomes", fillna_with_zeros:bool=False, sparse:bool=False, table_format:str = "parquet", delimiter:str="|"):
+    """
+    Merges sample-level step_coverage values from multiple samples into a single DataFrame.
+
+    Parameters
+    ----------
+    profiling_directory : str
+        Path to directory containing sample-level directories with output files.
+    level : str, optional
+        Level of organization. One of {"genomes", "genome_clusters"}.
+    fillna_with_zeros : bool, optional
+        Whether to fill missing values with zeros. Default is False.
+    sparse : bool, optional
+        Whether to return a pd.Sparse type. Default is False.
+    table_format : str
+        The --output_format used for `leviathan-profile-pathway.py` [Default: parquet]
+    delimiter : str or None
+        Delimiter for joining MultiIndex column tuples (e.g., "|" produces "M00001|0-2").
+        If None, the native MultiIndex columns are preserved. [Default: |]
+
+    Returns
+    -------
+    pd.DataFrame
+        Merged DataFrame with step_coverage values for each sample.
+
+    Files:
+    * step_coverage.genome_clusters.parquet
+    * step_coverage.genomes.parquet
+    """
+
+    check_argument_choice(
+        query=level,
+        choices={"genomes", "genome_clusters"},
+        )
+    check_argument_choice(
+        query=table_format,
+        choices={"parquet", "tsv"},
+        )
+
+    if table_format == "parquet":
+        extension = "parquet"
+    elif table_format == "tsv":
+        extension = "tsv.gz"
+
+    filepaths = glob.glob(f"{profiling_directory}/*/output/step_coverage.{level}.{extension}")
+    if filepaths:
+        output = dict()
+        description = "Merging {}-level step coverage values".format(level)
+        for filepath in tqdm(filepaths, description):
+            id_sample = filepath.split("/")[-3]
+            if table_format == "parquet":
+                df = pd.read_parquet(filepath)
+            elif table_format == "tsv":
+                df = pd.read_csv(filepath, sep="\t", index_col=0, header=[0,1])
+            if delimiter is not None:
+                df.columns = df.columns.map(delimiter.join)
+            output[id_sample] = df.stack()
+        X = pd.DataFrame(output).T
+
+        missing_value_fill = pd.NA
+        sparse_dtype = "int"
+        if fillna_with_zeros:
+            X = X.fillna(0)
+            missing_value_fill = 0
+        if sparse:
+            X = X.astype(pd.SparseDtype(sparse_dtype, missing_value_fill))
+        return X
+
+    else:
+        raise FileNotFoundError(f"Could not find any step_coverage.{level}.{extension} files in {profiling_directory}")
+
+def merge_step_coverage_as_xarray(profiling_directory:str, level="genomes", fillna_with_zeros:bool=False, table_format:str="parquet", delimiter:str="|"):
+    """
+    Merges sample-level step_coverage values from multiple samples into an xr.DataArray.
+
+    Parameters
+    ----------
+    profiling_directory : str
+        Path to directory containing sample-level directories with output files.
+    level : str, optional
+        Level of organization. One of {"genomes", "genome_clusters"}.
+    fillna_with_zeros : bool, optional
+        Whether to fill missing values with zeros. Default is False.
+    table_format : str
+        The --output_format used for `leviathan-profile-pathway.py` [Default: parquet]
+    delimiter : str
+        Delimiter for joining MultiIndex column tuples (e.g., "|" produces "M00001|0-2").
+        Recommended: '|' or '_'. Avoid '-' since step labels already contain '-'. [Default: |]
+
+    Returns
+    -------
+    xr.DataArray
+        Merged xr.DataArray with dims: (samples, {level}, pathway_steps)
+
+    Files:
+    * step_coverage.genome_clusters.parquet
+    * step_coverage.genomes.parquet
+    """
+
+    check_argument_choice(
+        query=level,
+        choices={"genomes", "genome_clusters"},
+        )
+    check_argument_choice(
+        query=table_format,
+        choices={"parquet", "tsv"},
+        )
+
+    if table_format == "parquet":
+        extension = "parquet"
+    elif table_format == "tsv":
+        extension = "tsv.gz"
+
+    filepaths = glob.glob(f"{profiling_directory}/*/output/step_coverage.{level}.{extension}")
+    if filepaths:
+        output = dict()
+        description = "Merging {}-level step coverage values".format(level)
+        for filepath in tqdm(filepaths, description):
+            id_sample = filepath.split("/")[-3]
+            if table_format == "parquet":
+                df = pd.read_parquet(filepath)
+            elif table_format == "tsv":
+                df = pd.read_csv(filepath, sep="\t", index_col=0, header=[0,1])
+            df.columns = df.columns.map(delimiter.join)
+            output[id_sample] = xr.DataArray(data=df.values, coords=[(level, df.index), ("pathway_steps", df.columns)])
+            del df
+
+        X = xr.concat(output.values(), dim="samples", join="outer")
+        X["samples"] = list(output.keys())
+
+        if fillna_with_zeros:
+            X = X.fillna(0)
+        X = X.astype(np.int8)
+        return X
+
+    else:
+        raise FileNotFoundError(f"Could not find any step_coverage.{level}.{extension} files in {profiling_directory}")

@@ -720,6 +720,7 @@ def merge_step_coverage_as_xarray(profiling_directory:str, level="genomes", fill
         if fillna_with_zeros:
             X = X.fillna(0)
         X = X.astype(np.int8)
+        X.name = "step_coverage"
         return X
 
     else:

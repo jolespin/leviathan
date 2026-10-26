@@ -70,17 +70,19 @@ def main(args=None):
     # Utilities
     parser_utility = parser.add_argument_group('Utility arguments')
     parser_utility.add_argument("-p","--n_jobs", type=int, default=1,  help = "Number of threads to use.  Use -1 for all available. [Default: 1]")
+    parser_utility.add_argument("-k","--leviathan_k", type=int, choices={21,31}, default=31,  help = "Master k-mer length passed to salmon and sylph when their individual k values are 'auto'. [Default: 31]")
     parser_utility.add_argument("--no_check", action="store_true",  help = "Don't check to ensure --genomes set equals --feature_mapping genome set")
 
     # Salmon
     parser_salmon_index = parser.add_argument_group('salmon index arguments')
     parser_salmon_index.add_argument("--salmon_executable", type=str, help="salmon executable [Default: $PATH]")
+    parser_salmon_index.add_argument("--salmon_k", type=str, default="auto",  help="salmon index | K-mer length (odd integer). If 'auto', uses --leviathan_k. Values other than 21 or 31 will produce a warning. [Default: auto]")
     parser_salmon_index.add_argument("--salmon_index_options", type=str, default="", help="salmon index | More options (e.g. --arg=1 ) https://salmon.readthedocs.io/en/latest/ [Default: '']")
 
     # Sylph
     parser_sylph_sketch = parser.add_argument_group('Sylph genomes sketcher arguments (Fastq)')
     parser_sylph_sketch.add_argument("--sylph_executable", type=str, help="Sylph executable [Default: $PATH]")
-    parser_sylph_sketch.add_argument("--sylph_k", type=int, choices={21,31}, default=31,  help="Sylph |  Value of k. Only k = 21, 31 are currently supported. [Default: 31]")
+    parser_sylph_sketch.add_argument("--sylph_k", type=str, default="auto",  help="Sylph | Value of k (21 or 31). If 'auto', uses --leviathan_k. [Default: auto]")
     parser_sylph_sketch.add_argument("--sylph_minimum_spacing", type=int,  default=30,  help="Sylph |  Minimum spacing between selected k-mers on the genomes [Default: 30]")
     parser_sylph_sketch.add_argument("--sylph_subsampling_rate", type=int, default=200,  help="Sylph | Subsampling rate.	[Default: 200]")
     parser_sylph_sketch.add_argument("--sylph_sketch_options", type=str, default="", help="Sylph | More options for `sylph sketch` (e.g. --arg=1 ) [Default: '']")
@@ -164,7 +166,40 @@ def main(args=None):
         logger.info(f"Setting --n_jobs to maximum threads {opts.n_jobs}")
 
     assert opts.n_jobs >= 1, "--n_jobs must be ≥ 1.  To select all available threads, use -1."
-    
+
+    # K-mer resolution
+    if opts.salmon_k == "auto" and opts.sylph_k == "auto":
+        opts.salmon_k = opts.leviathan_k
+        opts.sylph_k = opts.leviathan_k
+        logger.info(f"Setting --salmon_k and --sylph_k to --leviathan_k={opts.leviathan_k}")
+    elif opts.salmon_k != "auto" and opts.sylph_k != "auto":
+        try:
+            opts.salmon_k = int(opts.salmon_k)
+        except ValueError:
+            msg = f"--salmon_k must be 'auto' or an odd integer, got '{opts.salmon_k}'"
+            logger.critical(msg)
+            parser.error(msg)
+        try:
+            opts.sylph_k = int(opts.sylph_k)
+        except ValueError:
+            msg = f"--sylph_k must be 'auto', 21, or 31, got '{opts.sylph_k}'"
+            logger.critical(msg)
+            parser.error(msg)
+        if opts.salmon_k % 2 == 0 or opts.salmon_k < 1:
+            msg = f"--salmon_k must be an odd positive integer, got {opts.salmon_k}"
+            logger.critical(msg)
+            parser.error(msg)
+        if opts.salmon_k not in {21, 31}:
+            logger.warning(f"--salmon_k={opts.salmon_k} is not 21 or 31. Values of 21 or 31 are recommended.")
+        if opts.sylph_k not in {21, 31}:
+            msg = f"--sylph_k must be 21 or 31, got {opts.sylph_k}"
+            logger.critical(msg)
+            parser.error(msg)
+    else:
+        msg = "If either --salmon_k or --sylph_k is specified (not 'auto'), both must be specified"
+        logger.critical(msg)
+        parser.error(msg)
+
     # Executables
     # * Salmon
     if not opts.salmon_executable:
@@ -221,6 +256,7 @@ def main(args=None):
             n_jobs=opts.n_jobs,
             fasta=opts.fasta,
             index_directory=opts.index_directory,
+            k=opts.salmon_k,
             index_options=opts.salmon_index_options,
         )
 
@@ -233,6 +269,9 @@ def main(args=None):
             feature_mapping_filepath=opts.feature_mapping,
             contains_genome_cluster_mapping=False,
             contains_genome_filepaths=False,
+            leviathan_k=opts.leviathan_k,
+            salmon_k=opts.salmon_k,
+            sylph_k=opts.sylph_k,
             timestamp=get_timestamp(),
         )
         # Genomes and genes database
@@ -298,6 +337,7 @@ def main(args=None):
                         n_jobs=opts.n_jobs,
                         fasta=opts.fasta,
                         index_directory=opts.index_directory,
+                        k=opts.salmon_k,
                         index_options=opts.salmon_index_options,
         )
         

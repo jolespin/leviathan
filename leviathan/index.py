@@ -250,19 +250,21 @@ def check_salmon_index(salmon_index_directory, logger):
         raise FileNotFoundError(msg)
 
 # Run Salmon (salmon index --keepDuplicates --threads ${N_JOBS} --transcripts ${FASTA} --index ${INDEX})
-def run_salmon_indexer(logger, log_directory, salmon_executable, n_jobs, fasta, index_directory, index_options):    
+def run_salmon_indexer(logger, log_directory, salmon_executable, n_jobs, fasta, index_directory, k, index_options):
     cmd = RunShellCommand(
         command=[
             salmon_executable,
             "index",
             "--keepDuplicates",
+            "-k",
+            k,
             "--threads",
             n_jobs,
             "--transcripts",
             fasta,
             "--index",
             os.path.join(index_directory, "salmon_index"),
-            index_options,   
+            index_options,
             ], 
         name="salmon_indexer",
     )

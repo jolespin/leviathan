@@ -64,6 +64,8 @@ Richardson L, Allen B, Baldi G, Beracochea M, Bileschi ML, Burdett T, et al. MGn
 ---
 
 ## Frequently Asked Questions
+For more technical questions, refer to [FAQ](FAQ.md) and if your question isn't addressed then please [ask in a GitHub issue](https://github.com/jolespin/leviathan/issues).
+
 ### What is needed to run Leviathan?
 The bare minimum to build a database requires only genome-level fasta to build a database.  With genome-level fasta alone you can run the taxonomic profiling and if you add pangenome cluster assignments you will get both [genome and pangenome-level abundances](docs/OUTPUTS.md).
 
@@ -87,6 +89,12 @@ Setting `-p/--n_jobs` to `-1` uses all available processors
 For small datasets, the tsv files should be fine but for larger datasetes these will get massive to not only write but to read as well.  Parquet are excellent for tabular data and NetCDF files are great for multi-dimensional data (e.g., number of reads, tpm, coverage).  
 
 For help reading and indexing parquet or NetCDF files, please refer to the [walkthrough](docs/OUTPUTS.md).
+
+### Does Leviathan support paired-end, single-end, or long reads?
+Leviathan natively supports paired-end and single-end reads.  Long reads have not been thoroughly benchmarked.
+
+### Can I use Leviathan with MetaRiboSeq fastq? 
+Yes.  The recommended settings for this are with adapters removed/trimmed, forward only (use `-r` as single-ended reads) and `-k 21` when building the Leviathan index because Ribo-Seq is often between 20-40 bp.  
 
 ---
 ## License

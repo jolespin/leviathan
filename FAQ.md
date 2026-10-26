@@ -25,4 +25,3 @@ ds_taxonomic = xr.open_dataset("leviathan_output/artifacts/taxonomic_abundances.
 percent_assigned_reads = ds_taxonomic["sequence_abundances"].sum(axis=1).to_pandas()
 percent_unassigned_reads = 100 - percent_assigned_reads
 ```
-## 3. Do I need my own genomes or are there reference catalogs?

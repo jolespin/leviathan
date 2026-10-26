@@ -37,6 +37,7 @@ leviathan-profile-pathway.py -1 <r1-fastq[.gz]> -2 <r2-fastq[.gz]> -n <sample-na
 ```
 leviathan-merge.py -t <output-directory>/taxonomy/ -p <output-directory>/pathway/
 ```
+Merged pathway artifacts include `step_coverage.*.nc` files containing binary (0/1) presence/absence values for each pathway step per genome (or genome cluster).
 ### Walkthroughs
 * [Database Setup and Annotation](docs/SETUP-DATABASES.md) - Fetching backend databases and annotating proteins
 * [End-to-End](docs/END-TO-END.md) - Detailed walkthrough on how to run each module including downloading test data and interpreting output files. 
